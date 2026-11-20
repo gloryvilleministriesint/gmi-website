@@ -1,0 +1,218 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import giving from '../../data/giving.json';
+
+const cats = giving.categories;
+const bank = giving.bankTransfer;
+const hasBank = Boolean(bank.accountNumber);
+const currencyLabel = giving.currency.symbol || giving.currency.code;
+const failMessage = giving.onlineGiving
+  ? 'Sorry, we could not start your payment just now. Nothing has been charged. Please try again, or use one of the other ways to give.'
+  : 'Online giving is not open yet. Nothing has been charged. Please give in person during a service or by bank transfer, as shown on this page.';
+---
+<Base title="Giving & Partnership" description="Give tithes, offerings, partnership and seed sowing to Gloryville Ministries International, Ibadan.">
+  <PageHero
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Giving & Partnership' }]}
+    eyebrow="Giving & Partnership"
+    title="Give with a <em>cheerful</em> heart."
+    intro={giving.intro || undefined}
+    introPlaceholder="[Short introduction to giving at GMI, with a scripture if the church wishes]"
+  />
+
+  <section class="section" data-giving>
+    <div class="container">
+      <form class="give-form" action="/api/give" method="post" data-form data-fail={failMessage}>
+        <div class="step-head">
+          <h2 class="h3" id="cat-h">1. Choose what you are giving</h2>
+          <ol class="steps" aria-label="Giving steps">
+            <li class="is-done">Category</li>
+            <li class="is-current" aria-current="step">Details</li>
+            <li>Payment</li>
+            <li>Confirmation</li>
+          </ol>
+        </div>
+
+        <fieldset class="cats" aria-labelledby="cat-h">
+          <legend class="sr-only">Giving category</legend>
+          {cats.map((c, i) => (
+            <label class="cat">
+              <input type="radio" name="category" value={c.slug} checked={i === 0} data-cat={c.name} />
+              <span class="cat__check" aria-hidden="true"><Icon name="check" size={14} /></span>
+              <span class="cat__icon" aria-hidden="true"><Icon name={c.icon} size={20} /></span>
+              <span class="cat__name">{c.name}</span>
+              <span class="cat__text">{c.short}</span>
+            </label>
+          ))}
+        </fieldset>
+
+        <div class="layout">
+          <div class="form-card details" data-form-wrap>
+            <div class="form-body">
+              <p class="eyebrow eyebrow--plain">2. Your details</p>
+              <h2 class="h3 details__title">Giving to <span data-cat-name>{cats[0].name}</span></h2>
+
+              <div class="field">
+                <label for="g-amount">Amount</label>
+                <div class="amount">
+                  <span class:list={['amount__cur', { ph: !currencyLabel }]} aria-hidden={currencyLabel ? undefined : 'true'}>{currencyLabel || '[Currency]'}</span>
+                  <input class="input" id="g-amount" name="amount" type="number" inputmode="decimal" min="1" step="0.01" placeholder="0.00" required />
+                </div>
+                <p class="field-error" aria-live="polite"></p>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="g-name">Full name</label>
+                  <input class="input" id="g-name" name="name" autocomplete="name" required />
+                  <p class="field-error" aria-live="polite"></p>
+                </div>
+                <div class="field">
+                  <label for="g-email">Email address</label>
+                  <p class="hint" id="g-email-hint">For your giving receipt</p>
+                  <input class="input" id="g-email" name="email" type="email" autocomplete="email" aria-describedby="g-email-hint" required />
+                  <p class="field-error" aria-live="polite"></p>
+                </div>
+              </div>
+              <div class="field">
+                <label for="g-note">Note <span class="opt">(optional)</span></label>
+                <textarea id="g-note" name="note" placeholder="For example, a partnership reference"></textarea>
+              </div>
+              <input class="hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+              <div class="form-actions">
+                <button class="btn btn--primary" type="submit">Continue to payment <Icon name="arrow-right" size={18} /></button>
+              </div>
+              <p class="form-alert" role="alert"></p>
+              <p class="small secure"><Icon name="lock" size={14} />You will complete payment on a secure page from the church's payment provider.</p>
+            </div>
+          </div>
+
+          <aside class="side">
+            <div class="panel">
+              {cats.map((c, i) => (
+                <div data-about={c.slug} hidden={i !== 0}>
+                  <p class="panel__label">About {c.name.toLowerCase()}</p>
+                  {c.about ? <p>{c.about}</p> : <p class="ph">[Explanation of this giving category, supplied by the church]</p>}
+                </div>
+              ))}
+            </div>
+            <div class="panel">
+              <p class="panel__label">Other ways to give</p>
+              <ul class="ways">
+                <li><Icon name="church" size={18} /><span>In person during services</span></li>
+                <li>
+                  <Icon name="landmark" size={18} />
+                  {hasBank ? (
+                    <div class="bank">
+                      <span>Bank transfer</span>
+                      <dl>
+                        {bank.bank && <><dt>Bank</dt><dd>{bank.bank}</dd></>}
+                        {bank.accountName && <><dt>Account name</dt><dd>{bank.accountName}</dd></>}
+                        <dt>Account number</dt>
+                        <dd class="bank__num">{bank.accountNumber}<button type="button" class="copy" data-copy={bank.accountNumber}><Icon name="copy" size={14} /><span>Copy</span></button></dd>
+                      </dl>
+                      {bank.reference && <p class="small">{bank.reference}</p>}
+                    </div>
+                  ) : (
+                    <span>Bank transfer: <span class="ph">[account details to be supplied by GMI]</span></span>
+                  )}
+                </li>
+              </ul>
+            </div>
+            <p class="small">Questions about giving? <a href="/contact">Contact the church office</a>.</p>
+          </aside>
+        </div>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .step-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: var(--s-4); margin-bottom: var(--s-5); }
+  .steps { display: flex; align-items: center; gap: 10px; list-style: none; margin: 0; padding: 0; font-size: 0.875rem; font-weight: 600; color: var(--ink-2); }
+  .steps li + li::before { content: ''; display: inline-block; width: 22px; height: 1px; margin-right: 10px; vertical-align: middle; background: var(--line-strong); }
+  .steps .is-done, .steps .is-current { color: var(--blue-700); }
+
+  .cats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-4); margin: 0 0 var(--s-7); padding: 0; border: 0; }
+  .cat { position: relative; display: flex; flex-direction: column; padding: var(--s-5); background: var(--white); border: 1.5px solid var(--line); border-radius: var(--r-card); cursor: pointer; transition: border-color 0.2s var(--ease), background 0.2s var(--ease); }
+  .cat:hover { border-color: var(--line-strong); }
+  .cat input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .cat__check { position: absolute; top: 18px; right: 18px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--line-strong); color: transparent; }
+  .cat__icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--gold-100); color: var(--gold-700); margin-bottom: var(--s-4); }
+  .cat__name { font-family: var(--font-serif); font-size: 1.5rem; color: var(--blue-900); margin-bottom: var(--s-2); }
+  .cat__text { font-size: var(--fs-small); color: var(--ink-2); }
+  .cat:has(input:checked) { border-color: var(--blue-700); background: #eef2fa; }
+  .cat:has(input:checked) .cat__check { background: var(--blue-900); border-color: var(--blue-900); color: var(--white); }
+  .cat:has(input:checked) .cat__icon { background: var(--blue-900); color: var(--white); }
+  .cat:has(input:focus-visible) { outline: 3px solid var(--gold-500); outline-offset: 2px; }
+
+  .layout { display: grid; grid-template-columns: 1.25fr 1fr; gap: var(--s-6); align-items: start; }
+  .details .form-body { display: flex; flex-direction: column; gap: var(--s-4); }
+  .eyebrow--plain::before { display: none; }
+  .eyebrow--plain { color: var(--ink-2); margin-bottom: 0; }
+  .details__title { margin-bottom: var(--s-2); }
+  .amount { display: flex; border: 1.5px solid var(--line-strong); border-radius: var(--r-input); overflow: hidden; background: var(--white); }
+  .amount:focus-within { border-color: var(--blue-700); box-shadow: 0 0 0 3px var(--blue-100); }
+  .field.has-error .amount { border-color: var(--error); }
+  .amount__cur { display: grid; place-items: center; padding: 0 16px; background: var(--stone); border-right: 1px solid var(--line); font-weight: 600; color: var(--ink-2); }
+  .amount .input { border: 0; min-height: 54px; font-size: 1.25rem; box-shadow: none !important; }
+  .amount input::-webkit-outer-spin-button, .amount input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .amount input { -moz-appearance: textfield; }
+  .hint { margin: -2px 0 6px; font-size: 0.8125rem; color: var(--ink-3); }
+  .form-actions .btn { gap: 10px; }
+  .secure { display: flex; align-items: center; gap: 8px; color: var(--ink-3); margin: 0; }
+
+  .side { display: flex; flex-direction: column; gap: var(--s-4); }
+  .panel { padding: var(--s-6) var(--s-6); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-panel); }
+  .panel [hidden] { display: none; }
+  .panel__label { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin-bottom: var(--s-3); }
+  .ways { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
+  .ways li { display: flex; gap: 12px; align-items: flex-start; color: var(--ink); }
+  .ways li > :global(svg) { flex: none; margin-top: 3px; color: var(--ink-2); }
+  .bank dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0 0; font-size: var(--fs-small); }
+  .bank dt { color: var(--ink-3); }
+  .bank dd { margin: 0; font-weight: 600; }
+  .bank__num { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .copy { display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--white); color: var(--blue-700); font: inherit; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+
+  @media (max-width: 1024px) {
+    .cats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .layout { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 760px) {
+    .steps { display: none; }
+    .cats { gap: var(--s-3); }
+    .cat { padding: var(--s-4); }
+    .cat__icon { width: 40px; height: 40px; margin-bottom: var(--s-3); }
+    .cat__name { font-size: 1.25rem; }
+    .cat__check { top: 14px; right: 14px; }
+    .panel { padding: var(--s-5); }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-giving]');
+  if (root) {
+    const radios = Array.from(root.querySelectorAll<HTMLInputElement>('input[name=category]'));
+    const nameOut = root.querySelector<HTMLElement>('[data-cat-name]');
+    const select = (r: HTMLInputElement) => {
+      if (nameOut) nameOut.textContent = r.dataset.cat ?? '';
+      root.querySelectorAll<HTMLElement>('[data-about]').forEach((el) => (el.hidden = el.dataset.about !== r.value));
+      const url = new URL(location.href);
+      url.searchParams.set('category', r.value);
+      history.replaceState(null, '', url);
+    };
+    // A category can be preselected with ?category=partnership (e.g. from a partnership link).
+    const wanted = new URLSearchParams(location.search).get('category');
+    const pre = radios.find((r) => r.value === wanted);
+    if (pre) { pre.checked = true; select(pre); }
+    radios.forEach((r) => r.addEventListener('change', () => select(r)));
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    const label = btn.querySelector('span');
+    btn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(btn.dataset.copy!); if (label) { label.textContent = 'Copied'; setTimeout(() => (label.textContent = 'Copy'), 2000); } } catch { /* clipboard unavailable */ }
+    });
+  });
+</script>

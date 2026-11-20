@@ -1,0 +1,12 @@
+{
+  "intro": "",
+  "currency": { "code": "", "symbol": "" },
+  "categories": [
+    { "slug": "tithes", "name": "Tithes", "icon": "coins", "short": "A tenth of your income, given to God through the church.", "about": "" },
+    { "slug": "offerings", "name": "Offerings", "icon": "gift", "short": "Free-will giving during or outside services.", "about": "" },
+    { "slug": "partnership", "name": "Partnership", "icon": "handshake", "short": "Ongoing support for the work of the ministry.", "about": "" },
+    { "slug": "seed-sowing", "name": "Seed Sowing", "icon": "sprout", "short": "A seed given in faith.", "about": "" }
+  ],
+  "bankTransfer": { "bank": "", "accountName": "", "accountNumber": "", "reference": "" },
+  "onlineGiving": false
+}

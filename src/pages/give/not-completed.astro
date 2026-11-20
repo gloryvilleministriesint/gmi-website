@@ -1,0 +1,56 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+---
+<Base title="Payment not completed" description="Your payment to Gloryville Ministries International was not completed.">
+  <section class="section">
+    <div class="container result" data-result>
+      <div data-state="failed">
+        <span class="result__icon result__icon--err"><Icon name="circle-alert" size={28} /></span>
+        <p class="eyebrow">Giving & Partnership</p>
+        <h1 class="h2">Your payment was not completed.</h1>
+        <p>Nothing has been charged. You can try again, choose another way to give, or contact the church office if the problem continues.</p>
+      </div>
+      <div data-state="cancelled" hidden>
+        <span class="result__icon result__icon--err"><Icon name="circle-x" size={28} /></span>
+        <p class="eyebrow">Giving & Partnership</p>
+        <h1 class="h2">Your payment was cancelled.</h1>
+        <p>Nothing has been charged. You can start again whenever you are ready.</p>
+      </div>
+      <div data-state="pending" hidden>
+        <span class="result__icon result__icon--wait"><Icon name="clock" size={28} /></span>
+        <p class="eyebrow">Giving & Partnership</p>
+        <h1 class="h2">Your payment is being confirmed.</h1>
+        <p>Some payments take a little time to clear. We will email you as soon as it is confirmed. There is no need to pay again.</p>
+      </div>
+      <div class="result__btns">
+        <a class="btn btn--primary btn--sm" href="/give" data-retry>Try again</a>
+        <a class="btn btn--outline btn--sm" href="/contact">Contact the church office</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .result { max-width: 640px; text-align: center; }
+  .result [hidden] { display: none; }
+  .result .eyebrow { justify-content: center; }
+  .result h1 { margin-bottom: var(--s-4); }
+  .result__icon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; margin: 0 auto var(--s-5); }
+  .result__icon--err { background: var(--error-bg); color: var(--error); }
+  .result__icon--wait { background: var(--gold-100); color: var(--gold-700); }
+  .result__btns { display: flex; justify-content: center; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
+</style>
+
+<script>
+  // The payment provider returns here with ?status=failed|cancelled|pending (and optionally &category=).
+  const p = new URLSearchParams(location.search);
+  const status = ['failed', 'cancelled', 'pending'].includes(p.get('status') ?? '') ? p.get('status')! : 'failed';
+  document.querySelectorAll<HTMLElement>('[data-state]').forEach((el) => (el.hidden = el.dataset.state !== status));
+  const retry = document.querySelector<HTMLAnchorElement>('[data-retry]');
+  if (retry) {
+    if (status === 'pending') { retry.textContent = 'Back to Home'; retry.href = '/'; }
+    else if (p.get('category')) retry.href = `/give?category=${encodeURIComponent(p.get('category')!)}`;
+  }
+  document.title = `${document.querySelector('[data-state]:not([hidden]) h1')?.textContent ?? ''} · Gloryville Ministries International`;
+</script>

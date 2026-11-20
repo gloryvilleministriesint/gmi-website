@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+---
+<Base title="Thank you for giving" description="Your gift to Gloryville Ministries International has been received.">
+  <section class="section">
+    <div class="container result">
+      <span class="result__icon result__icon--ok"><Icon name="check" size={28} /></span>
+      <p class="eyebrow">Giving & Partnership</p>
+      <h1 class="h2">Thank you. Your gift has been received.</h1>
+      <p>A receipt is on its way to your email. Thank you for supporting the work of God at GMI.</p>
+      <div class="result__btns">
+        <a class="btn btn--primary btn--sm" href="/">Back to Home</a>
+        <a class="btn btn--outline btn--sm" href="/library">Visit the Digital Library</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .result { max-width: 640px; text-align: center; }
+  .result .eyebrow { justify-content: center; }
+  .result h1 { margin-bottom: var(--s-4); }
+  .result__icon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; margin: 0 auto var(--s-5); }
+  .result__icon--ok { background: var(--success-bg); color: var(--success); }
+  .result__btns { display: flex; justify-content: center; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
+</style>
