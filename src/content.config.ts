@@ -42,6 +42,8 @@ const messages = defineCollection({
     scripture: z.array(z.string()).default([]),
     summary: z.string().optional(),
     artwork: z.string().optional(),
+    duration: z.string().optional(), // e.g. "52:10"
+    notesFile: z.string().optional(), // link to sermon notes (PDF), if published
     featured: z.boolean().default(false),
     sample: z.boolean().default(false),
   }),

@@ -1,0 +1,279 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import MessageCard from '../../../components/MessageCard.astro';
+import { render } from 'astro:content';
+import { getMessages, seriesOf, longDate, hasAudio, hasVideo, youtubeId, type Message } from '../../../lib/messages';
+
+export async function getStaticPaths() {
+  return (await getMessages()).map((m) => ({ params: { slug: m.id }, props: { m } }));
+}
+
+const { m } = Astro.props as { m: Message };
+const d = m.data;
+const { Content } = await render(m);
+const hasNotes = Boolean(m.body?.trim());
+
+const all = await getMessages();
+const series = d.series ? seriesOf(all).find((s) => s.name === d.series) : undefined;
+const part = series ? series.messages.findIndex((x) => x.id === m.id) + 1 : 0;
+const prev = series && part > 1 ? series.messages[part - 2] : undefined;
+const next = series && part < series.messages.length ? series.messages[part] : undefined;
+
+const others = all.filter((x) => x.id !== m.id && (!d.series || x.data.series !== d.series));
+const related = [...others.filter((x) => d.speaker && x.data.speaker === d.speaker), ...others.filter((x) => !d.speaker || x.data.speaker !== d.speaker)].slice(0, 3);
+
+const video = hasVideo(m);
+const audio = hasAudio(m);
+const vid = youtubeId(d.youtube);
+const poster = d.artwork ?? (vid ? `https://i.ytimg.com/vi/${vid}/maxresdefault.jpg` : null);
+const pageUrl = new URL(`/library/messages/${m.id}`, Astro.site).href;
+const scriptures = d.scripture.length ? d.scripture : d.sample ? ['[Scripture reference]', '[Scripture reference]', '[Scripture reference]'] : [];
+---
+<Base title={d.title} description={d.summary ?? `A message${d.speaker ? ` by ${d.speaker}` : ''} from Gloryville Ministries International${d.series ? `, part of ${d.series}` : ''}.`}>
+  <section class="player-section on-dark">
+    <div class="container narrow">
+      <nav aria-label="Breadcrumb">
+        <ol class="crumbs">
+          <li><a href="/">Home</a></li>
+          <li><a href="/library">Digital Library</a></li>
+          <li><span aria-current="page">Message</span></li>
+        </ol>
+      </nav>
+
+      <div class="top-row">
+        <p class="chips">
+          {series && <span class="chip">{series.name} · Part {part}</span>}
+          {d.sample && <span class="chip">Sample content</span>}
+        </p>
+        {video && audio && (
+          <div class="mode" role="group" aria-label="Watch or listen">
+            <button type="button" data-mode="video" aria-pressed="true"><Icon name="video" size={16} />Watch</button>
+            <button type="button" data-mode="audio" aria-pressed="false"><Icon name="headphones" size={16} />Listen</button>
+          </div>
+        )}
+      </div>
+
+      {video && (
+        <div class="player" data-panel="video">
+          {vid ? (
+            <button type="button" class="yt" data-yt={vid} data-title={d.title} aria-label={`Play video: ${d.title}`}>
+              {poster && <img src={poster} alt="" />}
+              <span class="yt__play" aria-hidden="true"><Icon name="play" size={24} /></span>
+            </button>
+          ) : (
+            <div class="img-slot img-slot--dark yt yt--ph">
+              <span class="yt__play" aria-hidden="true"><Icon name="play" size={24} /></span>
+              <span class="img-label"><Icon name="video" />Video player: YouTube embed or hosted video</span>
+            </div>
+          )}
+        </div>
+      )}
+      {audio && (
+        <div class="player player--audio" data-panel="audio" hidden={video}>
+          {d.audio
+            ? <audio controls preload="none" src={d.audio} aria-label={`Audio: ${d.title}`}></audio>
+            : <div class="audio-ph"><span class="audio-ph__btn" aria-hidden="true"><Icon name="play" size={18} /></span><span class="ph">Audio player: hosted audio file</span><span class="ph">[mm:ss]</span></div>}
+        </div>
+      )}
+
+      <h1 class="title">{d.title}</h1>
+      <div class="meta-row">
+        <p class="meta">
+          <span class:list={{ ph: d.sample || !d.speaker }}>{d.sample || !d.speaker ? '[Speaker]' : d.speaker}</span>
+          <span class:list={{ ph: d.sample }}>{d.sample ? '[Date]' : longDate(d.date)}</span>
+          {d.topics.length > 0 && <span>Topic: {d.topics.join(', ')}</span>}
+          {d.duration && <span>{d.duration}</span>}
+        </p>
+        <div class="actions">
+          {d.audio && <a class="btn btn--outline btn--sm" href={d.audio} download><Icon name="download" size={16} />Download audio</a>}
+          {d.notesFile && <a class="btn btn--outline btn--sm" href={d.notesFile} download><Icon name="file-text" size={16} />Download notes</a>}
+          <button type="button" class="btn btn--outline btn--sm" data-share={pageUrl} data-title={d.title}><Icon name="share-2" size={16} /><span data-share-label>Share</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container narrow body">
+      <div>
+        <p class="eyebrow">Message summary</p>
+        {d.summary ? <p class="summary">{d.summary}</p> : <p class="summary ph">[Summary of the message]</p>}
+
+        {scriptures.length > 0 && (
+          <>
+            <p class="eyebrow">Key scriptures</p>
+            <ul class="scriptures">
+              {scriptures.map((s) => <li><Icon name="book" size={18} /><span class:list={{ ph: !d.scripture.length }}>{s}</span></li>)}
+            </ul>
+          </>
+        )}
+
+        {(hasNotes || d.sample) && (
+          <>
+            <p class="eyebrow">Notes</p>
+            <div class="notes">{hasNotes ? <Content /> : <p class="ph">[Sermon notes or outline, if the church publishes them]</p>}</div>
+          </>
+        )}
+
+        {(prev || next) && (
+          <nav class="series-nav" aria-label="Series navigation">
+            {prev ? <a href={`/library/messages/${prev.id}`}><span>Previous in series</span>{prev.data.title}</a> : <span></span>}
+            {next && <a class="series-nav__next" href={`/library/messages/${next.id}`}><span>Next in series</span>{next.data.title}</a>}
+          </nav>
+        )}
+      </div>
+
+      {series && (
+        <aside class="in-series" aria-labelledby="series-h">
+          <p class="in-series__label">In this series</p>
+          <h2 class="h3" id="series-h">{series.name}</h2>
+          <ol>
+            {series.messages.map((s, i) => (
+              <li>
+                <span class="in-series__num">{String(i + 1).padStart(2, '0')}</span>
+                <div>
+                  {s.id === m.id
+                    ? <span class="in-series__title is-current" aria-current="page">{s.data.title}</span>
+                    : <a class="in-series__title" href={`/library/messages/${s.id}`}>{s.data.title}</a>}
+                  <span class:list={['in-series__date', { ph: s.data.sample }]}>{s.data.sample ? '[Date]' : longDate(s.data.date)}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </aside>
+      )}
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section bg-stone">
+      <div class="container narrow">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">More messages</p>
+            <h2>You might also like</h2>
+          </div>
+          <a class="link-arrow" href="/library">Back to the Digital Library <Icon name="arrow-right" /></a>
+        </div>
+        <ul class="related">
+          {related.map((r) => <li><MessageCard m={r} meta="short" /></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .narrow { max-width: calc(918px + 2 * var(--gutter)); }
+  .player-section { background: var(--blue-950); padding: var(--s-6) 0 var(--s-7); }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0 0 var(--s-5); padding: 0; font-size: 0.8125rem; color: rgba(255, 255, 255, 0.7); }
+  .crumbs li + li::before { content: '/'; margin-right: 6px; opacity: 0.5; }
+  .crumbs a { color: rgba(255, 255, 255, 0.85); text-decoration: none; }
+  .crumbs a:hover { color: var(--white); text-decoration: underline; }
+  .top-row { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); flex-wrap: wrap; margin-bottom: var(--s-4); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+  .mode { display: inline-flex; padding: 3px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--r-pill); }
+  .mode button { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border: 0; border-radius: var(--r-pill); background: none; color: rgba(255, 255, 255, 0.8); font: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+  .mode [aria-pressed='true'] { background: var(--white); color: var(--blue-950); }
+
+  .player { border-radius: var(--r-panel); overflow: hidden; background: #111c3d; }
+  .player[hidden] { display: none; }
+  .yt { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; background: #12204a; cursor: pointer; border-radius: 0; }
+  .yt img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .yt--ph { cursor: default; }
+  .yt__play { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: grid; place-items: center; width: 68px; height: 68px; border-radius: 50%; background: var(--gold-500); color: var(--blue-950); box-shadow: var(--shadow-lg); }
+  .yt__play :global(svg) { fill: currentColor; margin-left: 3px; }
+  .yt:not(.yt--ph):hover .yt__play { transform: scale(1.06); }
+  .player :global(iframe) { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
+  .player--audio { padding: var(--s-5); }
+  .player--audio audio { width: 100%; }
+  .audio-ph { display: flex; align-items: center; gap: var(--s-4); }
+  .audio-ph span:last-child { margin-left: auto; }
+  .audio-ph__btn { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--gold-500); color: var(--blue-950); }
+  .audio-ph__btn :global(svg) { fill: currentColor; margin-left: 2px; }
+
+  .title { font-size: var(--fs-h1); margin-top: var(--s-6); }
+  .meta-row { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); flex-wrap: wrap; margin-top: var(--s-4); }
+  .meta { display: flex; flex-wrap: wrap; margin: 0; font-size: var(--fs-small); color: rgba(255, 255, 255, 0.8); }
+  .meta span + span::before { content: '·'; margin: 0 8px; font-style: normal; }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .actions .btn { gap: 8px; }
+
+  .body { display: grid; grid-template-columns: minmax(0, 1fr) 302px; gap: var(--s-8); align-items: start; }
+  .body .eyebrow { margin-top: var(--s-6); }
+  .body .eyebrow:first-child { margin-top: 0; }
+  .summary { font-size: 1.25rem; line-height: 1.55; color: var(--ink); }
+  .scriptures { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .scriptures li { display: flex; align-items: center; gap: 10px; font-size: 1.0625rem; }
+  .scriptures :global(svg) { color: var(--ink-2); flex: none; }
+  .notes { max-width: var(--reading); }
+  .notes :global(p), .notes :global(ul), .notes :global(ol) { margin-bottom: var(--s-4); }
+  .series-nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); margin-top: var(--s-7); }
+  .series-nav a { display: flex; flex-direction: column; gap: 2px; padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r-card); background: var(--white); color: var(--blue-900); font-family: var(--font-serif); font-size: 1.125rem; text-decoration: none; }
+  .series-nav a:hover { box-shadow: var(--shadow-md); }
+  .series-nav span { font-family: var(--font-sans); font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .series-nav__next { text-align: right; }
+
+  .in-series { padding: var(--s-6) var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-panel); }
+  .in-series__label { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 4px; }
+  .in-series h2 { margin-bottom: var(--s-4); }
+  .in-series ol { list-style: none; margin: 0; padding: 0; }
+  .in-series li { display: flex; gap: 14px; padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  .in-series__num { font-family: var(--font-serif); font-size: 1.125rem; color: var(--gold-700); }
+  .in-series__title { display: block; font-weight: 600; color: var(--ink); text-decoration: none; line-height: 1.4; }
+  a.in-series__title:hover { color: var(--blue-700); text-decoration: underline; }
+  .in-series__title.is-current { color: var(--blue-700); }
+  .in-series__date { display: block; font-size: var(--fs-small); color: var(--ink-3); margin-top: 2px; }
+
+  .related { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); }
+
+  @media (max-width: 1024px) {
+    .body { grid-template-columns: minmax(0, 1fr); gap: var(--s-7); }
+    .related { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .player { margin: 0 calc(-1 * var(--gutter)); border-radius: 0; }
+    .meta-row { flex-direction: column; align-items: flex-start; }
+    .series-nav { grid-template-columns: minmax(0, 1fr); }
+    .series-nav__next { text-align: left; }
+    .related { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+
+<script>
+  // YouTube: load the player only when asked (faster pages, no tracking until play). Video never autoplays on load.
+  document.querySelectorAll<HTMLButtonElement>('[data-yt]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${btn.dataset.yt}?autoplay=1&rel=0&enablejsapi=1`;
+      iframe.title = btn.dataset.title ?? 'Video';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      btn.replaceWith(iframe);
+      iframe.focus();
+    });
+  });
+
+  // Watch / Listen switch. Pauses whichever is hidden.
+  const modeBtns = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-mode]'));
+  modeBtns.forEach((b) => b.addEventListener('click', () => {
+    const mode = b.dataset.mode;
+    modeBtns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    document.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== mode));
+    if (mode === 'video') document.querySelector<HTMLAudioElement>('[data-panel=audio] audio')?.pause();
+    else document.querySelector<HTMLIFrameElement>('[data-panel=video] iframe')?.contentWindow
+      ?.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+  }));
+
+  // Share: native share sheet, otherwise copy the link.
+  document.querySelectorAll<HTMLButtonElement>('[data-share]').forEach((btn) => {
+    const label = btn.querySelector<HTMLElement>('[data-share-label]');
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.share!;
+      if (navigator.share) { try { await navigator.share({ title: btn.dataset.title, url }); } catch { /* cancelled */ } return; }
+      try { await navigator.clipboard.writeText(url); if (label) { label.textContent = 'Link copied'; setTimeout(() => (label.textContent = 'Share'), 2500); } }
+      catch { prompt('Copy this link:', url); }
+    });
+  });
+</script>

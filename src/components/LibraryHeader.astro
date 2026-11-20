@@ -1,0 +1,73 @@
+---
+// Dark Digital Library header: breadcrumbs, eyebrow, title, optional search, category tabs.
+import GloryRays from './GloryRays.astro';
+import Icon from './Icon.astro';
+import { libraryCategories } from '../data/navigation';
+
+interface Props {
+  title: string; // may contain <br />
+  current: string; // href of the active tab
+  crumb?: string; // last breadcrumb label (omit on the Library home)
+  intro?: string;
+  search?: boolean;
+  note?: string;
+}
+const { title, current, crumb, intro, search = false, note } = Astro.props;
+---
+<section class="lib-hero on-dark">
+  <GloryRays class="lib-hero__rays" opacity={0.25} color="var(--gold-400)" />
+  <div class="container lib-hero__inner">
+    <nav aria-label="Breadcrumb">
+      <ol class="crumbs">
+        <li><a href="/">Home</a></li>
+        {crumb ? <><li><a href="/library">GMI Digital Library</a></li><li><span aria-current="page">{crumb}</span></li></> : <li><span aria-current="page">GMI Digital Library</span></li>}
+      </ol>
+    </nav>
+    <p class="eyebrow">GMI Digital Library</p>
+    <h1 set:html={title} />
+    {intro && <p class="lib-hero__intro">{intro}</p>}
+    {search && (
+      <form class="lib-search" action="/library" role="search" data-lib-search>
+        <label class="sr-only" for="lib-q">Search the Digital Library</label>
+        <Icon name="search" size={20} />
+        <input id="lib-q" name="q" type="search" placeholder="Search by message title, speaker, topic or series" autocomplete="off" />
+        <button class="btn btn--gold btn--sm" type="submit">Search</button>
+      </form>
+    )}
+    {note && <p class="lib-hero__note">{note}</p>}
+  </div>
+  <nav class="container lib-tabs" aria-label="Library categories">
+    <ul>
+      {libraryCategories.map((c) => (
+        <li><a href={c.href} aria-current={c.href === current ? 'page' : undefined}>{c.name}</a></li>
+      ))}
+    </ul>
+  </nav>
+</section>
+
+<style>
+  .lib-hero { position: relative; overflow: hidden; background: var(--blue-950); padding-top: var(--s-7); }
+  :global(.lib-hero__rays) { right: -100px; bottom: -40px; width: 720px; height: 460px; }
+  .lib-hero__inner { position: relative; padding-bottom: var(--s-7); }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0 0 var(--s-5); padding: 0; font-size: 0.8125rem; color: rgba(255, 255, 255, 0.7); }
+  .crumbs li + li::before { content: '/'; margin-right: 6px; opacity: 0.5; }
+  .crumbs a { color: rgba(255, 255, 255, 0.85); text-decoration: none; }
+  .crumbs a:hover { color: var(--white); text-decoration: underline; }
+  h1 { max-width: 720px; }
+  .lib-hero__intro { max-width: 600px; margin-top: var(--s-4); font-size: var(--fs-body-lg); }
+  .lib-search { display: flex; align-items: center; gap: 12px; max-width: 720px; margin-top: var(--s-6); padding: 6px 6px 6px 22px; background: var(--white); border-radius: var(--r-pill); color: var(--ink-3); }
+  .lib-search:focus-within { box-shadow: 0 0 0 3px var(--gold-500); }
+  .lib-search input { flex: 1; min-width: 0; min-height: 48px; border: 0; background: none; font: inherit; font-size: 1rem; color: var(--ink); }
+  .lib-search input:focus { outline: none; }
+  .lib-hero__note { margin-top: var(--s-4); font-size: var(--fs-small); color: rgba(255, 255, 255, 0.72); }
+  .lib-tabs { position: relative; }
+  .lib-tabs ul { display: flex; gap: var(--s-2); list-style: none; margin: 0; padding: 0; overflow-x: auto; scrollbar-width: none; }
+  .lib-tabs a { display: block; padding: 14px 16px; border-bottom: 2px solid transparent; color: rgba(255, 255, 255, 0.78); font-size: 0.9375rem; font-weight: 500; text-decoration: none; white-space: nowrap; }
+  .lib-tabs a:hover { color: var(--white); }
+  .lib-tabs a[aria-current='page'] { color: var(--white); font-weight: 700; border-bottom-color: var(--gold-500); }
+  @media (max-width: 760px) {
+    .lib-search { padding-left: 16px; }
+    .lib-search button { padding: 0 16px; }
+    .lib-tabs ul { margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter); }
+  }
+</style>

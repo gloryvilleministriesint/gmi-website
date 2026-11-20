@@ -4,7 +4,7 @@ import departmentData from './departments.json';
 export const departments = departmentData.map((d) => ({ slug: d.slug, name: d.name, summary: d.summary }));
 
 export const libraryCategories = [
-  { href: '/library/messages', name: 'Messages and Sermons', summary: 'Latest messages, archive and series' },
+  { href: '/library', name: 'Messages and Sermons', summary: 'Latest messages, archive and series' },
   { href: '/library/music', name: 'Music and Songs', summary: 'Church music and worship songs' },
   { href: '/library/live', name: 'Live Services', summary: 'YouTube Live and other streams' },
   { href: '/library/connect', name: 'Online Connections', summary: 'Telegram and official platforms' },

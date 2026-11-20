@@ -1,6 +1,10 @@
 ---
 title: Sample message title 03
-date: 2026-11-01
-series: Sample Series B
+date: 2026-08-30
+series: Sample Series A
+speaker: Senior Pastor
+topics: [Faith]
+youtube: ""
+audio: ""
 sample: true
 ---

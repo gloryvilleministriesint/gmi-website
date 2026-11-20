@@ -70,7 +70,7 @@ const live = site.live.isLive;
                     </div>
                   ) : (
                     <div class="dropdown__grid">
-                      <form class="dropdown__search" action="/library/search" role="search">
+                      <form class="dropdown__search" action="/library" role="search">
                         <label class="sr-only" for="lib-search-desktop">Search the Digital Library</label>
                         <Icon name="search" size={18} />
                         <input id="lib-search-desktop" name="q" type="search" placeholder="Search messages, music and resources" />
@@ -130,7 +130,7 @@ const live = site.live.isLive;
                 ) : (
                   <>
                     <li>
-                      <form action="/library/search" role="search" class="mobile-search">
+                      <form action="/library" role="search" class="mobile-search">
                         <label class="sr-only" for="lib-search-mobile">Search the Digital Library</label>
                         <Icon name="search" size={18} />
                         <input id="lib-search-mobile" name="q" type="search" placeholder="Search messages and resources" />

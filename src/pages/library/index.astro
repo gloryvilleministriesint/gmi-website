@@ -1,0 +1,213 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import LibraryHeader from '../../components/LibraryHeader.astro';
+import MessageCard from '../../components/MessageCard.astro';
+import { getMessages, seriesOf, longDate, hasAudio, hasVideo, youtubeId } from '../../lib/messages';
+
+const messages = await getMessages();
+const featured = messages.find((m) => m.data.featured) ?? messages[0];
+const series = seriesOf(messages);
+const allSample = messages.length > 0 && messages.every((m) => m.data.sample);
+
+const uniq = (a: string[]) => [...new Set(a)].sort((x, y) => x.localeCompare(y));
+const speakers = uniq(messages.map((m) => m.data.speaker).filter((s): s is string => Boolean(s)));
+const topics = uniq(messages.flatMap((m) => m.data.topics));
+const seriesNames = series.map((s) => s.name);
+const tones = ['blue', 'night', 'earth'];
+
+const searchText = (m: (typeof messages)[number]) =>
+  [m.data.title, m.data.speaker, m.data.series, ...m.data.topics, ...m.data.scripture, m.data.summary].filter(Boolean).join(' ').toLowerCase();
+const fmt = (m: (typeof messages)[number]) => [hasVideo(m) && 'video', hasAudio(m) && 'audio'].filter(Boolean).join(' ');
+const featuredId = featured && youtubeId(featured.data.youtube);
+---
+<Base title="GMI Digital Library" description="Messages and sermons, music, live services, photos and resources from Gloryville Ministries International, Ibadan.">
+  <LibraryHeader
+    title="Messages, music and <br />moments from GMI."
+    current="/library"
+    search
+    note={allSample ? 'All library items below are sample placeholders to show the layout and search behaviour.' : undefined}
+  />
+
+  {messages.length === 0 ? (
+    <section class="section"><div class="container"><p>New messages will appear here soon. Meanwhile, <a href="/library/live">watch services live</a>.</p></div></section>
+  ) : (
+    <>
+      <section class="section featured-section">
+        <div class="container featured">
+          <a class="img-slot img-slot--dark featured__media" href={`/library/messages/${featured.id}`} aria-label={`Watch ${featured.data.title}`}>
+            {featured.data.artwork || featuredId
+              ? <img src={featured.data.artwork ?? `https://i.ytimg.com/vi/${featuredId}/hqdefault.jpg`} alt="" />
+              : <span class="img-label"><Icon name="video" />Featured message thumbnail</span>}
+            <span class="play" aria-hidden="true"><Icon name="play" size={22} /></span>
+          </a>
+          <div>
+            <p class="featured__chips">
+              <span class="chip chip--gold">Featured message</span>
+              {featured.data.sample && <span class="chip chip--sample">Sample</span>}
+            </p>
+            <h2 class="featured__title"><a href={`/library/messages/${featured.id}`}>{featured.data.title}</a></h2>
+            {featured.data.summary ? <p class="featured__summary">{featured.data.summary}</p> : <p class="featured__summary ph">[Short summary of the featured message]</p>}
+            <p class="featured__meta">
+              <span class:list={{ ph: featured.data.sample || !featured.data.speaker }}>{featured.data.sample || !featured.data.speaker ? '[Speaker]' : featured.data.speaker}</span>
+              {featured.data.series && <span> · {featured.data.series}</span>}
+              <span> · </span><span class:list={{ ph: featured.data.sample }}>{featured.data.sample ? '[Date]' : longDate(featured.data.date)}</span>
+            </p>
+            <a class="link-arrow" href={`/library/messages/${featured.id}`}>{hasVideo(featured) ? 'Watch now' : 'Listen now'} <Icon name="arrow-right" /></a>
+          </div>
+        </div>
+      </section>
+
+      {series.length > 0 && (
+        <section class="section section--tight" aria-labelledby="series-h">
+          <div class="container">
+            <div class="row-head">
+              <h2 class="h3" id="series-h">Browse by series</h2>
+              <p class="small muted">Select a series to filter</p>
+            </div>
+            <ul class="series">
+              {series.slice(0, 6).map((s, i) => (
+                <li>
+                  <button type="button" class={`series__card series__card--${tones[i % 3]}`} data-series-pick={s.name} aria-pressed="false">
+                    <span class="series__label">Series</span>
+                    <span class="series__name">{s.name}</span>
+                    <span class="series__count">{s.messages.length} {s.messages.length === 1 ? 'message' : 'messages'}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      <section class="section latest" id="latest" aria-labelledby="latest-h" data-library>
+        <div class="container">
+          <div class="row-head">
+            <h2 class="h3" id="latest-h">Latest messages</h2>
+            <p class="small muted" aria-live="polite" data-count>Showing {messages.length} of {messages.length} messages</p>
+          </div>
+
+          <p class="search-status" data-search-status hidden>
+            <span data-search-text></span>
+            <button type="button" class="link-btn" data-clear-search>Clear search</button>
+          </p>
+
+          <div class="filters" role="group" aria-label="Filter messages">
+            <div class="field">
+              <label for="f-speaker">Speaker</label>
+              <select id="f-speaker" data-f="speaker"><option value="">All speakers</option>{speakers.map((s) => <option>{s}</option>)}</select>
+            </div>
+            <div class="field">
+              <label for="f-topic">Topic</label>
+              <select id="f-topic" data-f="topic"><option value="">All topics</option>{topics.map((s) => <option>{s}</option>)}</select>
+            </div>
+            <div class="field">
+              <label for="f-series">Series</label>
+              <select id="f-series" data-f="series"><option value="">All series</option>{seriesNames.map((s) => <option>{s}</option>)}<option value="__standalone">Standalone messages</option></select>
+            </div>
+            <div class="field">
+              <label for="f-format">Format</label>
+              <select id="f-format" data-f="format"><option value="">Video and audio</option><option value="video">Video</option><option value="audio">Audio</option></select>
+            </div>
+            <div class="field">
+              <label for="f-sort">Sort</label>
+              <select id="f-sort" data-f="sort"><option value="">Latest first</option><option value="oldest">Oldest first</option></select>
+            </div>
+            <button type="button" class="link-btn filters__clear" data-clear-all>Clear all</button>
+          </div>
+
+          <ul class="grid" data-grid>
+            {messages.map((m) => (
+              <li data-item data-date={m.data.date.toISOString()} data-speaker={m.data.speaker ?? ''} data-topics={m.data.topics.join('|')} data-series={m.data.series ?? '__standalone'} data-format={fmt(m)} data-text={searchText(m)}>
+                <MessageCard m={m} />
+              </li>
+            ))}
+          </ul>
+
+          <div class="empty" data-empty hidden>
+            <h3 class="h3">No messages found</h3>
+            <p>Check the spelling, try fewer or different words, or search by speaker, topic or series.</p>
+            <button type="button" class="btn btn--primary btn--sm" data-clear-all>Clear search and filters</button>
+            {series.length > 0 && (
+              <div class="empty__series">
+                <p class="small muted">Or browse a series:</p>
+                <p class="empty__chips">{series.slice(0, 4).map((s) => <button type="button" class="chip chip--btn" data-series-pick={s.name}>{s.name}</button>)}</p>
+              </div>
+            )}
+          </div>
+
+          <div class="more"><button type="button" class="btn btn--outline btn--sm" data-more hidden>Load more messages</button></div>
+        </div>
+      </section>
+    </>
+  )}
+</Base>
+
+<style>
+  .featured-section { padding-bottom: var(--s-7); }
+  .featured { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-8); align-items: center; }
+  .featured__media { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: var(--r-panel); overflow: hidden; }
+  .featured__media img { width: 100%; height: 100%; object-fit: cover; }
+  .play { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--gold-500); color: var(--blue-950); box-shadow: var(--shadow-md); transition: transform 0.2s var(--ease); }
+  .play :global(svg) { fill: currentColor; margin-left: 3px; }
+  .featured__media:hover .play { transform: scale(1.08); }
+  .featured__chips { display: flex; gap: 8px; margin-bottom: var(--s-4); }
+  .featured__title { font-size: var(--fs-h1); line-height: 1.05; margin-bottom: var(--s-4); }
+  .featured__title a { color: inherit; text-decoration: none; }
+  .featured__title a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .featured__summary { font-size: 1.1875rem; margin-bottom: var(--s-3); }
+  .featured__meta { font-size: var(--fs-small); color: var(--ink-2); margin-bottom: var(--s-4); }
+
+  .section--tight { padding-top: 0; padding-bottom: 0; }
+  .row-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-4); flex-wrap: wrap; margin-bottom: var(--s-5); }
+  .muted { color: var(--ink-3); }
+  .series { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); }
+  .series__card { display: flex; flex-direction: column; justify-content: flex-end; width: 100%; min-height: 170px; padding: var(--s-5); border: 0; border-radius: var(--r-card); color: var(--white); text-align: left; cursor: pointer; font: inherit; transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+  .series__card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .series__card[aria-pressed='true'] { box-shadow: 0 0 0 3px var(--gold-500); }
+  .series__card--blue { background: var(--blue-800); }
+  .series__card--night { background: var(--blue-950); }
+  .series__card--earth { background: #2b2a24; }
+  .series__label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-400); margin-bottom: 4px; }
+  .series__name { font-family: var(--font-serif); font-size: 1.625rem; line-height: 1.2; }
+  .series__count { margin-top: 6px; font-size: var(--fs-small); color: rgba(255, 255, 255, 0.78); }
+
+  .latest { padding-top: var(--s-8); }
+  .search-status { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: var(--s-4); font-weight: 600; color: var(--ink); }
+  .search-status[hidden] { display: none; }
+  .link-btn { padding: 0; border: 0; background: none; color: var(--blue-700); font: inherit; font-weight: 700; font-size: 0.9375rem; cursor: pointer; text-decoration: none; }
+  .link-btn:hover { text-decoration: underline; }
+  .filters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) auto; gap: var(--s-3); align-items: end; padding: var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); margin-bottom: var(--s-6); }
+  .filters label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); }
+  .filters__clear { min-height: 48px; padding: 0 var(--s-3); }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-7) var(--s-4); }
+  .grid li[hidden] { display: none; }
+  .empty { padding: var(--s-7) var(--s-6); background: var(--stone); border-radius: var(--r-panel); text-align: center; }
+  .empty[hidden] { display: none; }
+  .empty p { max-width: 520px; margin: var(--s-3) auto var(--s-5); }
+  .empty__series { margin-top: var(--s-5); }
+  .empty__series p { margin: 0 0 var(--s-2); }
+  .empty__chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .chip--btn { border: 0; cursor: pointer; min-height: 32px; padding: 0 14px; font-size: 0.8125rem; }
+  .chip--btn:hover { background: var(--blue-700); color: var(--white); }
+  .more { display: flex; justify-content: center; margin-top: var(--s-7); }
+  .more [hidden] { display: none; }
+
+  @media (max-width: 1024px) {
+    .featured { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+    .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .series { grid-template-columns: minmax(0, 1fr); }
+    .series__card { min-height: 120px; }
+    .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: var(--s-4); }
+    .filters__clear { justify-self: start; min-height: 32px; }
+    .grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+  }
+</style>
+
+<script>
+  import { initLibrary } from '../../scripts/library';
+  initLibrary();
+</script>
