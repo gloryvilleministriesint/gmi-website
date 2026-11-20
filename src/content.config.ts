@@ -129,4 +129,19 @@ const books = defineCollection({
   }),
 });
 
-export const collections = { events, messages, updates, series, tracks, albums, resources, books };
+// Published testimonies only. Submissions are moderated outside the public site and added here once approved.
+const testimonies = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/testimonies' }),
+  schema: z.object({
+    name: z.string(), // display name, as approved by the member (e.g. "Sister A. O." or "Anonymous")
+    date: z.coerce.date(), // date shared or published
+    excerpt: z.string(), // short pull quote for cards
+    category: z.string().optional(), // e.g. Healing, Provision
+    video: z.string().optional(), // YouTube link for a video testimony
+    photo: z.string().optional(),
+    featured: z.boolean().default(false),
+    sample: z.boolean().default(false),
+  }),
+});
+
+export const collections = { events, messages, updates, testimonies, series, tracks, albums, resources, books };

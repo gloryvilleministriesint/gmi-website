@@ -1,0 +1,207 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import GloryRays from '../../components/GloryRays.astro';
+import { getCollection } from 'astro:content';
+import { longDate, youtubeId } from '../../lib/messages';
+
+const all = (await getCollection('testimonies')).sort((a, b) => +b.data.date - +a.data.date);
+const featured = all.find((t) => t.data.featured) ?? all[0];
+const rest = all.filter((t) => t !== featured);
+const isVideo = (t: (typeof all)[number]) => t.data.video !== undefined;
+const SHARE = '/testimonies/share';
+const featuredPhoto = featured?.data.photo ?? (featured && youtubeId(featured.data.video) ? `https://i.ytimg.com/vi/${youtubeId(featured.data.video)}/hqdefault.jpg` : null);
+---
+<Base title="Testimonies" description="Testimonies from the Gloryville Ministries International family. Read what God has done, or share your own testimony.">
+  <PageHero
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Testimonies' }]}
+    eyebrow="Testimonies"
+    title="What God has done."
+    intro="Testimonies from the GMI family. Every testimony is reviewed by the church before it is published."
+  >
+    <a class="btn btn--gold" href={SHARE}>Share your testimony</a>
+  </PageHero>
+
+  {all.length === 0 ? (
+    <section class="section">
+      <div class="container"><p>Testimonies will appear here soon. Has God done something in your life? <a href={SHARE}>Share your testimony</a>.</p></div>
+    </section>
+  ) : (
+    <>
+      <section class="section">
+        <div class="container featured">
+          <div class="img-slot arch featured__media">
+            {featuredPhoto ? <img src={featuredPhoto} alt="" /> : <span class="img-label"><Icon name={isVideo(featured) ? 'video' : 'image'} />Featured testimony: photo or video</span>}
+          </div>
+          <div>
+            <p class="chips">
+              <span class="chip chip--gold">Featured testimony</span>
+              {featured.data.sample && <span class="chip chip--sample">Sample</span>}
+            </p>
+            <span class="quote-mark" aria-hidden="true">“</span>
+            <blockquote class:list={['featured__quote', { ph: featured.data.sample }]}>
+              {featured.data.sample ? '[Pull quote from a published testimony]' : featured.data.excerpt}
+            </blockquote>
+            <p class:list={['featured__name', { ph: featured.data.sample }]}>{featured.data.sample ? '[Name, as approved by the member]' : featured.data.name}</p>
+            <p class:list={['featured__date', { ph: featured.data.sample }]}>{featured.data.sample ? '[Date shared]' : longDate(featured.data.date)}</p>
+            <a class="btn btn--outline" href={`/testimonies/${featured.id}`}>Read the full testimony</a>
+          </div>
+        </div>
+      </section>
+
+      {rest.length > 0 && (
+        <section class="section bg-stone" id="all" data-testimonies>
+          <div class="container">
+            <div class="list-head">
+              <div>
+                <p class="eyebrow">All testimonies</p>
+                <h2>Stories from the GMI family</h2>
+              </div>
+              <div class="seg" role="group" aria-label="Show testimonies">
+                <button type="button" data-kind="" aria-pressed="true">All</button>
+                <button type="button" data-kind="written" aria-pressed="false">Written</button>
+                <button type="button" data-kind="video" aria-pressed="false">Video</button>
+              </div>
+            </div>
+
+            <ul class="cards" data-cards>
+              {rest.map((t) => {
+                const vid = youtubeId(t.data.video);
+                return (
+                  <li data-item data-kind-item={isVideo(t) ? 'video' : 'written'}>
+                    <a class="card" href={`/testimonies/${t.id}`}>
+                      {isVideo(t) && (
+                        <div class="img-slot img-slot--dark card__media">
+                          {vid && <img src={`https://i.ytimg.com/vi/${vid}/hqdefault.jpg`} alt="" loading="lazy" />}
+                          <span class="card__badge">Video testimony</span>
+                        </div>
+                      )}
+                      <span class="quote-mark quote-mark--sm" aria-hidden="true">“</span>
+                      <p class:list={['card__quote', { ph: t.data.sample }]}>{t.data.excerpt}</p>
+                      <p class="card__meta">
+                        <span class="card__name">{t.data.name}</span>
+                        <span>{isVideo(t) ? 'Video' : 'Written'}</span>
+                        {!t.data.sample && <span>{longDate(t.data.date)}</span>}
+                      </p>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+            <p class="empty" data-empty hidden>No testimonies of this kind yet.</p>
+            <nav class="pages" aria-label="Testimony pages" data-pages></nav>
+          </div>
+        </section>
+      )}
+    </>
+  )}
+
+  <section class="section">
+    <div class="container">
+      <div class="band on-dark">
+        <GloryRays class="band__rays" opacity={0.3} color="var(--gold-400)" />
+        <div class="band__copy">
+          <p class="eyebrow">Share your testimony</p>
+          <h2 class="band__title">Has God done something in your life?</h2>
+          <p>Tell us. The church reviews every testimony before it appears on the website, and will contact you if anything needs checking.</p>
+        </div>
+        <a class="btn btn--gold band__btn" href={SHARE}>Share your testimony <Icon name="arrow-right" size={18} /></a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .featured { display: grid; grid-template-columns: 0.85fr 1fr; gap: var(--s-8); align-items: center; }
+  .featured__media { aspect-ratio: 4 / 5; border-radius: 999px 999px 0 0; overflow: hidden; background-color: var(--blue-100); }
+  .featured__media img { width: 100%; height: 100%; object-fit: cover; }
+  .chips { display: flex; gap: 8px; margin-bottom: var(--s-5); }
+  .quote-mark { display: block; font-family: var(--font-serif); font-size: 4rem; line-height: 0.6; height: 0.5em; color: var(--gold-500); }
+  .quote-mark--sm { font-size: 2.75rem; margin-bottom: var(--s-2); }
+  .featured__quote { margin: var(--s-4) 0 var(--s-5); font-family: var(--font-serif); font-style: italic; font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.375rem); line-height: 1.3; color: var(--blue-900); }
+  .featured__quote.ph { color: var(--ink-3); }
+  .featured__name { margin: 0; font-weight: 700; color: var(--ink); }
+  .featured__date { margin: 2px 0 var(--s-5); font-size: var(--fs-small); color: var(--ink-3); }
+
+  .list-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--s-5); flex-wrap: wrap; margin-bottom: var(--s-7); }
+  .seg { display: inline-flex; gap: 4px; }
+  .seg button { min-height: 42px; padding: 0 18px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--white); color: var(--ink); font: inherit; font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
+  .seg [aria-pressed='true'] { background: var(--blue-900); border-color: var(--blue-900); color: var(--white); }
+
+  .cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); }
+  .cards li[hidden] { display: none; }
+  .card { display: flex; flex-direction: column; height: 100%; min-height: 330px; padding: var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); text-decoration: none; color: var(--ink-2); transition: box-shadow 0.2s var(--ease), transform 0.2s var(--ease); }
+  .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); color: var(--ink-2); }
+  .card__media { position: relative; aspect-ratio: 16 / 9; border-radius: var(--r-input); overflow: hidden; margin: calc(-1 * var(--s-1)) 0 var(--s-5); }
+  .card__media img { width: 100%; height: 100%; object-fit: cover; }
+  .card__badge { position: absolute; left: 10px; bottom: 10px; padding: 3px 10px; border-radius: 6px; background: var(--blue-950); color: var(--white); font-size: 0.75rem; font-weight: 700; }
+  .card__quote { flex: 1; margin: var(--s-2) 0 var(--s-5); font-family: var(--font-serif); font-style: italic; font-size: 1.25rem; line-height: 1.4; color: var(--ink); }
+  .card:hover .card__quote:not(.ph) { color: var(--blue-900); }
+  .card__meta { display: flex; flex-wrap: wrap; align-items: center; margin: 0; font-size: var(--fs-small); color: var(--ink-3); }
+  .card__meta span + span::before { content: '•'; margin: 0 10px; color: var(--line-strong); }
+  .card__name { font-weight: 600; color: var(--ink); }
+  .empty { text-align: center; color: var(--ink-3); }
+  .empty[hidden] { display: none; }
+
+  .pages { display: flex; justify-content: center; gap: 6px; margin-top: var(--s-7); }
+  .pages:empty { display: none; }
+  .pages :global(button) { min-width: 42px; height: 42px; padding: 0 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
+  .pages :global(button[aria-current='page']) { background: var(--blue-800); border-color: var(--blue-800); color: var(--white); }
+
+  .band { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: var(--s-6); flex-wrap: wrap; padding: var(--s-8); border-radius: var(--r-panel); background: var(--blue-800); }
+  :global(.band__rays) { right: -40px; bottom: -140px; width: 560px; height: 420px; }
+  .band__copy { position: relative; max-width: 620px; }
+  .band__title { font-size: clamp(2.125rem, 1.5rem + 2.2vw, 3.25rem); line-height: 1.06; letter-spacing: -0.02em; margin-bottom: var(--s-4); }
+  .band__copy p { color: rgba(255, 255, 255, 0.82); margin: 0; }
+  .band__btn { position: relative; gap: 10px; }
+
+  @media (max-width: 1024px) {
+    .featured { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+    .featured__media { width: min(100%, 420px); }
+    .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .cards { grid-template-columns: minmax(0, 1fr); }
+    .card { min-height: 0; }
+    .featured__media { aspect-ratio: 1; }
+    .band { padding: var(--s-6) var(--s-5); }
+    .band__btn { width: 100%; }
+  }
+</style>
+
+<script>
+  // Written / Video filter and pages of six, as in the design.
+  const root = document.querySelector<HTMLElement>('[data-testimonies]');
+  if (root) {
+    const PER = 6;
+    const items = Array.from(root.querySelectorAll<HTMLElement>('[data-item]'));
+    const btns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-kind]'));
+    const pages = root.querySelector<HTMLElement>('[data-pages]')!;
+    const empty = root.querySelector<HTMLElement>('[data-empty]')!;
+    let kind = '';
+    let page = 1;
+    const render = (scroll = false) => {
+      const hits = items.filter((i) => !kind || i.dataset.kindItem === kind);
+      const count = Math.max(1, Math.ceil(hits.length / PER));
+      page = Math.min(page, count);
+      items.forEach((i) => (i.hidden = true));
+      hits.slice((page - 1) * PER, page * PER).forEach((i) => (i.hidden = false));
+      empty.hidden = hits.length > 0;
+      btns.forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.kind ?? '') === kind)));
+      pages.innerHTML = count > 1
+        ? Array.from({ length: count }, (_, n) => `<button type="button" data-page="${n + 1}" ${n + 1 === page ? 'aria-current="page"' : ''} aria-label="Page ${n + 1}">${n + 1}</button>`).join('')
+        : '';
+      if (scroll) root.scrollIntoView({ block: 'start' });
+    };
+    btns.forEach((b) => b.addEventListener('click', () => { kind = b.dataset.kind ?? ''; page = 1; render(); }));
+    pages.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-page]');
+      if (!b) return;
+      page = Number(b.dataset.page);
+      render(true);
+      root.querySelector<HTMLElement>('[data-item]:not([hidden]) a')?.focus({ preventScroll: true });
+    });
+    render();
+  }
+</script>

@@ -1,0 +1,114 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import PageHero from '../../components/PageHero.astro';
+import YouTubeLite from '../../components/YouTubeLite.astro';
+import { getCollection, render } from 'astro:content';
+import { longDate } from '../../lib/messages';
+import '../../styles/library.css';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('testimonies')).sort((a, b) => +b.data.date - +a.data.date);
+  return all.map((t) => ({ params: { slug: t.id }, props: { t, more: all.filter((x) => x.id !== t.id).slice(0, 3) } }));
+}
+type T = Awaited<ReturnType<typeof getCollection<'testimonies'>>>[number];
+const { t, more } = Astro.props as { t: T; more: T[] };
+const d = t.data;
+const { Content } = await render(t);
+const hasBody = Boolean(t.body?.trim());
+const isVideo = d.video !== undefined;
+const pageUrl = new URL(`/testimonies/${t.id}`, Astro.site).href;
+---
+<Base title={`Testimony${d.sample ? '' : ` from ${d.name}`}`} description={d.sample ? 'A testimony from the GMI family.' : d.excerpt}>
+  <PageHero
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Testimonies', href: '/testimonies' }, { label: 'Testimony' }]}
+    eyebrow={isVideo ? 'Video testimony' : 'Testimony'}
+    title={d.sample ? '[Testimony title or pull quote]' : d.excerpt}
+  />
+
+  <article class="section">
+    <div class="container read">
+      <p class="who">
+        {d.photo && <img class="who__photo" src={d.photo} alt="" />}
+        <span>
+          <span class:list={['who__name', { ph: d.sample }]}>{d.sample ? '[Name, as approved by the member]' : d.name}</span>
+          <span class:list={['who__date', { ph: d.sample }]}>{d.sample ? '[Date shared]' : `Shared ${longDate(d.date)}`}{d.category && ` · ${d.category}`}</span>
+        </span>
+      </p>
+
+      {isVideo && <div class="video"><YouTubeLite video={d.video} title={`Video testimony from ${d.name}`} label="Video testimony" /></div>}
+
+      <div class="prose">
+        {hasBody ? <Content /> : <p class="ph">[Full testimony, as approved by the member and the church]</p>}
+      </div>
+
+      <div class="foot">
+        <a class="link-arrow" href="/testimonies"><Icon name="arrow-left" />All testimonies</a>
+        <button type="button" class="btn btn--outline btn--sm share" data-share={pageUrl}><Icon name="share-2" size={16} /><span data-share-label>Share</span></button>
+      </div>
+    </div>
+  </article>
+
+  <section class="section bg-stone">
+    <div class="container read">
+      <div class="nudge">
+        <div>
+          <h2 class="h3">Has God done something in your life?</h2>
+          <p class="small">Share your testimony. The church reviews every testimony before it is published.</p>
+        </div>
+        <a class="btn btn--gold btn--sm" href="/testimonies/share">Share your testimony</a>
+      </div>
+      {more.length > 0 && (
+        <>
+          <h2 class="h3 more-h">More testimonies</h2>
+          <ul class="more">
+            {more.map((m) => (
+              <li>
+                <a href={`/testimonies/${m.id}`}>
+                  <span class:list={['more__quote', { ph: m.data.sample }]}>“{m.data.excerpt}”</span>
+                  <span class="small">{m.data.name}{m.data.video !== undefined && ' · Video'}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .read { max-width: calc(var(--reading) + 2 * var(--gutter)); }
+  .who { display: flex; align-items: center; gap: var(--s-4); margin-bottom: var(--s-6); }
+  .who > span { display: flex; flex-direction: column; }
+  .who__photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+  .who__name { font-weight: 700; color: var(--ink); }
+  .who__date { font-size: var(--fs-small); color: var(--ink-3); }
+  .video { margin-bottom: var(--s-6); }
+  .prose { font-size: 1.125rem; line-height: 1.75; }
+  .prose :global(p) { margin-bottom: var(--s-4); }
+  .foot { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); flex-wrap: wrap; margin-top: var(--s-7); padding-top: var(--s-5); border-top: 1px solid var(--line); }
+  .share { gap: 8px; }
+  .nudge { display: flex; justify-content: space-between; align-items: center; gap: var(--s-5); flex-wrap: wrap; padding: var(--s-6); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-panel); }
+  .nudge h2 { margin-bottom: 4px; }
+  .nudge p { margin: 0; }
+  .more-h { margin: var(--s-7) 0 var(--s-4); }
+  .more { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .more a { display: flex; flex-direction: column; gap: 4px; padding: var(--s-4) 0; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink-3); }
+  .more__quote { font-family: var(--font-serif); font-style: italic; font-size: 1.25rem; color: var(--blue-900); }
+  .more__quote.ph { color: var(--ink-3); }
+  .more a:hover .more__quote { text-decoration: underline; }
+</style>
+
+<script>
+  import { initYouTube } from '../../scripts/yt-lite';
+  initYouTube();
+  document.querySelectorAll<HTMLButtonElement>('[data-share]').forEach((btn) => {
+    const label = btn.querySelector<HTMLElement>('[data-share-label]');
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.share!;
+      if (navigator.share) { try { await navigator.share({ title: document.title, url }); } catch { /* cancelled */ } return; }
+      try { await navigator.clipboard.writeText(url); if (label) { label.textContent = 'Link copied'; setTimeout(() => (label.textContent = 'Share'), 2500); } } catch { /* unavailable */ }
+    });
+  });
+</script>
