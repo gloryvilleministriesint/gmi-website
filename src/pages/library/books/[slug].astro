@@ -1,0 +1,93 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import LibraryHeader from '../../../components/LibraryHeader.astro';
+import { render } from 'astro:content';
+import { getBooks } from '../../../lib/library';
+import '../../../styles/library.css';
+
+export async function getStaticPaths() {
+  const all = await getBooks();
+  return all.map((b) => ({ params: { slug: b.id }, props: { b, more: all.filter((x) => x.id !== b.id).slice(0, 4) } }));
+}
+type B = Awaited<ReturnType<typeof getBooks>>[number];
+const { b, more } = Astro.props as { b: B; more: B[] };
+const d = b.data;
+const { Content } = await render(b);
+const hasBody = Boolean(b.body?.trim());
+const authorPh = d.author.startsWith('[');
+---
+<Base title={`${d.title} by ${authorPh ? 'the author' : d.author}`} description={d.summary ?? `${d.title}, a book recommended by Gloryville Ministries International.`}>
+  <LibraryHeader title={d.title} current="/library/books" crumb={d.title} parent={{ label: 'Recommended Books', href: '/library/books' }} />
+
+  <section class="section">
+    <div class="container book">
+      <div class="img-slot img-slot--warm cover">
+        {d.cover ? <img src={d.cover} alt={`Cover of ${d.title} by ${d.author}`} /> : <span class="img-label"><Icon name="book" />Book cover</span>}
+      </div>
+      <div>
+        <p class="eyebrow">Recommended book</p>
+        <h2 class="book__title">{d.title}</h2>
+        <p class:list={['book__author', { ph: authorPh }]}>{authorPh ? d.author : `by ${d.author}`}</p>
+        {d.recommendedBy ? <p class="rec">Recommended by {d.recommendedBy}</p> : d.sample && <p class="rec ph">[Recommended by]</p>}
+
+        <h3 class="h4 why-h">Why we recommend it</h3>
+        <div class="prose">
+          {hasBody ? <Content /> : d.summary ? <p>{d.summary}</p> : <p class="ph">[Why this book is recommended, supplied by the church]</p>}
+        </div>
+
+        {d.links.length > 0 && (
+          <ul class="links">
+            {d.links.map((l) => (
+              <li><a class="btn btn--outline btn--sm" href={l.url} target="_blank" rel="noopener">{l.label}<Icon name="external-link" size={14} class="ext-icon" /><span class="sr-only"> (opens an external site in a new tab)</span></a></li>
+            ))}
+          </ul>
+        )}
+        {d.links.length > 0 && <p class="small lib-muted">External links go to other websites. GMI does not sell books through this site.</p>}
+
+        <a class="link-arrow back" href="/library/books"><Icon name="arrow-left" />All recommended books</a>
+      </div>
+    </div>
+  </section>
+
+  {more.length > 0 && (
+    <section class="section bg-stone">
+      <div class="container">
+        <h2 class="h3 more-h">More recommended books</h2>
+        <ul class="lib-grid lib-grid--4">
+          {more.map((m) => (
+            <li>
+              <a class="lib-card" href={`/library/books/${m.id}`}>
+                <div class="img-slot small-cover">{m.data.cover ? <img src={m.data.cover} alt="" loading="lazy" /> : <span class="img-label"><Icon name="book" />Cover</span>}</div>
+                <p class="lib-card__title">{m.data.title}</p>
+                <p class:list={['lib-card__meta', { ph: m.data.author.startsWith('[') }]}>{m.data.author}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .book { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: var(--s-8); align-items: start; }
+  .cover { aspect-ratio: 2 / 3; border-radius: var(--r-input); overflow: hidden; box-shadow: var(--shadow-lg); }
+  .cover img { width: 100%; height: 100%; object-fit: cover; }
+  .book__title { font-size: var(--fs-h1); line-height: 1.05; margin-bottom: var(--s-2); }
+  .book__author { font-size: 1.1875rem; color: var(--ink-2); margin-bottom: var(--s-2); }
+  .rec { font-weight: 600; color: var(--gold-700); }
+  .why-h { font-family: var(--font-sans); font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin: var(--s-6) 0 var(--s-3); }
+  .prose { max-width: var(--reading); }
+  .prose :global(p) { margin-bottom: var(--s-4); }
+  .links { display: flex; flex-wrap: wrap; gap: var(--s-2); list-style: none; margin: var(--s-5) 0 var(--s-2); padding: 0; }
+  .links .btn { gap: 4px; }
+  .back { margin-top: var(--s-6); }
+  .more-h { margin-bottom: var(--s-5); }
+  .small-cover { aspect-ratio: 2 / 3; border-radius: var(--r-input); overflow: hidden; margin-bottom: var(--s-3); }
+  .small-cover img { width: 100%; height: 100%; object-fit: cover; }
+  @media (max-width: 760px) {
+    .book { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+    .cover { width: min(220px, 60%); }
+  }
+</style>

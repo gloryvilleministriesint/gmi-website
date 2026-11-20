@@ -1,0 +1,163 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import LibraryHeader from '../../../components/LibraryHeader.astro';
+import YouTubeLite from '../../../components/YouTubeLite.astro';
+import { getAlbums, longDate } from '../../../lib/library';
+import '../../../styles/library.css';
+
+export async function getStaticPaths() {
+  const albums = await getAlbums();
+  return albums.map((a, i) => ({ params: { album: a.id }, props: { a, newer: albums[i - 1], older: albums[i + 1] } }));
+}
+type A = Awaited<ReturnType<typeof getAlbums>>[number];
+const { a, newer, older } = Astro.props as { a: A; newer?: A; older?: A };
+const d = a.data;
+const photos = d.photos;
+const placeholders = photos.length === 0 && d.sample ? 8 : 0;
+---
+<Base title={`${d.title} (gallery)`} description={`Photos${d.videos.length ? ' and videos' : ''} from ${d.title} at Gloryville Ministries International.`}>
+  <LibraryHeader title={d.title} current="/library/gallery" crumb={d.title} parent={{ label: 'Gallery', href: '/library/gallery' }} />
+
+  <section class="section">
+    <div class="container">
+      <div class="lib-section-head">
+        <p class="meta">
+          <span class="chip">{d.kind}</span>
+          <span class:list={{ ph: d.sample }}>{d.sample ? '[Date]' : longDate(d.date)}</span>
+          <span>{photos.length ? `${photos.length} photos` : placeholders ? <span class="ph">[Photo count]</span> : 'No photos yet'}</span>
+        </p>
+        <a class="link-arrow" href="/library/gallery"><Icon name="arrow-left" />All albums</a>
+      </div>
+
+      {(photos.length > 0 || placeholders > 0) && (
+        <ul class="photos" data-photos>
+          {photos.map((p, i) => (
+            <li>
+              <button type="button" class="photo" data-index={i} aria-label={`Open photo ${i + 1} of ${photos.length}: ${p.alt}`}>
+                <img src={p.src} alt={p.alt} loading="lazy" decoding="async" />
+              </button>
+            </li>
+          ))}
+          {Array.from({ length: placeholders }, (_, i) => (
+            <li><div class:list={['img-slot photo', { 'img-slot--warm': i % 3 === 0 }]}><span class="img-label"><Icon name="image" />Photo</span></div></li>
+          ))}
+        </ul>
+      )}
+
+      {d.videos.length > 0 && (
+        <div class="videos">
+          <h2 class="h3">Videos</h2>
+          <ul class="lib-grid">
+            {d.videos.map((v) => <li><YouTubeLite video={v.youtube} title={v.title} /><p class="v-title">{v.title}</p></li>)}
+          </ul>
+        </div>
+      )}
+
+      {(newer || older) && (
+        <nav class="pager" aria-label="Other albums">
+          {older ? <a href={`/library/gallery/${older.id}`}><span>Previous album</span>{older.data.title}</a> : <span></span>}
+          {newer && <a class="pager__next" href={`/library/gallery/${newer.id}`}><span>Next album</span>{newer.data.title}</a>}
+        </nav>
+      )}
+    </div>
+  </section>
+
+  {photos.length > 0 && (
+    <dialog class="lightbox" data-lightbox aria-label="Photo viewer">
+      <figure>
+        <img data-lb-img alt="" />
+        <figcaption><span data-lb-caption></span> <span class="lightbox__count" data-lb-count></span></figcaption>
+      </figure>
+      <button type="button" class="lb-btn lb-close" data-lb-close aria-label="Close photo viewer"><Icon name="x" size={22} /></button>
+      <button type="button" class="lb-btn lb-prev" data-lb-prev aria-label="Previous photo"><Icon name="chevron-left" size={26} /></button>
+      <button type="button" class="lb-btn lb-next" data-lb-next aria-label="Next photo"><Icon name="chevron-right" size={26} /></button>
+      <script type="application/json" data-lb-data set:html={JSON.stringify(photos)} />
+    </dialog>
+  )}
+</Base>
+
+<style>
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0; font-size: var(--fs-small); color: var(--ink-2); }
+  .photos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); }
+  .photo { display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; border-radius: var(--r-input); overflow: hidden; background: var(--stone); cursor: zoom-in; }
+  div.photo { cursor: default; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s var(--ease); }
+  .photo:hover img { transform: scale(1.04); }
+  .photo:focus-visible { outline: 3px solid var(--gold-500); outline-offset: 2px; }
+  .videos { margin-top: var(--s-8); }
+  .videos h2 { margin-bottom: var(--s-5); }
+  .v-title { margin: var(--s-3) 0 0; font-weight: 600; color: var(--ink); }
+  .pager { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); margin-top: var(--s-8); }
+  .pager a { display: flex; flex-direction: column; gap: 4px; padding: var(--s-4) var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); font-family: var(--font-serif); font-size: 1.25rem; color: var(--blue-900); text-decoration: none; }
+  .pager a:hover { box-shadow: var(--shadow-md); }
+  .pager span { font-family: var(--font-sans); font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .pager__next { text-align: right; }
+
+  .lightbox { width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(10, 22, 51, 0.96); color: var(--white); }
+  .lightbox::backdrop { background: rgba(10, 22, 51, 0.9); }
+  .lightbox figure { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; margin: 0; padding: 64px 72px 24px; gap: var(--s-3); }
+  .lightbox img { max-width: 100%; max-height: calc(100vh - 140px); object-fit: contain; border-radius: var(--r-input); }
+  .lightbox figcaption { font-size: var(--fs-small); color: rgba(255, 255, 255, 0.85); text-align: center; }
+  .lightbox__count { color: rgba(255, 255, 255, 0.6); margin-left: 8px; }
+  .lb-btn { position: absolute; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.08); color: var(--white); cursor: pointer; }
+  .lb-btn:hover { background: rgba(255, 255, 255, 0.18); }
+  .lb-close { top: 16px; right: 16px; }
+  .lb-prev { left: 16px; top: 50%; translate: 0 -50%; }
+  .lb-next { right: 16px; top: 50%; translate: 0 -50%; }
+
+  @media (max-width: 1024px) { .photos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 760px) {
+    .photos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); }
+    .pager { grid-template-columns: minmax(0, 1fr); }
+    .pager__next { text-align: left; }
+    .lightbox figure { padding: 64px 12px 88px; }
+    .lb-prev, .lb-next { top: auto; bottom: 20px; translate: none; }
+    .lb-prev { left: calc(50% - 60px); }
+    .lb-next { right: calc(50% - 60px); }
+  }
+</style>
+
+<script>
+  import { initYouTube } from '../../../scripts/yt-lite';
+  initYouTube();
+
+  // Lightbox: arrows and swipe to move, Esc to close, focus returns to the photo that opened it.
+  const dlg = document.querySelector<HTMLDialogElement>('[data-lightbox]');
+  if (dlg) {
+    const photos: { src: string; alt: string }[] = JSON.parse(dlg.querySelector('[data-lb-data]')!.textContent || '[]');
+    const img = dlg.querySelector<HTMLImageElement>('[data-lb-img]')!;
+    const cap = dlg.querySelector<HTMLElement>('[data-lb-caption]')!;
+    const count = dlg.querySelector<HTMLElement>('[data-lb-count]')!;
+    let i = 0;
+    let opener: HTMLElement | null = null;
+    const show = (n: number) => {
+      i = (n + photos.length) % photos.length;
+      img.src = photos[i].src;
+      img.alt = photos[i].alt;
+      cap.textContent = photos[i].alt;
+      count.textContent = `${i + 1} of ${photos.length}`;
+      // Preload the next photo.
+      new Image().src = photos[(i + 1) % photos.length].src;
+    };
+    document.querySelectorAll<HTMLButtonElement>('[data-photos] button[data-index]').forEach((b) =>
+      b.addEventListener('click', () => { opener = b; show(Number(b.dataset.index)); dlg.showModal(); }),
+    );
+    dlg.querySelector('[data-lb-prev]')!.addEventListener('click', () => show(i - 1));
+    dlg.querySelector('[data-lb-next]')!.addEventListener('click', () => show(i + 1));
+    dlg.querySelector('[data-lb-close]')!.addEventListener('click', () => dlg.close());
+    dlg.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(i - 1);
+      if (e.key === 'ArrowRight') show(i + 1);
+    });
+    dlg.addEventListener('close', () => opener?.focus());
+    let x0: number | null = null;
+    dlg.addEventListener('touchstart', (e) => (x0 = e.touches[0].clientX), { passive: true });
+    dlg.addEventListener('touchend', (e) => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1));
+      x0 = null;
+    });
+  }
+</script>

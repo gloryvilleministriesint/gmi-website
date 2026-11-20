@@ -1,0 +1,93 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import LibraryHeader from '../../../components/LibraryHeader.astro';
+import { getResources, longDate, fileInfo } from '../../../lib/library';
+import '../../../styles/library.css';
+
+const resources = await getResources();
+const types = [
+  { value: 'Article', label: 'Articles', icon: 'file-text' },
+  { value: 'Download', label: 'Downloads', icon: 'download' },
+  { value: 'Devotional', label: 'Devotionals', icon: 'book-open' },
+].map((t) => ({ ...t, count: resources.filter((r) => r.data.type === t.value).length })).filter((t) => t.count > 0);
+const iconFor = (type: string) => types.find((t) => t.value === type)?.icon ?? 'file-text';
+---
+<Base title="Publications and Resources" description="Articles, devotionals and downloadable resources from Gloryville Ministries International.">
+  <LibraryHeader title="Publications and Resources" current="/library/resources" crumb="Publications and Resources" intro="Articles, devotionals and downloads for study and encouragement." />
+
+  <section class="section" data-resources>
+    <div class="container">
+      {resources.length === 0 ? (
+        <div class="lib-empty"><h2 class="h3">Resources are coming soon</h2><p>Articles, devotionals and downloads will appear here.</p></div>
+      ) : (
+        <>
+          <div class="lib-chips" role="group" aria-label="Filter by type">
+            <button type="button" class="lib-chip" data-type="" aria-pressed="true">All <span class="count">{resources.length}</span></button>
+            {types.map((t) => <button type="button" class="lib-chip" data-type={t.value} aria-pressed="false">{t.label} <span class="count">{t.count}</span></button>)}
+          </div>
+          <ul class="list">
+            {resources.map((r) => {
+              const info = r.data.type === 'Download' ? fileInfo(r.data.file) : null;
+              return (
+                <li data-type-item={r.data.type}>
+                  <span class="list__icon" aria-hidden="true"><Icon name={iconFor(r.data.type)} size={20} /></span>
+                  <div>
+                    <p class="lib-card__kicker">{r.data.type}</p>
+                    <h2 class="list__title"><a href={`/library/resources/${r.id}`}>{r.data.title}</a></h2>
+                    {r.data.summary ? <p class="lib-card__text">{r.data.summary}</p> : r.data.sample && <p class="lib-card__text ph">[One-line summary]</p>}
+                    <p class="lib-card__meta">
+                      <span class:list={{ ph: r.data.sample }}>{r.data.sample ? '[Date]' : longDate(r.data.date)}</span>
+                      {r.data.author && ` · ${r.data.author}`}
+                      {info && ` · ${info}`}
+                    </p>
+                  </div>
+                  {r.data.type === 'Download' && r.data.file
+                    ? <a class="btn btn--outline btn--sm list__go" href={r.data.file} download><Icon name="download" size={16} />Download<span class="sr-only"> {r.data.title}{info && ` (${info})`}</span></a>
+                    : <a class="link-arrow list__go" href={`/library/resources/${r.id}`} aria-hidden="true" tabindex="-1">{r.data.type === 'Download' ? 'Details' : 'Read'} <Icon name="arrow-right" /></a>}
+                </li>
+              );
+            })}
+          </ul>
+          <div class="lib-empty" data-none hidden><p>Nothing of this type yet.</p></div>
+        </>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .list li { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: var(--s-5); align-items: center; padding: var(--s-5) 0; border-bottom: 1px solid var(--line); }
+  .list li[hidden] { display: none; }
+  .list__icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--gold-100); color: var(--gold-700); }
+  .list__title { font-size: 1.5rem; margin: 0 0 6px; }
+  .list__title a { color: var(--blue-900); text-decoration: none; }
+  .list__title a:hover { text-decoration: underline; }
+  .list__go.btn { gap: 8px; }
+  @media (max-width: 760px) {
+    .list li { grid-template-columns: 40px minmax(0, 1fr); gap: var(--s-4); }
+    .list__icon { width: 40px; height: 40px; }
+    .list__go { grid-column: 2; justify-self: start; }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-resources]');
+  if (root) {
+    const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-type]'));
+    const items = Array.from(root.querySelectorAll<HTMLElement>('[data-type-item]'));
+    const none = root.querySelector<HTMLElement>('[data-none]')!;
+    const apply = (type: string) => {
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.type === type)));
+      items.forEach((li) => (li.hidden = Boolean(type) && li.dataset.typeItem !== type));
+      none.hidden = items.some((li) => !li.hidden);
+      const url = new URL(location.href);
+      type ? url.searchParams.set('type', type) : url.searchParams.delete('type');
+      history.replaceState(null, '', url);
+    };
+    chips.forEach((c) => c.addEventListener('click', () => apply(c.dataset.type ?? '')));
+    const start = new URLSearchParams(location.search).get('type');
+    if (start && chips.some((c) => c.dataset.type === start)) apply(start);
+  }
+</script>

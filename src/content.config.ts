@@ -61,4 +61,72 @@ const updates = defineCollection({
   }),
 });
 
-export const collections = { events, messages, updates };
+// ---------- Digital Library categories (Blueprint 5.2–5.7) ----------
+
+const series = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/series' }),
+  schema: z.object({
+    name: z.string(), // must match the `series` value used on messages
+    summary: z.string().optional(),
+    image: z.string().optional(),
+    sample: z.boolean().default(false),
+  }),
+});
+
+const tracks = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/tracks' }),
+  schema: z.object({
+    title: z.string(),
+    collection: z.string().optional(), // album or collection name
+    audio: z.string().optional(), // hosted audio file
+    link: z.string().url().optional(), // official streaming link
+    credits: z.string().optional(),
+    duration: z.string().optional(),
+    date: z.coerce.date(),
+    order: z.number().default(0),
+    sample: z.boolean().default(false),
+  }),
+});
+
+const albums = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/albums' }),
+  schema: z.object({
+    title: z.string(), // occasion name
+    date: z.coerce.date(),
+    kind: z.enum(['Service', 'Special occasion', 'Programme', 'Department']).default('Service'),
+    cover: z.string().optional(),
+    photos: z.array(z.object({ src: z.string(), alt: z.string() })).default([]),
+    videos: z.array(z.object({ title: z.string(), youtube: z.string() })).default([]),
+    sample: z.boolean().default(false),
+  }),
+});
+
+const resources = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/resources' }),
+  schema: z.object({
+    title: z.string(),
+    type: z.enum(['Article', 'Download', 'Devotional']),
+    date: z.coerce.date(),
+    summary: z.string().optional(),
+    author: z.string().optional(),
+    file: z.string().optional(), // e.g. /files/devotional.pdf (in public/files)
+    image: z.string().optional(),
+    sample: z.boolean().default(false),
+  }),
+});
+
+const books = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/books' }),
+  schema: z.object({
+    title: z.string(),
+    author: z.string(),
+    cover: z.string().optional(),
+    recommendedBy: z.string().optional(),
+    summary: z.string().optional(),
+    links: z.array(z.object({ label: z.string(), url: z.string().url() })).default([]),
+    date: z.coerce.date(),
+    sample: z.boolean().default(false),
+  }),
+});
+
+export const collections = { events, messages, updates, series, tracks, albums, resources, books };

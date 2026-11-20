@@ -1,0 +1,108 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import LibraryHeader from '../../components/LibraryHeader.astro';
+import YouTubeLite from '../../components/YouTubeLite.astro';
+import site from '../../data/site.json';
+import { getMessages, hasVideo, longDate, youtubeId } from '../../lib/messages';
+import '../../styles/library.css';
+
+const live = site.live;
+const liveId = youtubeId(live.url);
+const channel = live.youtubeChannel || site.social.youtube;
+const streamed = site.services.filter((s) => s.streamed);
+const latest = (await getMessages()).find((m) => hasVideo(m));
+---
+<Base title="Live Services" description="Watch Gloryville Ministries International services live, see when the next stream starts and catch up on the latest recording.">
+  <LibraryHeader title="Live Services" current="/library/live" crumb="Live Services" intro="Join GMI services from wherever you are." />
+
+  <section class="section">
+    <div class="container live-layout">
+      <div>
+        {live.isLive ? (
+          <>
+            <p class="status status--live"><span class="pulse" aria-hidden="true"></span>We are live now</p>
+            {liveId ? (
+              <iframe class="yt-frame" src={`https://www.youtube-nocookie.com/embed/${liveId}?rel=0`} title="GMI live service" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            ) : (
+              <a class="btn btn--gold" href={live.url || channel} target="_blank" rel="noopener">Watch the live service<Icon name="external-link" size={16} class="ext-icon" /></a>
+            )}
+          </>
+        ) : (
+          <>
+            <p class="status">Not live right now</p>
+            <h2>Next live stream</h2>
+            {live.nextStream
+              ? <p class="next">{live.nextStream}</p>
+              : <p class="next">Services stream live at these times (West Africa Time):</p>}
+            <ul class="times">
+              {streamed.map((s) => <li><Icon name="radio" size={18} /><span><strong>{s.name}</strong> · Every {s.day}, {s.time}</span></li>)}
+            </ul>
+            <p class="small lib-muted">This page shows the live player as soon as a service starts.</p>
+          </>
+        )}
+
+        {latest && (
+          <div class="latest">
+            <div class="lib-section-head">
+              <h2 class="h3">Latest recording</h2>
+              <a class="link-arrow" href="/library">All messages <Icon name="arrow-right" /></a>
+            </div>
+            <YouTubeLite video={latest.data.youtube} title={latest.data.title} label="Latest recorded service or message" />
+            <p class="latest__title"><a href={`/library/messages/${latest.id}`}>{latest.data.title}</a></p>
+            <p class="small lib-muted">
+              <span class:list={{ ph: latest.data.sample || !latest.data.speaker }}>{latest.data.sample || !latest.data.speaker ? '[Speaker]' : latest.data.speaker}</span> · <span class:list={{ ph: latest.data.sample }}>{latest.data.sample ? '[Date]' : longDate(latest.data.date)}</span>
+            </p>
+          </div>
+        )}
+      </div>
+
+      <aside class="side">
+        <div class="lib-panel">
+          <p class="lib-panel__label">Watch on YouTube</p>
+          <p class="small">Subscribe to GMI on YouTube to be notified when a service goes live.</p>
+          {channel
+            ? <a class="btn btn--primary btn--sm" href={channel} target="_blank" rel="noopener"><Icon name="youtube" size={18} />Open the GMI channel<span class="sr-only"> (opens in a new tab)</span></a>
+            : <p class="ph small">[YouTube channel link, supplied by GMI]</p>}
+        </div>
+        <div class="lib-panel">
+          <p class="lib-panel__label">Other ways to join</p>
+          <p class="small">Announcements and reminders are shared on GMI's official channels.</p>
+          <a class="link-arrow" href="/library/connect">Online Connections <Icon name="arrow-right" /></a>
+        </div>
+        <div class="lib-panel">
+          <p class="lib-panel__label">Prefer to come in person?</p>
+          <a class="link-arrow" href="/plan-your-visit">Plan your visit <Icon name="arrow-right" /></a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .live-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--s-8); align-items: start; }
+  .status { display: inline-flex; align-items: center; gap: 10px; min-height: 32px; padding: 0 14px; margin-bottom: var(--s-4); border-radius: var(--r-pill); background: var(--stone); color: var(--ink-2); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .status--live { background: var(--error-bg); color: var(--error); }
+  .pulse { width: 9px; height: 9px; border-radius: 50%; background: var(--error); animation: pulse 1.6s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(179, 38, 30, 0.5); } 100% { box-shadow: 0 0 0 10px rgba(179, 38, 30, 0); } }
+  @media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+  h2 { margin-bottom: var(--s-3); }
+  .next { font-size: 1.1875rem; color: var(--ink); }
+  .times { list-style: none; margin: var(--s-4) 0; padding: 0; display: grid; gap: var(--s-3); }
+  .times li { display: flex; align-items: center; gap: 12px; padding: var(--s-4); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); }
+  .times :global(svg) { color: var(--blue-700); flex: none; }
+  .latest { margin-top: var(--s-8); }
+  .latest__title { margin: var(--s-4) 0 4px; font-family: var(--font-serif); font-size: 1.5rem; }
+  .latest__title a { color: var(--blue-900); text-decoration: none; }
+  .latest__title a:hover { text-decoration: underline; }
+  .side { display: grid; gap: var(--s-4); }
+  .side .lib-panel { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-2); }
+  .side .lib-panel p { margin: 0; }
+  .side .btn { gap: 8px; margin-top: var(--s-2); }
+  @media (max-width: 1024px) { .live-layout { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<script>
+  import { initYouTube } from '../../scripts/yt-lite';
+  initYouTube();
+</script>

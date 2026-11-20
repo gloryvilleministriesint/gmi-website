@@ -1,0 +1,118 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import LibraryHeader from '../../components/LibraryHeader.astro';
+import { getTracks, longDate } from '../../lib/library';
+import '../../styles/library.css';
+
+const tracks = await getTracks();
+// Group by collection (album); tracks without one go under "Singles and recordings".
+const groups = new Map<string, typeof tracks>();
+for (const t of tracks) {
+  const key = t.data.collection ?? 'Singles and recordings';
+  groups.set(key, [...(groups.get(key) ?? []), t]);
+}
+const ordered = [...groups.entries()].map(([name, list]) => ({ name, list: list.sort((a, b) => a.data.order - b.data.order) }));
+---
+<Base title="Music and Songs" description="Church music and worship songs from Gloryville Ministries International, Ibadan.">
+  <LibraryHeader title="Music and Songs" current="/library/music" crumb="Music and Songs" intro="Worship songs and recordings from GMI. Press play to listen here, or open a song on its official streaming page." />
+
+  <section class="section">
+    <div class="container">
+      {tracks.length === 0 ? (
+        <div class="lib-empty"><h2 class="h3">Music is coming soon</h2><p>Church recordings will appear here. Meanwhile, <a href="/library">listen to recent messages</a>.</p></div>
+      ) : (
+        <div class="collections" data-music>
+          {ordered.map((g) => (
+            <section class="collection" aria-labelledby={`c-${g.list[0].id}`}>
+              <div class="collection__head">
+                <div class="img-slot img-slot--warm collection__art"><span class="img-label"><Icon name="music" />Artwork</span></div>
+                <div>
+                  <p class="lib-card__kicker">{g.name === 'Singles and recordings' ? 'Recordings' : 'Collection'}</p>
+                  <h2 class="h3" id={`c-${g.list[0].id}`}>{g.name}</h2>
+                  <p class="small lib-muted">{g.list.length} {g.list.length === 1 ? 'track' : 'tracks'}{!g.list[0].data.sample && ` · ${longDate(g.list[0].data.date)}`}</p>
+                </div>
+              </div>
+              <ol class="tracks">
+                {g.list.map((t, i) => (
+                  <li id={t.id} class="track" data-track>
+                    {t.data.audio ? (
+                      <button type="button" class="track__play" data-src={t.data.audio} data-title={t.data.title} aria-label={`Play ${t.data.title}`}>
+                        <Icon name="play" size={16} class="i-play" /><Icon name="pause" size={16} class="i-pause" />
+                      </button>
+                    ) : (
+                      <span class="track__play track__play--off" title={t.data.sample ? 'Sample track: no audio yet' : 'Audio not available'} aria-hidden="true"><Icon name="play" size={16} /></span>
+                    )}
+                    <span class="track__num">{String(i + 1).padStart(2, '0')}</span>
+                    <div class="track__body">
+                      <p class="track__title">{t.data.title}</p>
+                      {t.data.credits ? <p class="track__credits">{t.data.credits}</p> : t.data.sample && <p class="track__credits ph">[Credits, if supplied]</p>}
+                    </div>
+                    <span class:list={['track__time', { ph: !t.data.duration }]}>{t.data.duration ?? '[mm:ss]'}</span>
+                    {t.data.link && <a class="track__link" href={t.data.link} target="_blank" rel="noopener">Open<span class="sr-only"> {t.data.title} on streaming site (opens in a new tab)</span><Icon name="external-link" size={14} class="ext-icon" /></a>}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))}
+        </div>
+      )}
+      <audio data-player preload="none"></audio>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .collections { display: grid; gap: var(--s-8); }
+  .collection__head { display: flex; align-items: center; gap: var(--s-5); margin-bottom: var(--s-5); }
+  .collection__head p { margin: 0; }
+  .collection__art { width: 112px; aspect-ratio: 1; flex: none; border-radius: var(--r-card); }
+  .collection__art .img-label { font-size: 0.6875rem; }
+  .tracks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .track { display: grid; grid-template-columns: 44px 32px minmax(0, 1fr) auto auto; gap: var(--s-4); align-items: center; padding: var(--s-3) 0; border-bottom: 1px solid var(--line); }
+  .track.is-playing { background: linear-gradient(90deg, var(--gold-100), transparent 70%); }
+  .track__play { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--blue-900); color: var(--white); cursor: pointer; }
+  .track__play :global(svg) { fill: currentColor; }
+  .track__play :global(.i-pause), .track.is-playing .track__play :global(.i-play) { display: none; }
+  .track.is-playing .track__play :global(.i-pause) { display: block; }
+  .track__play--off { background: var(--stone); color: var(--ink-3); cursor: not-allowed; }
+  .track__num { font-family: var(--font-serif); color: var(--gold-700); }
+  .track__title { margin: 0; font-weight: 600; color: var(--ink); }
+  .track__credits { margin: 2px 0 0; font-size: var(--fs-small); color: var(--ink-3); }
+  .track__time { font-size: var(--fs-small); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .track__link { font-size: var(--fs-small); font-weight: 700; color: var(--blue-700); text-decoration: none; white-space: nowrap; }
+  .track__link:hover { text-decoration: underline; }
+  @media (max-width: 760px) {
+    .collection__art { width: 80px; }
+    .track { grid-template-columns: 44px minmax(0, 1fr) auto; gap: var(--s-3); }
+    .track__num { display: none; }
+    .track__link { grid-column: 2 / -1; }
+  }
+</style>
+
+<script>
+  // One shared audio element: pressing play on a track switches to it; pressing again pauses.
+  const player = document.querySelector<HTMLAudioElement>('[data-player]');
+  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('.track__play[data-src]'));
+  let current: HTMLButtonElement | null = null;
+  const mark = (btn: HTMLButtonElement | null, playing: boolean) => {
+    buttons.forEach((b) => {
+      const on = b === btn && playing;
+      b.closest('[data-track]')?.classList.toggle('is-playing', on);
+      b.setAttribute('aria-label', `${on ? 'Pause' : 'Play'} ${b.dataset.title}`);
+    });
+  };
+  if (player) {
+    buttons.forEach((b) => b.addEventListener('click', () => {
+      if (current === b && !player.paused) { player.pause(); return; }
+      if (current !== b) { player.src = b.dataset.src!; current = b; }
+      player.play().catch(() => mark(null, false));
+    }));
+    player.addEventListener('play', () => mark(current, true));
+    player.addEventListener('pause', () => mark(current, false));
+    player.addEventListener('ended', () => {
+      const next = buttons[buttons.indexOf(current!) + 1];
+      if (next) next.click(); else mark(null, false);
+    });
+  }
+</script>

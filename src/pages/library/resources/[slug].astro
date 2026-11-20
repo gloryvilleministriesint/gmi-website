@@ -1,0 +1,101 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import LibraryHeader from '../../../components/LibraryHeader.astro';
+import { render } from 'astro:content';
+import { getResources, longDate, fileInfo } from '../../../lib/library';
+import '../../../styles/library.css';
+
+export async function getStaticPaths() {
+  const all = await getResources();
+  return all.map((r) => ({ params: { slug: r.id }, props: { r, more: all.filter((x) => x.id !== r.id && x.data.type === r.data.type).slice(0, 3) } }));
+}
+type R = Awaited<ReturnType<typeof getResources>>[number];
+const { r, more } = Astro.props as { r: R; more: R[] };
+const d = r.data;
+const { Content } = await render(r);
+const hasBody = Boolean(r.body?.trim());
+const info = fileInfo(d.file);
+const pageUrl = new URL(`/library/resources/${r.id}`, Astro.site).href;
+---
+<Base title={d.title} description={d.summary ?? `${d.type} from Gloryville Ministries International.`}>
+  <LibraryHeader title={d.title} current="/library/resources" crumb={d.title} parent={{ label: 'Publications and Resources', href: '/library/resources' }} />
+
+  <article class="section">
+    <div class="container article">
+      <p class="meta">
+        <span class="chip chip--gold">{d.type}</span>
+        <span class:list={{ ph: d.sample }}>{d.sample ? '[Date]' : longDate(d.date)}</span>
+        {d.author ? <span>{d.author}</span> : d.sample && <span class="ph">[Author]</span>}
+      </p>
+
+      {d.image && <img class="article__img" src={d.image} alt="" />}
+      {d.summary ? <p class="lead">{d.summary}</p> : d.sample && <p class="lead ph">[Short summary]</p>}
+
+      {d.file && (
+        <div class="lib-panel download">
+          <span class="download__icon" aria-hidden="true"><Icon name="file-down" size={24} /></span>
+          <div>
+            <p class="download__title">{d.title}</p>
+            {info && <p class="small lib-muted">{info}</p>}
+          </div>
+          <a class="btn btn--primary btn--sm" href={d.file} download><Icon name="download" size={16} />Download{info && <span class="sr-only"> ({info})</span>}</a>
+        </div>
+      )}
+
+      <div class="prose">
+        {hasBody ? <Content /> : d.sample && <p class="ph">[{d.type === 'Download' ? 'Description of the resource and who it is for' : 'Article or devotional text'}, supplied by the church]</p>}
+      </div>
+
+      <div class="article__foot">
+        <a class="link-arrow" href="/library/resources"><Icon name="arrow-left" />All publications and resources</a>
+        <button type="button" class="btn btn--outline btn--sm share" data-share={pageUrl} data-title={d.title}><Icon name="share-2" size={16} /><span data-share-label>Share</span></button>
+      </div>
+    </div>
+  </article>
+
+  {more.length > 0 && (
+    <section class="section bg-stone">
+      <div class="container article">
+        <h2 class="h3 more-h">More {d.type.toLowerCase()}s</h2>
+        <ul class="more">
+          {more.map((m) => <li><a href={`/library/resources/${m.id}`}>{m.data.title}</a><span class:list={['small', { ph: m.data.sample }]}>{m.data.sample ? '[Date]' : longDate(m.data.date)}</span></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .article { max-width: calc(var(--reading) + 2 * var(--gutter)); }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-bottom: var(--s-5); font-size: var(--fs-small); color: var(--ink-2); }
+  .article__img { width: 100%; border-radius: var(--r-panel); margin-bottom: var(--s-6); }
+  .lead { font-family: var(--font-serif); font-size: var(--fs-h3); line-height: 1.4; color: var(--ink); margin-bottom: var(--s-6); }
+  .download { display: flex; align-items: center; gap: var(--s-4); margin-bottom: var(--s-6); flex-wrap: wrap; }
+  .download > div { flex: 1; min-width: 180px; }
+  .download p { margin: 0; }
+  .download__icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: var(--r-card); background: var(--blue-100); color: var(--blue-700); }
+  .download__title { font-weight: 700; color: var(--ink); }
+  .download .btn { gap: 8px; }
+  .prose :global(p), .prose :global(ul), .prose :global(ol) { margin-bottom: var(--s-4); }
+  .prose :global(h2) { font-size: var(--fs-h3); margin: var(--s-6) 0 var(--s-3); }
+  .prose :global(blockquote) { margin: var(--s-5) 0; padding-left: var(--s-5); border-left: 3px solid var(--gold-500); font-family: var(--font-serif); font-size: 1.25rem; color: var(--ink); }
+  .article__foot { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); flex-wrap: wrap; margin-top: var(--s-7); padding-top: var(--s-5); border-top: 1px solid var(--line); }
+  .share { gap: 8px; }
+  .more-h { margin-bottom: var(--s-4); }
+  .more { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .more li { display: flex; justify-content: space-between; gap: var(--s-4); padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  .more a { font-family: var(--font-serif); font-size: 1.25rem; color: var(--blue-900); text-decoration: none; }
+  .more a:hover { text-decoration: underline; }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-share]').forEach((btn) => {
+    const label = btn.querySelector<HTMLElement>('[data-share-label]');
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.share!;
+      if (navigator.share) { try { await navigator.share({ title: btn.dataset.title, url }); } catch { /* cancelled */ } return; }
+      try { await navigator.clipboard.writeText(url); if (label) { label.textContent = 'Link copied'; setTimeout(() => (label.textContent = 'Share'), 2500); } } catch { /* unavailable */ }
+    });
+  });
+</script>

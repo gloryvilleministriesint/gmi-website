@@ -1,0 +1,19 @@
+---
+// Video placeholder that becomes a YouTube player on click. Shows a design placeholder when no video is set.
+import Icon from './Icon.astro';
+import { youtubeId } from '../lib/messages';
+interface Props { video?: string; title: string; label?: string }
+const { video, title, label = 'Video' } = Astro.props;
+const id = youtubeId(video);
+---
+{id ? (
+  <button type="button" class="yt-lite" data-yt={id} data-title={title} aria-label={`Play video: ${title}`}>
+    <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" loading="lazy" />
+    <span class="yt-lite__play" aria-hidden="true"><Icon name="play" size={22} /></span>
+  </button>
+) : (
+  <div class="img-slot img-slot--dark yt-lite yt-lite--ph">
+    <span class="yt-lite__play" aria-hidden="true"><Icon name="play" size={22} /></span>
+    <span class="img-label"><Icon name="video" />{label}</span>
+  </div>
+)}

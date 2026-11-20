@@ -141,6 +141,7 @@ const scriptures = d.scripture.length ? d.scripture : d.sample ? ['[Scripture re
               </li>
             ))}
           </ol>
+          <a class="link-arrow in-series__all" href={`/library/series/${series.slug}`}>View the whole series <Icon name="arrow-right" /></a>
         </aside>
       )}
     </div>
@@ -220,6 +221,7 @@ const scriptures = d.scripture.length ? d.scripture : d.sample ? ['[Scripture re
   .in-series h2 { margin-bottom: var(--s-4); }
   .in-series ol { list-style: none; margin: 0; padding: 0; }
   .in-series li { display: flex; gap: 14px; padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  .in-series__all { margin-top: var(--s-4); }
   .in-series__num { font-family: var(--font-serif); font-size: 1.125rem; color: var(--gold-700); }
   .in-series__title { display: block; font-weight: 600; color: var(--ink); text-decoration: none; line-height: 1.4; }
   a.in-series__title:hover { color: var(--blue-700); text-decoration: underline; }

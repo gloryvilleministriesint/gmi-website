@@ -1,0 +1,78 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Icon from '../../../components/Icon.astro';
+import LibraryHeader from '../../../components/LibraryHeader.astro';
+import { getSeriesPages, longDate } from '../../../lib/library';
+import { formatOf } from '../../../lib/messages';
+import '../../../styles/library.css';
+
+export async function getStaticPaths() {
+  return (await getSeriesPages()).map((s) => ({ params: { slug: s.slug }, props: { s } }));
+}
+type S = Awaited<ReturnType<typeof getSeriesPages>>[number];
+const { s } = Astro.props as { s: S };
+const summary = s.info?.data.summary;
+const sample = s.messages.every((m) => m.data.sample);
+const first = s.messages[0];
+---
+<Base title={`${s.name} (series)`} description={summary ?? `${s.name}: a message series from Gloryville Ministries International.`}>
+  <LibraryHeader title={s.name} current="/library" crumb={s.name} parent={{ label: 'Series', href: '/library#latest' }} intro={summary} />
+
+  <section class="section">
+    <div class="container series-layout">
+      <div>
+        <p class="eyebrow">Series · {s.messages.length} {s.messages.length === 1 ? 'message' : 'messages'}</p>
+        <h2>Messages in order</h2>
+        {!summary && <p class="ph intro-ph">[Short description of the series, supplied by the church]</p>}
+        <ol class="parts">
+          {s.messages.map((m, i) => (
+            <li>
+              <span class="parts__num">{String(i + 1).padStart(2, '0')}</span>
+              <div class="parts__body">
+                <a class="parts__title" href={`/library/messages/${m.id}`}>{m.data.title}</a>
+                <p class="parts__meta">
+                  <span class:list={{ ph: m.data.sample || !m.data.speaker }}>{m.data.sample || !m.data.speaker ? '[Speaker]' : m.data.speaker}</span>
+                  <span class:list={{ ph: m.data.sample }}>{m.data.sample ? '[Date]' : longDate(m.data.date)}</span>
+                  <span>{formatOf(m)}</span>
+                </p>
+              </div>
+              <a class="link-arrow parts__go" href={`/library/messages/${m.id}`} aria-hidden="true" tabindex="-1">{formatOf(m) === 'Audio' ? 'Listen' : 'Watch'} <Icon name="arrow-right" /></a>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <aside class="lib-panel start">
+        <p class="lib-panel__label">Start the series</p>
+        <p class="start__title">{first.data.title}</p>
+        <p class="small lib-muted">Part 1{!sample && ` · ${longDate(first.data.date)}`}</p>
+        <a class="btn btn--primary btn--sm" href={`/library/messages/${first.id}`}><Icon name="play" size={16} />Start from part 1</a>
+        <a class="link-arrow" href={`/library?series=${encodeURIComponent(s.name)}#latest`}>Filter the Library by this series <Icon name="arrow-right" /></a>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .series-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--s-8); align-items: start; }
+  .series-layout h2 { margin-bottom: var(--s-3); }
+  .intro-ph { margin-bottom: var(--s-5); }
+  .parts { list-style: none; margin: var(--s-5) 0 0; padding: 0; border-top: 1px solid var(--line); }
+  .parts li { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: var(--s-4); align-items: center; padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  .parts__num { font-family: var(--font-serif); font-size: 1.5rem; color: var(--gold-700); }
+  .parts__title { font-family: var(--font-serif); font-size: 1.375rem; color: var(--blue-900); text-decoration: none; }
+  .parts__title:hover { text-decoration: underline; }
+  .parts__meta { display: flex; flex-wrap: wrap; margin: 4px 0 0; font-size: var(--fs-small); color: var(--ink-2); }
+  .parts__meta span + span::before { content: '·'; margin: 0 8px; font-style: normal; }
+  .start { position: sticky; top: 100px; display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-3); }
+  .start p { margin: 0; }
+  .start__title { font-family: var(--font-serif); font-size: 1.5rem; color: var(--blue-900); }
+  .start .btn { gap: 8px; }
+  @media (max-width: 1024px) {
+    .series-layout { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+    .start { position: static; }
+  }
+  @media (max-width: 760px) {
+    .parts li { grid-template-columns: 40px minmax(0, 1fr); }
+    .parts__go { display: none; }
+  }
+</style>

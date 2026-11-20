@@ -3,16 +3,21 @@
 import GloryRays from './GloryRays.astro';
 import Icon from './Icon.astro';
 import { libraryCategories } from '../data/navigation';
+import { getCategoryCounts } from '../lib/library';
 
 interface Props {
   title: string; // may contain <br />
   current: string; // href of the active tab
   crumb?: string; // last breadcrumb label (omit on the Library home)
+  parent?: { label: string; href: string }; // optional crumb between the Library and this page
   intro?: string;
   search?: boolean;
   note?: string;
 }
-const { title, current, crumb, intro, search = false, note } = Astro.props;
+const { title, current, crumb, parent, intro, search = false, note } = Astro.props;
+// A category with no content is hidden until it has some (Blueprint 5).
+const counts = await getCategoryCounts();
+const tabs = libraryCategories.filter((c) => (counts[c.href] ?? 1) > 0 || c.href === current);
 ---
 <section class="lib-hero on-dark">
   <GloryRays class="lib-hero__rays" opacity={0.25} color="var(--gold-400)" />
@@ -20,7 +25,7 @@ const { title, current, crumb, intro, search = false, note } = Astro.props;
     <nav aria-label="Breadcrumb">
       <ol class="crumbs">
         <li><a href="/">Home</a></li>
-        {crumb ? <><li><a href="/library">GMI Digital Library</a></li><li><span aria-current="page">{crumb}</span></li></> : <li><span aria-current="page">GMI Digital Library</span></li>}
+        {crumb ? <><li><a href="/library">GMI Digital Library</a></li>{parent && <li><a href={parent.href}>{parent.label}</a></li>}<li><span aria-current="page">{crumb}</span></li></> : <li><span aria-current="page">GMI Digital Library</span></li>}
       </ol>
     </nav>
     <p class="eyebrow">GMI Digital Library</p>
@@ -38,7 +43,7 @@ const { title, current, crumb, intro, search = false, note } = Astro.props;
   </div>
   <nav class="container lib-tabs" aria-label="Library categories">
     <ul>
-      {libraryCategories.map((c) => (
+      {tabs.map((c) => (
         <li><a href={c.href} aria-current={c.href === current ? 'page' : undefined}>{c.name}</a></li>
       ))}
     </ul>
@@ -71,3 +76,11 @@ const { title, current, crumb, intro, search = false, note } = Astro.props;
     .lib-tabs ul { margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter); }
   }
 </style>
+
+<script>
+  // Keep the current category tab visible in the scrolling tab row on small screens.
+  document.querySelectorAll<HTMLElement>('.lib-tabs ul').forEach((ul) => {
+    const a = ul.querySelector<HTMLElement>('[aria-current="page"]');
+    if (a) ul.scrollLeft = a.offsetLeft - (ul.clientWidth - a.offsetWidth) / 2;
+  });
+</script>

@@ -1,0 +1,172 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import LibraryHeader from '../../components/LibraryHeader.astro';
+import { getSearchIndex, getSeriesPages } from '../../lib/library';
+import '../../styles/library.css';
+
+const index = await getSearchIndex();
+const popular = (await getSeriesPages()).slice(0, 4).map((s) => ({ name: s.name, url: `/library/series/${s.slug}` }));
+const groups = ['Messages and Sermons', 'Series', 'Music and Songs', 'Gallery', 'Publications and Resources', 'Recommended Books'];
+---
+<Base title="Search the Digital Library" description="Search messages, series, music, photos, resources and books from Gloryville Ministries International.">
+  <LibraryHeader title="Search the Library" current="" crumb="Search" />
+
+  <section class="section" data-search-page>
+    <div class="container narrow">
+      <form class="search" action="/library/search" role="search" data-form-search>
+        <label for="s-q" class="sr-only">Search the Digital Library</label>
+        <Icon name="search" size={20} />
+        <input id="s-q" name="q" type="search" placeholder="Search by title, speaker, scripture, topic or series" autocomplete="off" />
+        <button class="btn btn--primary btn--sm" type="submit">Search</button>
+      </form>
+
+      <p class="summary" aria-live="polite" data-summary>Type a word or two to search messages, music, photos, resources and books.</p>
+      <p class="dym" data-dym hidden>Did you mean <a href="#" data-dym-link></a>?</p>
+
+      <div class="lib-chips" role="group" aria-label="Show results from" data-chips hidden></div>
+
+      <div data-results></div>
+
+      <div class="lib-empty" data-none hidden>
+        <h2 class="h3">No results found</h2>
+        <p>Check the spelling, try fewer or different words, or search by speaker, topic or series.</p>
+        {popular.length > 0 && (
+          <>
+            <p class="small lib-muted pop-label">Popular series</p>
+            <p class="pop">{popular.map((p) => <a class="lib-chip" href={p.url}>{p.name}</a>)}</p>
+          </>
+        )}
+        <p><a class="link-arrow" href="/library">Browse all messages <Icon name="arrow-right" /></a></p>
+      </div>
+    </div>
+    <script type="application/json" data-index set:html={JSON.stringify({ index, groups })} />
+  </section>
+</Base>
+
+<style>
+  .narrow { max-width: calc(920px + 2 * var(--gutter)); }
+  .search { display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 20px; background: var(--white); border: 1.5px solid var(--line-strong); border-radius: var(--r-pill); color: var(--ink-3); }
+  .search:focus-within { border-color: var(--blue-700); box-shadow: 0 0 0 3px var(--blue-100); }
+  .search input { flex: 1; min-width: 0; min-height: 46px; border: 0; background: none; font: inherit; font-size: 1.0625rem; color: var(--ink); }
+  .search input:focus { outline: none; }
+  .summary { margin: var(--s-5) 0 var(--s-3); font-weight: 600; color: var(--ink); }
+  .dym { margin: 0 0 var(--s-4); }
+  .dym[hidden], [data-chips][hidden] { display: none; }
+  .dym a { font-weight: 700; }
+  :global(.r-group) { margin-bottom: var(--s-7); }
+  :global(.r-group[hidden]) { display: none; }
+  :global(.r-head) { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); margin-bottom: var(--s-3); }
+  :global(.r-head h2) { font-size: var(--fs-h3); margin: 0; }
+  :global(.r-list) { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  :global(.r-list li) { padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  :global(.r-list a) { font-family: var(--font-serif); font-size: 1.3125rem; color: var(--blue-900); text-decoration: none; }
+  :global(.r-list a:hover) { text-decoration: underline; }
+  :global(.r-list mark) { background: var(--gold-100); color: inherit; padding: 0 2px; border-radius: 3px; }
+  :global(.r-meta) { margin: 4px 0 0; font-size: var(--fs-small); color: var(--ink-2); }
+  :global(.r-more) { margin-top: var(--s-3); }
+  .pop-label { margin-top: var(--s-5); }
+  .pop { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+</style>
+
+<script>
+  interface Item { group: string; title: string; url: string; meta: string; text: string }
+  const root = document.querySelector<HTMLElement>('[data-search-page]');
+  if (root) {
+    const { index, groups } = JSON.parse(root.querySelector('[data-index]')!.textContent!) as { index: Item[]; groups: string[] };
+    const input = root.querySelector<HTMLInputElement>('#s-q')!;
+    const form = root.querySelector<HTMLFormElement>('[data-form-search]')!;
+    const summary = root.querySelector<HTMLElement>('[data-summary]')!;
+    const results = root.querySelector<HTMLElement>('[data-results]')!;
+    const chips = root.querySelector<HTMLElement>('[data-chips]')!;
+    const none = root.querySelector<HTMLElement>('[data-none]')!;
+    const dym = root.querySelector<HTMLElement>('[data-dym]')!;
+    const dymLink = root.querySelector<HTMLAnchorElement>('[data-dym-link]')!;
+    const PER_GROUP = 5;
+
+    const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+    const highlight = (s: string, words: string[]) => {
+      let out = esc(s);
+      for (const w of words) out = out.replace(new RegExp(`(${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'), '<mark>$1</mark>');
+      return out;
+    };
+
+    // Vocabulary for "did you mean": words of 3+ letters found in the index.
+    const vocab = [...new Set(index.flatMap((i) => i.text.split(/[^a-z0-9']+/)).filter((w) => w.length >= 3))];
+    const distance = (a: string, b: string) => {
+      const dp = Array.from({ length: b.length + 1 }, (_, j) => j);
+      for (let i = 1; i <= a.length; i++) {
+        let prev = dp[0]; dp[0] = i;
+        for (let j = 1; j <= b.length; j++) {
+          const tmp = dp[j];
+          dp[j] = Math.min(dp[j] + 1, dp[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+          prev = tmp;
+        }
+      }
+      return dp[b.length];
+    };
+    const suggest = (words: string[]) => {
+      let changed = false;
+      const fixed = words.map((w) => {
+        if (vocab.includes(w) || w.length < 3) return w;
+        let best = w, bestD = w.length > 5 ? 2 : 1;
+        for (const v of vocab) { const d = distance(w, v); if (d <= bestD && d > 0) { best = v; bestD = d; } }
+        if (best !== w) changed = true;
+        return best;
+      });
+      return changed ? fixed.join(' ') : null;
+    };
+
+    let active = '';
+    function run(q: string) {
+      const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+      const url = new URL(location.href);
+      q ? url.searchParams.set('q', q) : url.searchParams.delete('q');
+      active ? url.searchParams.set('in', active) : url.searchParams.delete('in');
+      history.replaceState(null, '', url);
+      document.title = q ? `“${q}” · Search the Digital Library · Gloryville Ministries International` : 'Search the Digital Library · Gloryville Ministries International';
+
+      if (!words.length) {
+        results.innerHTML = ''; chips.hidden = true; none.hidden = true; dym.hidden = true;
+        summary.textContent = 'Type a word or two to search messages, music, photos, resources and books.';
+        return;
+      }
+      const hits = index.filter((i) => words.every((w) => i.text.includes(w)));
+      const byGroup = groups.map((g) => ({ g, items: hits.filter((h) => h.group === g) })).filter((x) => x.items.length);
+      if (active && !byGroup.some((x) => x.g === active)) active = '';
+
+      summary.textContent = hits.length ? `${hits.length} ${hits.length === 1 ? 'result' : 'results'} for “${q}”` : `No results for “${q}”`;
+      none.hidden = hits.length > 0;
+      const s = hits.length < 3 ? suggest(words) : null;
+      dym.hidden = !s;
+      if (s) { dymLink.textContent = s; dymLink.href = `?q=${encodeURIComponent(s)}`; }
+
+      chips.hidden = byGroup.length < 2;
+      chips.innerHTML = [`<button type="button" class="lib-chip" data-g="" aria-pressed="${!active}">All <span class="count">${hits.length}</span></button>`,
+        ...byGroup.map((x) => `<button type="button" class="lib-chip" data-g="${esc(x.g)}" aria-pressed="${active === x.g}">${esc(x.g)} <span class="count">${x.items.length}</span></button>`)].join('');
+
+      results.innerHTML = byGroup.map((x) => {
+        const show = active ? x.items : x.items.slice(0, PER_GROUP);
+        return `<section class="r-group" ${active && active !== x.g ? 'hidden' : ''}><div class="r-head"><h2>${esc(x.g)}</h2><span class="small">${x.items.length}</span></div>` +
+          `<ul class="r-list">${show.map((i) => `<li><a href="${i.url}">${highlight(i.title, words)}</a>${i.meta ? `<p class="r-meta">${esc(i.meta)}</p>` : ''}</li>`).join('')}</ul>` +
+          (!active && x.items.length > PER_GROUP ? `<button type="button" class="link-arrow r-more" data-g="${esc(x.g)}" style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-weight:700">Show all ${x.items.length} in ${esc(x.g)}</button>` : '') +
+          `</section>`;
+      }).join('');
+    }
+
+    root.addEventListener('click', (e) => {
+      const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-g]');
+      if (!b) return;
+      active = b.dataset.g ?? '';
+      run(input.value.trim());
+    });
+    form.addEventListener('submit', (e) => { e.preventDefault(); active = ''; run(input.value.trim()); });
+    let t: number | undefined;
+    input.addEventListener('input', () => { clearTimeout(t); t = window.setTimeout(() => run(input.value.trim()), 200); });
+
+    const p = new URLSearchParams(location.search);
+    input.value = p.get('q') ?? '';
+    active = groups.includes(p.get('in') ?? '') ? p.get('in')! : '';
+    run(input.value.trim());
+  }
+</script>

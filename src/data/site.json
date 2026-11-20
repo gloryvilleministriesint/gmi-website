@@ -4,17 +4,39 @@
   "tagline": "",
   "identityLine": "",
   "address": {
-    "lines": ["1B Titilayo Crescent", "Off Olumbe Bashir Drive", "Ojurin, Ashi-Bodija", "Ibadan"],
+    "lines": [
+      "1B Titilayo Crescent",
+      "Off Olumbe Bashir Drive",
+      "Ojurin, Ashi-Bodija",
+      "Ibadan"
+    ],
     "country": "Nigeria",
     "mapsQuery": "1B Titilayo Crescent, Off Olumbe Bashir Drive, Ojurin, Ashi-Bodija, Ibadan, Nigeria"
   },
   "phone": "",
   "email": "",
   "services": [
-    { "name": "Sunday Service", "day": "Sunday", "time": "9:00 AM", "description": "", "streamed": true },
-    { "name": "Wednesday Service", "day": "Wednesday", "time": "6:00 PM", "description": "", "streamed": true }
+    {
+      "name": "Sunday Service",
+      "day": "Sunday",
+      "time": "9:00 AM",
+      "description": "",
+      "streamed": true
+    },
+    {
+      "name": "Wednesday Service",
+      "day": "Wednesday",
+      "time": "6:00 PM",
+      "description": "",
+      "streamed": true
+    }
   ],
-  "live": { "isLive": false, "url": "" },
+  "live": {
+    "isLive": false,
+    "url": "",
+    "youtubeChannel": "",
+    "nextStream": ""
+  },
   "social": {
     "youtube": "",
     "telegram": "",

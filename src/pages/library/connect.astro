@@ -1,0 +1,52 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import LibraryHeader from '../../components/LibraryHeader.astro';
+import site from '../../data/site.json';
+import platforms from '../../data/platforms.json';
+import '../../styles/library.css';
+
+// Official channels only. A platform with "adopted": false (e.g. Mixlr) stays hidden.
+const social = site.social as Record<string, string>;
+const list = platforms
+  .filter((p) => (p as { adopted?: boolean }).adopted !== false)
+  .map((p) => ({ ...p, href: p.url || social[p.icon] || '' }));
+---
+<Base title="Online Connections" description="Gloryville Ministries International's official online channels: YouTube, Telegram, Instagram and Facebook.">
+  <LibraryHeader title="Online Connections" current="/library/connect" crumb="Online Connections" intro="Stay connected with GMI through its official channels. Only the links on this page are run by the church." />
+
+  <section class="section">
+    <div class="container">
+      <ul class="platforms">
+        {list.map((p) => (
+          <li class="platform">
+            <span class="platform__icon" aria-hidden="true"><Icon name={p.icon} size={24} /></span>
+            <h2 class="h3">{p.platform}</h2>
+            <p>{p.description}</p>
+            {p.href ? (
+              <a class="btn btn--primary btn--sm" href={p.href} target="_blank" rel="noopener">{p.action}<span class="sr-only"> GMI on {p.platform} (opens in a new tab)</span><Icon name="external-link" size={14} class="ext-icon" /></a>
+            ) : (
+              <p class="ph small">[Official {p.platform} link, supplied by GMI]</p>
+            )}
+          </li>
+        ))}
+      </ul>
+      <div class="lib-panel safety">
+        <Icon name="shield-check" size={22} />
+        <p class="small">GMI will never ask for money or personal details through a private message. If an account claiming to be GMI is not listed here, please <a href="/contact">let the church know</a>.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .platforms { list-style: none; margin: 0 0 var(--s-6); padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); }
+  .platform { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-2); padding: var(--s-6); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-panel); }
+  .platform p { margin: 0 0 var(--s-3); }
+  .platform__icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--blue-100); color: var(--blue-700); margin-bottom: var(--s-2); }
+  .platform .btn { margin-top: auto; gap: 6px; }
+  .safety { display: flex; gap: var(--s-4); align-items: flex-start; background: var(--stone); border-color: transparent; }
+  .safety :global(svg) { flex: none; color: var(--blue-700); margin-top: 2px; }
+  .safety p { margin: 0; }
+  @media (max-width: 760px) { .platforms { grid-template-columns: minmax(0, 1fr); } .platform { padding: var(--s-5); } }
+</style>
