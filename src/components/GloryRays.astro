@@ -1,0 +1,21 @@
+---
+// The one decorative motif: fine gold rays fanning up from a point, plus faint arcs.
+// Used behind heroes only, at low opacity.
+interface Props { class?: string; opacity?: number; color?: string }
+const { class: cls = '', opacity = 0.5, color = 'var(--gold-500)' } = Astro.props;
+const cx = 400, cy = 640;
+const rays = Array.from({ length: 15 }, (_, i) => {
+  const a = Math.PI + (Math.PI * (i + 0.5)) / 15;
+  return { x: cx + Math.cos(a) * 700, y: cy + Math.sin(a) * 700 };
+});
+---
+<svg class={`rays ${cls}`} viewBox="0 0 800 640" preserveAspectRatio="xMidYMax slice" aria-hidden="true" style={`opacity:${opacity};color:${color}`}>
+  <g stroke="currentColor" stroke-width="1" fill="none">
+    {rays.map((r) => <line x1={cx} y1={cy} x2={r.x.toFixed(1)} y2={r.y.toFixed(1)} />)}
+    <circle cx={cx} cy={cy} r="210" stroke-opacity="0.6" />
+    <circle cx={cx} cy={cy} r="380" stroke-opacity="0.4" />
+  </g>
+</svg>
+<style>
+  .rays { position: absolute; pointer-events: none; }
+</style>

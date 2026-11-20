@@ -1,0 +1,408 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import GloryRays from '../components/GloryRays.astro';
+import site from '../data/site.json';
+import { getCollection } from 'astro:content';
+
+const tz = 'Africa/Lagos';
+const now = new Date();
+
+const events = (await getCollection('events'))
+  .filter((e) => (e.data.end ?? e.data.start) >= now)
+  .sort((a, b) => +a.data.start - +b.data.start)
+  .slice(0, 3);
+
+const messages = (await getCollection('messages')).sort((a, b) => +b.data.date - +a.data.date);
+const featured = messages.find((m) => m.data.featured) ?? messages[0];
+const moreMessages = messages.filter((m) => m !== featured).slice(0, 3);
+
+const updates = (await getCollection('updates'))
+  .filter((u) => !u.data.expires || u.data.expires >= now)
+  .sort((a, b) => +b.data.date - +a.data.date)
+  .slice(0, 4);
+const [leadUpdate, ...otherUpdates] = updates;
+
+const fmt = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('en-GB', { timeZone: tz, ...o }).format(d);
+const longDate = (d: Date) => fmt(d, { day: 'numeric', month: 'long', year: 'numeric' });
+const chipClass: Record<string, string> = { Programme: 'chip chip--gold' };
+
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address.mapsQuery)}`;
+const serviceLine = site.services.map((s) => `${s.day} · ${s.time}`);
+
+const quickLinks = [
+  { icon: 'church', title: 'Our Services', text: 'When we gather and what each service is for.', href: '/services' },
+  { icon: 'calendar', title: 'Church Calendar', text: 'Weekly activities, meetings and programmes.', href: '/calendar' },
+  { icon: 'users', title: 'Departments', text: 'Nine departments that serve the church.', href: '/departments' },
+  { icon: 'mic', title: 'Digital Library', text: 'Messages, music, live services and resources.', href: '/library' },
+  { icon: 'gift', title: 'Giving & Partnership', text: 'Tithes, offerings, partnership and seed sowing.', href: '/give' },
+  { icon: 'quote', title: 'Testimonies', text: 'Read testimonies or share your own.', href: '/testimonies' },
+  { icon: 'sparkles', title: 'About GMI', text: 'Our story, vision, mission and beliefs.', href: '/about' },
+  { icon: 'mail', title: 'Contact Us', text: 'Enquiries, directions and FAQs.', href: '/contact' },
+];
+---
+<Base>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow">Gloryville Ministries International</p>
+        <h1 class="display">You are <em>welcome</em> at&nbsp;Gloryville.</h1>
+        {site.tagline
+          ? <p class="hero__intro">{site.tagline}</p>
+          : <p class="hero__intro ph">[One or two sentences introducing GMI, its vision or theme for the year, supplied by the church]</p>}
+        <div class="hero__ctas">
+          <a href="/plan-your-visit" class="btn btn--gold">Plan Your Visit <Icon name="arrow-right" /></a>
+          <a href="/new-here" class="btn btn--outline">New here? Start here</a>
+        </div>
+        <dl class="hero__facts">
+          <div>
+            <dt><Icon name="clock" size={18} /> Service times</dt>
+            <dd>{serviceLine.map((l) => <span>{l}</span>)}</dd>
+            <dd><a href="/services">All services</a></dd>
+          </div>
+          <div>
+            <dt><Icon name="map-pin" size={18} /> Location</dt>
+            <dd><span>{site.address.lines.slice(0, 2).join(', ')}</span><span>{site.address.lines.slice(2).join(', ')}</span></dd>
+            <dd><a href={mapsUrl} target="_blank" rel="noopener">Get directions</a></dd>
+          </div>
+        </dl>
+      </div>
+      <div class="hero__media">
+        <GloryRays class="hero__rays" opacity={0.55} />
+        <div class="img-slot arch hero__arch">
+          <span class="img-label"><Icon name="image" />Photograph: GMI congregation in worship</span>
+        </div>
+        <a class="live-card" href="/library/live">
+          <span class="live-card__icon"><Icon name="radio" size={20} /></span>
+          <span>
+            <strong>{site.live.isLive ? 'We are live now' : 'Join us live'}</strong>
+            <span>{site.live.isLive ? 'Tap to watch the service.' : 'Services stream on YouTube. Status shows here when live.'}</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visitor pathways -->
+  <section class="pathways">
+    <div class="container pathways__grid">
+      <a class="path-card path-card--dark on-dark" href="/plan-your-visit">
+        <span class="path-card__icon"><Icon name="compass" size={20} /></span>
+        <p class="eyebrow">First time with us?</p>
+        <h2 class="h2">Plan your visit</h2>
+        <p>Service times, how to find us and what to expect when you arrive, all in one place.</p>
+        <span class="link-arrow">Plan your visit <Icon name="arrow-right" /></span>
+      </a>
+      <a class="path-card" href="/new-here">
+        <span class="path-card__icon path-card__icon--gold"><Icon name="user-plus" size={20} /></span>
+        <p class="eyebrow">New here</p>
+        <h2 class="h2">Become a member</h2>
+        <p>From your first visit to the membership class, discipleship and cell groups, and serving in a department.</p>
+        <span class="link-arrow">See the membership journey <Icon name="arrow-right" /></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Word of welcome -->
+  <section class="section welcome">
+    <div class="container welcome__grid">
+      <div class="img-slot arch welcome__portrait">
+        <span class="img-label"><Icon name="image" />Portrait: Senior Pastor and wife</span>
+      </div>
+      <div>
+        <p class="eyebrow">A word of welcome</p>
+        <h2 class="h1">From our <br />Senior Pastor</h2>
+        <hr class="rule" />
+        <p class="welcome__quote ph">[A short personal welcome message from the Senior Pastor and his wife, two to four sentences]</p>
+        <p class="welcome__names"><span class="ph">[Senior Pastor's name]</span> &amp; <span class="ph">[Wife's name]</span></p>
+        <p class="small">Senior Pastor, Gloryville Ministries International</p>
+        <a class="link-arrow" href="/about#our-story">Read our story <Icon name="arrow-right" /></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured messages -->
+  <section class="section bg-dark on-dark">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Featured messages</p>
+          <h2>Hear the Word, wherever you are</h2>
+          <p class="body-lg sub">Watch or listen to recent messages from the GMI Digital Library.</p>
+        </div>
+        <a class="link-arrow" href="/library">Browse the Digital Library <Icon name="arrow-right" /></a>
+      </div>
+      <div class="messages">
+        {featured && (
+          <a class="msg-feature" href={`/library/messages/${featured.id}`}>
+            <div class="img-slot img-slot--dark msg-feature__media">
+              <span class="play"><Icon name="play" size={22} /></span>
+              <span class="img-label"><Icon name="video" />Featured message thumbnail</span>
+            </div>
+            <div class="msg-feature__chips"><span class="chip">Featured</span>{featured.data.sample && <span class="chip">Sample content</span>}</div>
+            <h3 class="h2">{featured.data.title}</h3>
+            <p class="msg-meta">
+              {featured.data.sample
+                ? <span class="ph">[Speaker] · [Series] · [Date]</span>
+                : [featured.data.speaker, featured.data.series, longDate(featured.data.date)].filter(Boolean).join(' · ')}
+            </p>
+          </a>
+        )}
+        <ul class="msg-list">
+          {moreMessages.map((m) => (
+            <li>
+              <a href={`/library/messages/${m.id}`}>
+                <div class="img-slot img-slot--dark msg-list__thumb"><span class="img-label"><Icon name="video" />Thumbnail</span></div>
+                <div>
+                  {m.data.series && <p class="msg-series">{m.data.series}</p>}
+                  <h3 class="msg-title">{m.data.title}</h3>
+                  <p class="msg-meta">{m.data.sample ? <span class="ph">[Speaker] · [Date]</span> : [m.data.speaker, longDate(m.data.date)].filter(Boolean).join(' · ')}</p>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Programmes and events -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Upcoming</p>
+          <h2>Programmes and events</h2>
+        </div>
+        <a class="link-arrow" href="/calendar">Open the church calendar <Icon name="arrow-right" /></a>
+      </div>
+      {events.length === 0 ? (
+        <p>New programmes will appear here soon. See the <a href="/calendar">church calendar</a> for weekly activities.</p>
+      ) : (
+        <ul class="events">
+          {events.map((e) => (
+            <li class="event">
+              <div class="event__date" aria-hidden="true">
+                <span>{fmt(e.data.start, { month: 'short' })}</span>
+                <strong>{fmt(e.data.start, { day: '2-digit' })}</strong>
+              </div>
+              <div class="event__body">
+                <div class="event__chips">
+                  <span class={chipClass[e.data.category] ?? 'chip'}>{e.data.category}</span>
+                  {e.data.sample && <span class="chip chip--sample">Sample</span>}
+                </div>
+                <h3 class="event__title"><a href={`/calendar/${e.id}`}>{e.data.title}</a></h3>
+                <p class="event__meta">
+                  <span class="sr-only">{longDate(e.data.start)}. </span>
+                  <span><Icon name="clock" size={14} />{e.data.time ?? <span class="ph">[Time]</span>}</span>
+                  <span><Icon name="map-pin" size={14} />{e.data.venue ?? <span class="ph">[Venue]</span>}</span>
+                </p>
+              </div>
+              <a class="link-arrow event__link" href={`/calendar/${e.id}`} aria-hidden="true" tabindex="-1">Details <Icon name="arrow-right" /></a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+
+  <!-- Church updates -->
+  {leadUpdate && (
+    <section class="section bg-stone">
+      <div class="container">
+        <p class="eyebrow">Church updates</p>
+        <h2 class="news__heading">News from GMI</h2>
+        <div class="news">
+          <article class="news__lead">
+            <div class="img-slot img-slot--warm news__lead-img"><span class="img-label"><Icon name="image" />Photograph: church update</span></div>
+            <p class="news__date">{leadUpdate.data.sample ? <span class="ph">[Date]</span> : longDate(leadUpdate.data.date)} · Church update</p>
+            <h3 class:list={['h3', { ph: leadUpdate.data.sample }]}>{leadUpdate.data.sample ? '[Lead church update headline]' : leadUpdate.data.title}</h3>
+            {leadUpdate.data.summary && <p class:list={{ ph: leadUpdate.data.sample }}>{leadUpdate.data.sample ? `[${leadUpdate.data.summary}]` : leadUpdate.data.summary}</p>}
+          </article>
+          <ul class="news__list">
+            {otherUpdates.map((u) => (
+              <li>
+                <div class="img-slot img-slot--warm news__thumb"><span class="img-label"><Icon name="image" />Photo</span></div>
+                <div>
+                  <p class="news__date">{u.data.sample ? <span class="ph">[Date]</span> : longDate(u.data.date)}</p>
+                  <h3 class:list={['news__title', { ph: u.data.sample }]}>{u.data.sample ? '[Church update headline]' : u.data.title}</h3>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Quick links -->
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Quick links</p>
+      <h2 class="quick__heading">Find your way around</h2>
+      <ul class="quick">
+        {quickLinks.map((q) => (
+          <li>
+            <a href={q.href}>
+              <Icon name={q.icon} size={22} class="quick__icon" />
+              <h3 class="quick__title">{q.title}</h3>
+              <p>{q.text}</p>
+              <span class="link-arrow">Open <Icon name="arrow-right" /></span>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <div class="cta-band on-dark">
+        <GloryRays class="cta-band__rays" opacity={0.35} color="var(--gold-400)" />
+        <div class="cta-band__copy">
+          <p class="eyebrow">Come as you are</p>
+          <h2 class="cta-band__title">We would love to welcome you in person.</h2>
+        </div>
+        <div class="cta-band__btns">
+          <a href="/plan-your-visit" class="btn btn--gold">Plan Your Visit</a>
+          <a href="/contact" class="btn btn--outline">Contact us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Hero */
+  .hero { position: relative; overflow: hidden; padding: clamp(48px, 7vw, 96px) 0 var(--s-8); }
+  .hero__grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--s-8); align-items: center; }
+  .hero__intro { margin: var(--s-5) 0 var(--s-6); max-width: 480px; font-size: var(--fs-body-lg); line-height: 1.6; }
+  .hero__ctas { display: flex; flex-wrap: wrap; gap: var(--s-3); }
+  .hero__facts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5); margin: var(--s-6) 0 0; padding-top: var(--s-5); border-top: 1px solid var(--line); max-width: 520px; }
+  .hero__facts dt { display: flex; align-items: center; gap: 8px; font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px; }
+  .hero__facts dt :global(svg) { color: var(--gold-700); }
+  .hero__facts dd { margin: 0 0 4px 26px; font-size: var(--fs-small); color: var(--ink); }
+  .hero__facts dd span { display: block; }
+  .hero__facts a { font-weight: 600; }
+  .hero__media { position: relative; display: flex; justify-content: center; min-height: 520px; }
+  :global(.hero__rays) { inset: -60px -120px -40px -80px; width: calc(100% + 200px); height: calc(100% + 100px); }
+  .hero__arch { position: relative; width: min(100%, 400px); aspect-ratio: 3 / 4; margin-left: auto; }
+  .live-card {
+    position: absolute; left: 0; bottom: 48px; display: flex; gap: 14px; align-items: center; max-width: 260px;
+    padding: 16px 18px; background: var(--white); border-radius: var(--r-card); box-shadow: var(--shadow-md); text-decoration: none;
+  }
+  .live-card strong { display: block; color: var(--blue-950); font-size: var(--fs-small); }
+  .live-card span span { display: block; color: var(--ink-3); font-size: 0.8125rem; line-height: 1.45; }
+  .live-card__icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--blue-800); color: var(--white); }
+
+  /* Pathways */
+  .pathways { padding-bottom: var(--section-y-compact); }
+  .pathways__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); }
+  .path-card {
+    display: block; padding: var(--s-6); border-radius: var(--r-panel); background: var(--white); border: 1px solid var(--line);
+    text-decoration: none; color: var(--ink-2); transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
+  }
+  .path-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); color: var(--ink-2); }
+  .path-card--dark { background: var(--blue-800); border-color: var(--blue-800); color: rgba(255, 255, 255, 0.82); }
+  .path-card--dark:hover { color: rgba(255, 255, 255, 0.82); }
+  .path-card h2 { margin-bottom: var(--s-3); }
+  .path-card p:not(.eyebrow) { max-width: 420px; margin-bottom: var(--s-5); }
+  .path-card__icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: var(--gold-400); margin-bottom: var(--s-6); }
+  .path-card__icon--gold { background: var(--gold-100); color: var(--gold-700); margin-bottom: var(--s-4); }
+  .path-card:not(.path-card--dark) .link-arrow { color: var(--blue-700); }
+
+  /* Welcome */
+  .welcome__grid { display: grid; grid-template-columns: 0.75fr 1fr; gap: var(--s-8); align-items: center; }
+  .welcome__portrait { aspect-ratio: 3 / 4; max-width: 380px; }
+  .rule { border: 0; border-top: 1px solid var(--gold-500); margin: var(--s-5) 0; }
+  .welcome__quote { font-family: var(--font-serif); font-size: var(--fs-h3); line-height: 1.4; margin-bottom: var(--s-5); }
+  .welcome__names { margin: 0; font-weight: 700; color: var(--ink); }
+  .welcome__names + .small { margin: 2px 0 var(--s-5); }
+
+  /* Messages */
+  .sub { margin-top: var(--s-3); color: rgba(255, 255, 255, 0.72); }
+  .messages { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--s-6); }
+  .msg-feature { text-decoration: none; color: inherit; }
+  .msg-feature__media { aspect-ratio: 16 / 9; display: grid; place-items: center; }
+  .play { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--gold-500); color: var(--blue-950); transition: transform 0.2s var(--ease); }
+  .play :global(svg) { fill: currentColor; margin-left: 3px; }
+  .msg-feature:hover .play { transform: scale(1.08); }
+  .msg-feature__chips { display: flex; gap: 6px; margin: var(--s-4) 0 var(--s-3); }
+  .msg-feature h3 { margin-bottom: var(--s-2); }
+  .msg-meta { font-size: var(--fs-small); color: rgba(255, 255, 255, 0.7); margin: 0; }
+  .msg-list { list-style: none; margin: 0; padding: 0; }
+  .msg-list li { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+  .msg-list a { display: grid; grid-template-columns: 136px 1fr; gap: var(--s-4); align-items: center; padding: var(--s-4) 0; text-decoration: none; color: inherit; }
+  .msg-list li:first-child a { padding-top: 0; }
+  .msg-list__thumb { aspect-ratio: 16 / 9; border-radius: var(--r-input); }
+  .msg-series { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-400); margin: 0 0 4px; }
+  .msg-title { font-size: 1.1875rem; color: var(--white); margin-bottom: 4px; }
+  .msg-list a:hover .msg-title { color: var(--gold-400); }
+
+  /* Events */
+  .events { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .event { position: relative; display: grid; grid-template-columns: 64px 1fr auto; gap: var(--s-5); align-items: center; padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  .event__date { display: grid; place-items: center; align-content: center; height: 64px; border: 1px solid var(--line); border-radius: var(--r-input); background: var(--white); }
+  .event__date span { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-700); line-height: 1; }
+  .event__date strong { font-family: var(--font-serif); font-weight: 500; font-size: 1.75rem; color: var(--blue-900); line-height: 1.05; }
+  .event__chips { display: flex; gap: 6px; margin-bottom: 6px; }
+  .event__title { font-size: 1.375rem; margin-bottom: 4px; }
+  .event__title a { color: inherit; text-decoration: none; }
+  .event__title a::after { content: ''; position: absolute; inset: 0; }
+  .event:hover .event__title { color: var(--blue-700); }
+  .event__meta { display: flex; gap: var(--s-4); margin: 0; font-size: var(--fs-small); }
+  .event__meta > span { display: inline-flex; align-items: center; gap: 6px; }
+  .event__meta :global(svg) { color: var(--ink-3); }
+
+  /* News */
+  .news__heading { margin-bottom: var(--s-7); }
+  .news { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--s-6); }
+  .news__lead-img { aspect-ratio: 3 / 2; margin-bottom: var(--s-4); }
+  .news__date { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: var(--s-2); }
+  .news__lead h3 { margin-bottom: var(--s-2); }
+  .news__list { list-style: none; margin: 0; padding: 0; }
+  .news__list li { display: grid; grid-template-columns: 100px 1fr; gap: var(--s-4); padding-bottom: var(--s-4); margin-bottom: var(--s-4); border-bottom: 1px solid var(--line); }
+  .news__thumb { aspect-ratio: 4 / 3; border-radius: var(--r-input); }
+  .news__title { font-size: 1.1875rem; }
+
+  /* Quick links */
+  .quick__heading { margin-bottom: var(--s-7); }
+  .quick { list-style: none; margin: 0 0 var(--section-y); padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .quick li { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .quick a { display: flex; flex-direction: column; height: 100%; padding: var(--s-5); text-decoration: none; color: var(--ink-3); font-size: var(--fs-small); transition: background-color 0.2s var(--ease); }
+  .quick a:hover { background: var(--white); }
+  :global(.quick__icon) { color: var(--gold-700); margin-bottom: var(--s-3); }
+  .quick__title { font-size: 1.1875rem; margin-bottom: var(--s-2); }
+  .quick p { flex: 1; margin-bottom: var(--s-4); }
+
+  /* CTA band */
+  .cta-band { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: var(--s-6); flex-wrap: wrap; padding: var(--s-8) var(--s-8); border-radius: var(--r-panel); background: var(--blue-800); }
+  .cta-band__copy { position: relative; max-width: 600px; }
+  .cta-band__title { font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.08; letter-spacing: -0.02em; }
+  .cta-band__btns { position: relative; display: flex; gap: var(--s-3); flex-wrap: wrap; }
+  :global(.cta-band__rays) { right: -60px; bottom: -120px; width: 620px; height: 420px; }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .hero__grid { grid-template-columns: 1fr; gap: var(--s-7); }
+    .hero__media { min-height: 0; }
+    .hero__arch { margin: 0 auto; width: min(100%, 360px); }
+    .live-card { left: 50%; transform: translateX(-130%); bottom: 32px; }
+    .messages, .news { grid-template-columns: 1fr; }
+    .quick { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 760px) {
+    .hero__facts { grid-template-columns: 1fr; }
+    .hero__ctas .btn { flex: 1 1 100%; }
+    .live-card { position: relative; left: auto; bottom: auto; transform: none; margin: var(--s-4) auto 0; }
+    .hero__media { flex-direction: column; align-items: center; }
+    .pathways__grid, .welcome__grid { grid-template-columns: 1fr; }
+    .welcome__portrait { max-width: 300px; }
+    .path-card, .cta-band { padding: var(--s-5); }
+    .msg-list a { grid-template-columns: 104px 1fr; }
+    .event { grid-template-columns: 56px 1fr; gap: var(--s-4); }
+    .event__date { height: 56px; }
+    .event__link { display: none; }
+    .event__meta { flex-wrap: wrap; gap: 4px var(--s-4); }
+    .quick { grid-template-columns: 1fr; }
+    .quick a { padding: var(--s-4); }
+    .cta-band__btns .btn { flex: 1; }
+  }
+</style>

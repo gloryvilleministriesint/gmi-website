@@ -1,0 +1,31 @@
+---
+// Header/footer lockup: the official GMI mark with the church name set beside it.
+interface Props { variant?: 'light' | 'dark' }
+const { variant = 'light' } = Astro.props;
+const src = variant === 'dark' ? '/images/brand/gmi-mark-dark' : '/images/brand/gmi-mark';
+---
+<a href="/" class={`logo logo--${variant}`} aria-label="Gloryville Ministries International, home">
+  <picture>
+    <source srcset={`${src}.webp`} type="image/webp" />
+    <img src={`${src}.png`} alt="" width="338" height="141" />
+  </picture>
+  <span class="logo__text" aria-hidden="true">
+    <span class="logo__name">Gloryville</span>
+    <span class="logo__sub">Ministries International</span>
+  </span>
+</a>
+
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+  .logo img { height: 40px; width: auto; }
+  .logo__text { display: flex; flex-direction: column; line-height: 1; }
+  .logo__name { font-family: var(--font-serif); font-size: 1.3rem; font-weight: 600; color: var(--blue-900); letter-spacing: -0.01em; }
+  .logo__sub { margin-top: 5px; font-size: 0.5625rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-700); }
+  .logo--dark .logo__name { color: var(--white); }
+  .logo--dark .logo__sub { color: var(--gold-400); }
+  @media (max-width: 420px) {
+    .logo img { height: 32px; }
+    .logo__name { font-size: 1.1rem; }
+    .logo__sub { font-size: 0.5rem; }
+  }
+</style>

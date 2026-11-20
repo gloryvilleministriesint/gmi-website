@@ -1,0 +1,76 @@
+/* GMI design system: "Sanctuary Editorial".
+   Values come from GMI_Church_Website_DESIGN.pdf. Change brand colours here only. */
+:root {
+  /* Blues */
+  --blue-700: #1b3b8c; /* primary: nav, headings, primary buttons */
+  --blue-900: #0f2150; /* headings, hover states */
+  --blue-950: #0a1633; /* dark sections, footer, utility bar */
+  --blue-100: #e4eaf6; /* tints, selected states */
+  --blue-800: #142c6e; /* feature cards, CTA band */
+
+  /* Golds */
+  --gold-500: #c8a24a; /* CTA fill, rules, focus ring */
+  --gold-400: #d9bc74; /* gold on dark backgrounds */
+  --gold-700: #82621b; /* gold text on light (eyebrows, numbers) */
+  --gold-100: #f5ecd6; /* soft highlight backgrounds */
+
+  /* Neutrals */
+  --paper: #fbfaf7;
+  --stone: #f3f0e9;
+  --white: #ffffff;
+  --line: #e2ddd2;
+  --line-strong: #8a8272;
+  --ink: #161c2c;
+  --ink-2: #4a5163;
+  --ink-3: #636979;
+
+  /* Feedback */
+  --success: #1e7a4c;
+  --success-bg: #e7f3ec;
+  --error: #b3261e;
+  --error-bg: #fbeae8;
+
+  /* Type */
+  --font-serif: 'Newsreader Variable', 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Manrope Variable', 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --fs-display: clamp(2.75rem, 1.6rem + 4.6vw, 5.125rem); /* 44–82 */
+  --fs-h1: clamp(2.375rem, 1.7rem + 2.7vw, 3.75rem); /* 38–60 */
+  --fs-h2: clamp(1.875rem, 1.45rem + 1.7vw, 2.75rem); /* 30–44 */
+  --fs-h3: clamp(1.375rem, 1.2rem + 0.7vw, 1.75rem); /* 22–28 */
+  --fs-h4: 1.1875rem; /* 19 */
+  --fs-body-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem); /* 18–21 */
+  --fs-body: 1.0625rem; /* 17 */
+  --fs-small: 0.90625rem; /* 14.5 */
+  --fs-label: 0.78125rem; /* 12.5 */
+  --fs-nav: 0.9375rem; /* 15 */
+
+  /* Space */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --s-9: 96px; --s-10: 128px;
+  --section-y: clamp(64px, 4rem + 4vw, 120px);
+  --section-y-compact: clamp(48px, 3rem + 2vw, 72px);
+
+  /* Layout */
+  --container: 1240px;
+  --gutter: clamp(20px, 5vw, 64px);
+  --reading: 720px;
+
+  /* Shape */
+  --r-input: 8px;
+  --r-card: 12px;
+  --r-panel: 18px;
+  --r-pill: 999px;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px rgba(10, 22, 51, 0.06), 0 1px 1px rgba(10, 22, 51, 0.04);
+  --shadow-md: 0 8px 24px -8px rgba(10, 22, 51, 0.18);
+  --shadow-lg: 0 24px 48px -16px rgba(10, 22, 51, 0.28);
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (max-width: 760px) {
+  :root { --fs-body: 1rem; }
+}

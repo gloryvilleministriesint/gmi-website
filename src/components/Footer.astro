@@ -1,0 +1,123 @@
+---
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+import site from '../data/site.json';
+import { footerNav, legalNav } from '../data/navigation';
+
+const year = new Date().getFullYear();
+const socials = ['youtube', 'telegram', 'instagram', 'facebook'].filter((k) => (site.social as Record<string, string>)[k]);
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address.mapsQuery)}`;
+---
+<footer class="footer on-dark">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <Logo variant="dark" />
+        {site.identityLine
+          ? <p class="footer__identity">{site.identityLine}</p>
+          : <p class="footer__identity ph">[One-line statement of GMI's identity, supplied by the church]</p>}
+        <ul class="footer__contact">
+          <li><Icon name="map-pin" size={16} /><a href={mapsUrl} target="_blank" rel="noopener">{site.address.lines.join(', ')}</a></li>
+          <li><Icon name="phone" size={16} />{site.phone ? <a href={`tel:${site.phone.replace(/\s/g, '')}`}>{site.phone}</a> : <span class="ph">[Phone number]</span>}</li>
+          <li><Icon name="mail" size={16} />{site.email ? <a href={`mailto:${site.email}`}>{site.email}</a> : <span class="ph">[Email address]</span>}</li>
+        </ul>
+        {socials.length > 0 && (
+          <ul class="footer__social" aria-label="GMI on social media">
+            {socials.map((k) => <li><a href={(site.social as Record<string, string>)[k]} target="_blank" rel="noopener"><Icon name={k} size={18} label={k[0].toUpperCase() + k.slice(1)} /></a></li>)}
+          </ul>
+        )}
+      </div>
+
+      <nav class="footer__nav" aria-label="Footer">
+        {Object.entries(footerNav).map(([heading, links]) => (
+          <div>
+            <h2 class="footer__heading">{heading}</h2>
+            <ul>{links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+          </div>
+        ))}
+      </nav>
+
+      <div class="newsletter">
+        <h2 class="newsletter__title">Church updates in your inbox</h2>
+        <p>News, programmes and new messages from GMI. Unsubscribe any time.</p>
+        <form class="newsletter__form" action="/api/subscribe" method="post" data-newsletter novalidate>
+          <label class="sr-only" for="nl-email">Email address</label>
+          <input id="nl-email" name="email" type="email" autocomplete="email" placeholder="Your email" required />
+          <input type="text" name="company" tabindex="-1" autocomplete="off" class="sr-only" aria-hidden="true" />
+          <button class="btn btn--gold btn--sm" type="submit">Subscribe</button>
+        </form>
+        <p class="newsletter__msg" role="status" aria-live="polite" data-newsletter-msg></p>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p>© {year} Gloryville Ministries International. All rights reserved.</p>
+      <ul>{legalNav.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer { background: var(--blue-950); color: rgba(255, 255, 255, 0.72); padding-top: var(--s-9); font-size: var(--fs-small); }
+  .footer a { color: var(--white); text-decoration: none; }
+  .footer a:hover { color: var(--gold-400); }
+  .footer__top { display: grid; grid-template-columns: 1.25fr 1.5fr 1.15fr; gap: var(--s-7); padding-bottom: var(--s-8); }
+  .footer__identity { margin: var(--s-5) 0; max-width: 300px; }
+  .footer__contact { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .footer__contact li { display: flex; gap: 10px; align-items: flex-start; }
+  .footer__contact :global(svg) { flex-shrink: 0; margin-top: 3px; color: rgba(255, 255, 255, 0.6); }
+  .footer__social { display: flex; gap: var(--s-2); list-style: none; margin: var(--s-5) 0 0; padding: 0; }
+  .footer__social a { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; }
+  .footer__social a:hover { background: rgba(255, 255, 255, 0.08); }
+  .footer__nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5); }
+  .footer__heading { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-400); margin: 0 0 var(--s-4); }
+  .footer__nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .footer__nav a { font-weight: 500; }
+  .newsletter { align-self: start; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--r-panel); padding: var(--s-5); }
+  .newsletter__title { font-size: 1.375rem; line-height: 1.25; color: var(--white); margin-bottom: var(--s-2); }
+  .newsletter__form { display: flex; gap: var(--s-2); margin-top: var(--s-4); }
+  .newsletter__form input[type='email'] {
+    flex: 1; min-width: 0; min-height: 44px; padding: 0 14px; border-radius: var(--r-input);
+    border: 1.5px solid rgba(255, 255, 255, 0.28); background: rgba(255, 255, 255, 0.06); color: var(--white);
+  }
+  .newsletter__form input::placeholder { color: rgba(255, 255, 255, 0.55); }
+  .newsletter__form input:focus { outline: none; border-color: var(--gold-400); }
+  .newsletter__msg { margin-top: var(--s-2); font-size: 0.8125rem; color: var(--gold-400); min-height: 1.2em; }
+  .footer__bottom { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); flex-wrap: wrap; padding: var(--s-5) 0 var(--s-6); border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.8125rem; }
+  .footer__bottom p { margin: 0; }
+  .footer__bottom ul { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); list-style: none; margin: 0; padding: 0; }
+  .footer__bottom a { color: rgba(255, 255, 255, 0.72); }
+
+  @media (max-width: 1024px) {
+    .footer__top { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .footer__nav { order: 3; grid-column: 1 / -1; }
+  }
+  @media (max-width: 760px) {
+    .footer { padding-top: var(--s-8); }
+    .footer__top { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+    .footer__nav { order: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--s-6); }
+  }
+</style>
+
+<script>
+  // Newsletter: client-side check now; the /api/subscribe endpoint (double opt-in) is added in the forms phase.
+  const form = document.querySelector<HTMLFormElement>('[data-newsletter]');
+  const msg = document.querySelector<HTMLElement>('[data-newsletter-msg]');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = form.querySelector<HTMLInputElement>('input[type=email]')!;
+    if (!email.validity.valid) {
+      msg!.textContent = 'Please enter a valid email address.';
+      email.focus();
+      return;
+    }
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+      if (!res.ok) throw new Error();
+      msg!.textContent = 'Almost done: check your inbox to confirm your subscription.';
+      form.reset();
+    } catch {
+      msg!.textContent = 'Subscriptions open soon. Please try again later.';
+    }
+  });
+</script>
