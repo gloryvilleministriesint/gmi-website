@@ -135,3 +135,38 @@ a:hover { color: var(--blue-900); }
   background: var(--blue-950); color: var(--white); font-weight: 700; text-decoration: none;
 }
 .skip-link:focus { top: 16px; color: var(--white); }
+
+/* ---------- Forms ---------- */
+.form-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-panel); padding: var(--s-6); box-shadow: var(--shadow-sm); }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4) var(--s-4); }
+.form-grid .full { grid-column: 1 / -1; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label, .field legend { font-size: var(--fs-small); font-weight: 700; color: var(--ink); }
+.field .opt { font-weight: 400; color: var(--ink-3); }
+.field .hint { font-size: 0.8125rem; color: var(--ink-3); margin: -2px 0 2px; }
+.input, .field select, .field textarea {
+  width: 100%; min-height: 48px; padding: 10px 14px; border: 1.5px solid var(--line-strong); border-radius: var(--r-input);
+  background: var(--white); color: var(--ink); font-size: 1rem; line-height: 1.4;
+}
+.field textarea { min-height: 140px; resize: vertical; }
+.field select { appearance: none; padding-right: 40px; background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23161c2c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center; }
+.input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--blue-700); box-shadow: 0 0 0 3px var(--blue-100); }
+.field.has-error .input, .field.has-error select, .field.has-error textarea { border-color: var(--error); }
+.field-error { display: none; align-items: center; gap: 6px; font-size: 0.8125rem; color: var(--error); }
+.field.has-error .field-error { display: flex; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: var(--fs-small); color: var(--ink-2); cursor: pointer; }
+.check input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--blue-700); flex-shrink: 0; }
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-4); margin-top: var(--s-5); }
+.form-note { font-size: 0.8125rem; color: var(--ink-3); }
+.form-alert { display: none; gap: 10px; padding: 14px 16px; border-radius: var(--r-input); font-size: var(--fs-small); margin-top: var(--s-4); }
+.form-alert.is-error { display: flex; background: var(--error-bg); color: var(--error); }
+.form-success { display: none; text-align: left; }
+.form-success__icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--success-bg); color: var(--success); margin-bottom: var(--s-4); }
+.form-success h3 { margin-bottom: var(--s-2); }
+.is-sent .form-body { display: none; }
+.is-sent .form-success { display: block; }
+.hp { position: absolute !important; left: -9999px !important; }
+@media (max-width: 760px) {
+  .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .form-card { padding: var(--s-5); }
+}

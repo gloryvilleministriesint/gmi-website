@@ -1,0 +1,238 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Pathways from '../components/Pathways.astro';
+import Icon from '../components/Icon.astro';
+import about from '../data/about.json';
+
+type Value = { title: string; text: string };
+type Belief = { heading: string; text: string };
+type Milestone = { year: string; title: string; text: string };
+
+const values: Value[] = about.values.length ? (about.values as Value[]) : [1, 2, 3, 4].map((n) => ({ title: `[Core value ${n}]`, text: '[One-sentence explanation]' }));
+const valuesPh = !about.values.length;
+const beliefs: Belief[] = about.beliefs.length ? (about.beliefs as Belief[]) : [1, 2, 3, 4].map((n) => ({ heading: `[Belief heading ${n}]`, text: '[Statement of this belief, with scripture references]' }));
+const beliefsPh = !about.beliefs.length;
+const milestones: Milestone[] = about.milestones.length ? (about.milestones as Milestone[]) : [1, 2, 3].map((n) => ({ year: '[Year]', title: `[Milestone ${n}]`, text: '[What happened and why it mattered]' }));
+const milestonesPh = !about.milestones.length;
+
+const sections = [
+  { id: 'our-story', label: 'Our Story' },
+  { id: 'vision-and-mission', label: 'Vision & Mission' },
+  { id: 'our-mandate', label: 'Our Mandate' },
+  { id: 'core-values', label: 'Core Values' },
+  { id: 'what-we-believe', label: 'What We Believe' },
+  { id: 'our-history', label: 'Our History' },
+  { id: 'leadership', label: 'Leadership' },
+];
+const [pastor, wife] = about.leaders;
+---
+<Base title="About GMI" description="The story, vision, mission, mandate, values and beliefs of Gloryville Ministries International, and our Senior Pastor and his wife.">
+  <PageHero
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'About GMI' }]}
+    eyebrow="About GMI"
+    title="A ministry with a <em>story</em>, a mandate and a family."
+    intro={about.intro}
+    introPlaceholder="[Short introduction to Gloryville Ministries International, supplied by the church]"
+  />
+
+  <nav class="section-bar" aria-label="On this page">
+    <div class="container">
+      <ul>
+        {sections.map((s) => <li><a href={`#${s.id}`} data-section-link>{s.label}</a></li>)}
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 01 Our story -->
+  <section id="our-story" class="section anchor">
+    <div class="container story">
+      <div>
+        <p class="eyebrow">01 · Our story</p>
+        <h2 class="h1">How Gloryville began</h2>
+        {about.story.opening
+          ? <p class="story__lead">{about.story.opening}</p>
+          : <p class="story__lead ph">[Opening paragraph of GMI's story]</p>}
+        {about.story.paragraphs.length
+          ? about.story.paragraphs.map((p: string) => <p>{p}</p>)
+          : <p class="ph small">[Two or three further paragraphs: how GMI started, who it serves and where it is going]</p>}
+      </div>
+      <div class="img-slot img-slot--warm arch story__img">
+        <span class="img-label"><Icon name="image" />Photograph: early or archival GMI image</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02/03 Vision, mission, mandate -->
+  <section id="vision-and-mission" class="section bg-dark on-dark anchor">
+    <div class="container">
+      <p class="eyebrow">02 · Vision &amp; Mission</p>
+      <h2 class="h1">What we are called to</h2>
+      <div class="calling">
+        <div><p class="calling__label">Vision</p><p class:list={['calling__text', { ph: !about.vision }]}>{about.vision || '[GMI vision statement]'}</p></div>
+        <div><p class="calling__label">Mission</p><p class:list={['calling__text', { ph: !about.mission }]}>{about.mission || '[GMI mission statement]'}</p></div>
+        <div id="our-mandate" class="anchor"><p class="calling__label">03 · Our Mandate</p><p class:list={['calling__text', { ph: !about.mandate }]}>{about.mandate || '[GMI mandate statement]'}</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 Core values -->
+  <section id="core-values" class="section anchor">
+    <div class="container">
+      <p class="eyebrow">04 · Core values</p>
+      <h2>The values that shape us</h2>
+      {valuesPh && <p class="sub">Each value is shown with a short explanation once the church supplies them.</p>}
+      <ol class="values">
+        {values.map((v, i) => (
+          <li>
+            <span class="values__num">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class:list={['values__title', { ph: valuesPh }]}>{v.title}</h3>
+            <p class:list={['small', { ph: valuesPh }]}>{v.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 05 What we believe -->
+  <section id="what-we-believe" class="section bg-stone anchor">
+    <div class="container beliefs">
+      <p class="eyebrow">05 · What we believe</p>
+      <h2>Statement <br />of faith</h2>
+      <dl class="beliefs__list">
+        {beliefs.map((b) => (
+          <div>
+            <dt class:list={{ ph: beliefsPh }}>{b.heading}</dt>
+            <dd class:list={{ ph: beliefsPh }}>{b.text}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <!-- 06 Our history -->
+  <section id="our-history" class="section anchor">
+    <div class="container history">
+      <div>
+        <p class="eyebrow">06 · Our history</p>
+        <h2 class="h1">Milestones</h2>
+        <p class="small">Key moments in the life of the ministry, in order.</p>
+      </div>
+      <ol class="timeline">
+        {milestones.map((m) => (
+          <li>
+            <p class:list={['timeline__year', { ph: milestonesPh }]}>{m.year}</p>
+            <h3 class:list={['timeline__title', { ph: milestonesPh }]}>{m.title}</h3>
+            <p class:list={['small', { ph: milestonesPh }]}>{m.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 07 Leadership -->
+  <section id="leadership" class="section leaders-wrap anchor">
+    <div class="container">
+      <p class="eyebrow">07 · Leadership</p>
+      <h2>Our Senior Pastor and his wife</h2>
+      <div class="leaders">
+        {[pastor, wife].map((l, i) => (
+          <article class:list={['leader', { 'leader--offset': i === 1 }]}>
+            <div class="img-slot arch leader__img">
+              {l.portrait
+                ? <img src={l.portrait} alt={l.name} loading="lazy" />
+                : <span class="img-label"><Icon name="image" />{i === 0 ? 'Portrait: Senior Pastor' : "Portrait: Senior Pastor's wife"}</span>}
+            </div>
+            <p class:list={['leader__role', { ph: !l.role }]}>{l.role || '[Her title or role]'}</p>
+            <h3 class:list={['leader__name', { ph: !l.name }]}>{l.name || '[Full name and title]'}</h3>
+            {l.bio.length ? l.bio.map((p: string) => <p>{p}</p>) : <p class="ph small">[Short biography, two to three paragraphs]</p>}
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Pathways />
+</Base>
+
+<style>
+  /* Section bar: in-page navigation, sticks under the header */
+  .section-bar { position: sticky; top: 77px; z-index: 20; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .section-bar ul { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; overflow-x: auto; scrollbar-width: none; }
+  .section-bar ul::-webkit-scrollbar { display: none; }
+  .section-bar a { display: block; padding: 14px 10px; font-size: 0.875rem; font-weight: 600; color: var(--ink-2); text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; }
+  .section-bar a:hover { color: var(--blue-700); }
+  .section-bar a.is-active { color: var(--blue-700); border-bottom-color: var(--gold-500); }
+  .anchor { scroll-margin-top: 140px; }
+
+  .story { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--s-8); align-items: center; }
+  .story h2 { margin-bottom: var(--s-5); }
+  .story__lead { font-family: var(--font-serif); font-size: var(--fs-h3); line-height: 1.4; color: var(--ink); }
+  .story__img { aspect-ratio: 3 / 4; max-width: 420px; justify-self: end; width: 100%; }
+
+  .calling { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: var(--s-7); border-top: 1px solid rgba(255, 255, 255, 0.14); }
+  .calling > div { padding: var(--s-5) var(--s-5) 0 0; }
+  .calling > div + div { padding-left: var(--s-5); border-left: 1px solid rgba(255, 255, 255, 0.14); }
+  .calling__label { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-400); margin-bottom: var(--s-2); }
+  .calling__text { font-family: var(--font-serif); font-size: var(--fs-h3); line-height: 1.35; color: var(--white); }
+
+  .sub { max-width: 520px; margin-top: var(--s-3); }
+  .values { list-style: none; margin: var(--s-7) 0 0; padding: var(--s-5) 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-5); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .values__num { font-family: var(--font-serif); font-size: 2.25rem; color: var(--gold-700); line-height: 1; }
+  .values__title { font-size: 1.375rem; margin: var(--s-3) 0 var(--s-2); }
+
+  .beliefs { max-width: 760px; }
+  .beliefs__list { margin: var(--s-6) 0 0; border-top: 1px solid var(--line); }
+  .beliefs__list > div { display: grid; grid-template-columns: 200px 1fr; gap: var(--s-5); padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  .beliefs__list dt { font-family: var(--font-serif); font-size: 1.125rem; color: var(--blue-900); }
+  .beliefs__list dd { margin: 0; }
+
+  .history { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: var(--s-8); }
+  .history h2 { margin-bottom: var(--s-3); }
+  .timeline { list-style: none; margin: 0; padding: 0 0 0 var(--s-6); border-left: 1px solid var(--line); }
+  .timeline li { position: relative; padding-bottom: var(--s-6); }
+  .timeline li:last-child { padding-bottom: 0; }
+  .timeline li::before { content: ''; position: absolute; left: calc(-1 * var(--s-6) - 5px); top: 5px; width: 9px; height: 9px; border-radius: 50%; background: var(--gold-500); }
+  .timeline__year { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-700); margin-bottom: 4px; }
+  .timeline__title { font-size: 1.375rem; margin-bottom: 4px; }
+
+  .leaders-wrap { background: #eef2fa; }
+  .leaders { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6); margin-top: var(--s-7); }
+  .leader--offset { margin-top: var(--s-8); }
+  .leader__img { aspect-ratio: 4 / 5; margin-bottom: var(--s-5); }
+  .leader__role { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+  .leader__name { font-size: var(--fs-h3); margin-bottom: var(--s-3); }
+
+  @media (max-width: 1180px) { .section-bar { top: 69px; } }
+  @media (max-width: 1024px) {
+    .values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .story, .history, .leaders { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+    .story__img { justify-self: center; max-width: 320px; }
+    .calling { grid-template-columns: minmax(0, 1fr); }
+    .calling > div + div { padding-left: 0; border-left: 0; border-top: 1px solid rgba(255, 255, 255, 0.14); margin-top: var(--s-5); }
+    .values { grid-template-columns: minmax(0, 1fr); }
+    .beliefs__list > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .leader--offset { margin-top: 0; }
+  }
+</style>
+
+<script>
+  // Highlight the section bar link for the section in view.
+  const links = new Map<string, HTMLAnchorElement>();
+  document.querySelectorAll<HTMLAnchorElement>('[data-section-link]').forEach((a) => links.set(a.hash.slice(1), a));
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        links.forEach((a) => a.classList.remove('is-active'));
+        const a = links.get(e.target.id);
+        a?.classList.add('is-active');
+        a?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      });
+    },
+    { rootMargin: '-30% 0px -60% 0px' },
+  );
+  links.forEach((_, id) => { const el = document.getElementById(id); if (el) io.observe(el); });
+</script>

@@ -1,0 +1,192 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import site from '../data/site.json';
+
+const s = site as typeof site & { officeHours?: string };
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address.mapsQuery)}`;
+const embedUrl = `https://www.google.com/maps?q=${encodeURIComponent(site.address.mapsQuery)}&output=embed`;
+const serviceList = site.services.map((x) => `${x.name}: ${x.day}s at ${x.time}`).join('. ');
+const socials = ['youtube', 'telegram', 'instagram', 'facebook'].filter((k) => (site.social as Record<string, string>)[k]);
+
+// Answers use confirmed facts only; anything the church has not supplied stays as a placeholder.
+const faqs = [
+  { q: 'What time are services?', a: `${serviceList}. Services are also streamed live.`, href: '/services', link: 'See all services' },
+  { q: 'Where is the church and is there parking?', a: `We meet at ${site.address.lines.join(', ')}.`, ph: '[Parking information]', href: '/plan-your-visit#location', link: 'Directions and map' },
+  { q: 'What should I expect on my first visit?', a: 'Plan Your Visit explains what happens when you arrive, during the service and afterwards.', href: '/plan-your-visit', link: 'Plan your visit' },
+  { q: 'How do I become a member?', a: 'Membership starts with the membership class. The New Here page explains all six steps and lets you register your interest.', href: '/new-here', link: 'See the membership journey' },
+  { q: 'Is there anything for children during services?', ph: '[What the Children Department provides during services]', href: '/departments/children', link: 'Children Department' },
+  { q: 'How can I join a department?', a: 'Members can express interest in any of our nine departments from each department page.', href: '/departments', link: 'Explore departments' },
+  { q: 'How do I give or become a partner?', a: 'Giving & Partnership covers tithes, offerings, partnership and seed sowing.', href: '/give', link: 'Giving & Partnership' },
+  { q: 'How do I share a testimony?', a: 'Use the Share your testimony form. The church reviews every testimony before it appears on the website.', href: '/testimonies/share', link: 'Share your testimony' },
+];
+---
+<Base title="Contact Us" description="Contact Gloryville Ministries International, Ibadan: send an enquiry, find directions or read frequently asked questions.">
+  <PageHero
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Contact Us' }]}
+    eyebrow="Contact us"
+    title="We would love to hear from you."
+    intro="Send an enquiry, find us, or check the frequently asked questions below."
+  />
+
+  <section class="section">
+    <div class="container contact">
+      <div>
+        <dl class="info">
+          <div>
+            <dt><Icon name="map-pin" size={18} />Address</dt>
+            <dd><a href={mapsUrl} target="_blank" rel="noopener">{site.address.lines.map((l) => <span class="line">{l}</span>)}</a></dd>
+          </div>
+          <div>
+            <dt><Icon name="phone" size={18} />Phone</dt>
+            <dd>{site.phone ? <a href={`tel:${site.phone.replace(/\s/g, '')}`}>{site.phone}</a> : <span class="ph">[Phone number]</span>}</dd>
+          </div>
+          <div>
+            <dt><Icon name="mail" size={18} />Email</dt>
+            <dd>{site.email ? <a href={`mailto:${site.email}`}>{site.email}</a> : <span class="ph">[Email address]</span>}</dd>
+          </div>
+          <div>
+            <dt><Icon name="clock" size={18} />Office hours</dt>
+            <dd>{s.officeHours ? s.officeHours : <span class="ph">[Office hours, if any]</span>}</dd>
+          </div>
+        </dl>
+        {socials.length > 0 && (
+          <ul class="social">
+            {socials.map((k) => <li><a href={(site.social as Record<string, string>)[k]} target="_blank" rel="noopener"><Icon name={k} size={18} label={k} /></a></li>)}
+          </ul>
+        )}
+      </div>
+
+      <div class="form-card" data-form-wrap>
+        <form class="form-body" action="/api/forms/enquiry" method="post" data-form>
+          <h2 class="form-title">Send an enquiry</h2>
+          <div class="form-grid">
+            <div class="field">
+              <label for="c-name">Full name</label>
+              <input class="input" id="c-name" name="name" autocomplete="name" required />
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field">
+              <label for="c-email">Email address</label>
+              <input class="input" id="c-email" name="email" type="email" autocomplete="email" required />
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field">
+              <label for="c-phone">Phone number <span class="opt">(optional)</span></label>
+              <input class="input" id="c-phone" name="phone" type="tel" autocomplete="tel" />
+            </div>
+            <div class="field">
+              <label for="c-subject">Subject</label>
+              <select id="c-subject" name="subject" required>
+                <option value="">Choose a subject</option>
+                <option>General enquiry</option>
+                <option>Visiting GMI</option>
+                <option>Membership</option>
+                <option>Departments</option>
+                <option>Giving &amp; Partnership</option>
+                <option>Prayer request</option>
+                <option>Other</option>
+              </select>
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field full">
+              <label for="c-message">Message</label>
+              <textarea id="c-message" name="message" required></textarea>
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field full">
+              <label class="check"><input type="checkbox" name="consent_contact" value="yes" required data-error="Please tick this box so the church can reply to you." /> GMI may contact me about this enquiry.</label>
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+          </div>
+          <input class="hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div class="form-actions">
+            <button class="btn btn--primary btn--sm" type="submit">Send message</button>
+          </div>
+          <p class="form-alert" role="alert"></p>
+        </form>
+        <div class="form-success" tabindex="-1">
+          <span class="form-success__icon"><Icon name="check" size={24} /></span>
+          <h3 class="h3">Thank you, your message has been sent.</h3>
+          <p>Someone from the church will reply by email. A copy of your message is on its way to your inbox.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-stone" id="directions">
+    <div class="container find">
+      <div class="find__map">
+        <iframe title="Map showing Gloryville Ministries International, Ibadan" src={embedUrl} loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div>
+        <p class="eyebrow">Location &amp; directions</p>
+        <h2>Finding GMI</h2>
+        <p class="find__addr">{site.address.lines.join(', ')}</p>
+        <p class="ph small">[Directions from main roads or landmarks]</p>
+        <a class="btn btn--primary btn--sm" href={mapsUrl} target="_blank" rel="noopener">Get directions <Icon name="arrow-right" /></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="container faq">
+      <p class="eyebrow">FAQ</p>
+      <h2>Frequently asked questions</h2>
+      <div class="faq__list">
+        {faqs.map((f) => (
+          <details>
+            <summary>{f.q}<span class="pm" aria-hidden="true"></span></summary>
+            <div class="faq__a">
+              {f.a && <p>{f.a}</p>}
+              {f.ph && <p class="ph">{f.ph}</p>}
+              <a class="link-arrow" href={f.href}>{f.link} <Icon name="arrow-right" /></a>
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: var(--s-8); align-items: start; }
+  .info { margin: 0; border-top: 1px solid var(--line); }
+  .info > div { padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  .info dt { display: flex; align-items: center; gap: 10px; font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+  .info dt :global(svg) { color: var(--gold-700); }
+  .info dd { margin: 0 0 0 28px; color: var(--ink); }
+  .info dd a { color: var(--ink); text-decoration: none; }
+  .info dd a:hover { color: var(--blue-700); text-decoration: underline; }
+  .line { display: block; }
+  .social { display: flex; gap: var(--s-2); list-style: none; margin: var(--s-4) 0 0; padding: 0; }
+  .social a { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; color: var(--blue-900); }
+  .social a:hover { background: var(--blue-100); }
+  .form-title { font-size: var(--fs-h3); margin-bottom: var(--s-5); }
+
+  .find { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-8); align-items: center; }
+  .find__map { aspect-ratio: 4 / 3; border-radius: var(--r-panel); overflow: hidden; background: var(--blue-100); }
+  .find__map iframe { width: 100%; height: 100%; border: 0; }
+  .find h2 { margin-bottom: var(--s-4); }
+  .find__addr { color: var(--ink); }
+  .find .btn { margin-top: var(--s-4); }
+
+  .faq { max-width: 860px; }
+  .faq h2 { margin-bottom: var(--s-6); }
+  .faq__list { border-top: 1px solid var(--line); }
+  details { border-bottom: 1px solid var(--line); }
+  summary { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); min-height: 60px; padding: var(--s-3) 0; cursor: pointer; list-style: none; font-weight: 700; color: var(--ink); }
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { color: var(--blue-700); }
+  .pm { position: relative; width: 16px; height: 16px; flex-shrink: 0; }
+  .pm::before, .pm::after { content: ''; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: var(--blue-700); transition: transform 0.2s var(--ease); }
+  .pm::after { transform: rotate(90deg); }
+  details[open] .pm::after { transform: rotate(0); }
+  .faq__a { padding: 0 0 var(--s-5); max-width: 680px; }
+  .faq__a p { margin-bottom: var(--s-3); }
+
+  @media (max-width: 1024px) {
+    .contact, .find { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+  }
+</style>

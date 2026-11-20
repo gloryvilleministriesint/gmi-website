@@ -1,0 +1,36 @@
+---
+// Compact visitor pathway band used at the foot of inner pages.
+import Icon from './Icon.astro';
+---
+<section class="section section--compact">
+  <div class="container pathways">
+    <a class="pw pw--dark on-dark" href="/plan-your-visit">
+      <span class="pw__icon"><Icon name="compass" size={20} /></span>
+      <h2 class="h2">Plan your visit</h2>
+      <p>Service times, directions and what to expect.</p>
+      <span class="link-arrow">Plan your visit <Icon name="arrow-right" /></span>
+    </a>
+    <a class="pw" href="/new-here">
+      <span class="pw__icon pw__icon--gold"><Icon name="user-plus" size={20} /></span>
+      <h2 class="h2">Become a member</h2>
+      <p>Start the membership journey at GMI.</p>
+      <span class="link-arrow">New here? Start here <Icon name="arrow-right" /></span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .pathways { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); }
+  .pw { display: block; padding: var(--s-6); border-radius: var(--r-panel); background: var(--white); border: 1px solid var(--line); color: var(--ink-2); text-decoration: none; transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease); }
+  .pw:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); color: var(--ink-2); }
+  .pw--dark { background: var(--blue-800); border-color: var(--blue-800); color: rgba(255, 255, 255, 0.82); }
+  .pw--dark:hover { color: rgba(255, 255, 255, 0.82); }
+  .pw h2 { margin: var(--s-4) 0 var(--s-2); }
+  .pw p { margin-bottom: var(--s-4); }
+  .pw__icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: var(--gold-400); }
+  .pw__icon--gold { background: var(--gold-100); color: var(--gold-700); }
+  @media (max-width: 760px) {
+    .pathways { grid-template-columns: minmax(0, 1fr); }
+    .pw { padding: var(--s-5); }
+  }
+</style>

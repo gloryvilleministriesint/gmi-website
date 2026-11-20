@@ -1,0 +1,108 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import site from '../data/site.json';
+
+const visit = (site as any).visitorInfo ?? {};
+---
+<Base title="Our Services" description="When Gloryville Ministries International gathers in Ibadan: Sunday Service at 9:00 AM and Wednesday Service at 6:00 PM, in person and online.">
+  <PageHero
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Our Services' }]}
+    eyebrow="Our services"
+    title="When we gather."
+    intro="Every service is open to you, whether it's your first time or you've been with us for years. Services are also streamed live, so you can join from wherever you are."
+  >
+    <a href="/plan-your-visit" class="btn btn--gold btn--sm">Plan Your Visit</a>
+    <a href="/calendar" class="btn btn--outline btn--sm">Open the calendar</a>
+  </PageHero>
+
+  <section class="section">
+    <div class="container">
+      <ul class="services">
+        {site.services.map((s, i) => (
+          <li class="service">
+            <div class:list={['img-slot service__img', { 'img-slot--warm': i % 2 === 1 }]}>
+              <span class="img-label"><Icon name="image" />Photograph: {s.name}</span>
+            </div>
+            <div class="service__body">
+              <p class="service__num">Service {i + 1}</p>
+              <h2 class="h2">{s.name}</h2>
+              {s.description
+                ? <p>{s.description}</p>
+                : <p class="ph">[What happens in this service and who it is for]</p>}
+            </div>
+            <div class="service__when">
+              <p class="service__day">{s.day}s</p>
+              <p class="service__time"><Icon name="clock" size={15} />{s.time}</p>
+              <p class="service__mode">{s.streamed ? 'In person and online' : 'In person'}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section bg-stone">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Visitor information</p>
+          <h2>Coming to a service</h2>
+          <p class="lead">Practical details for anyone attending for the first time.</p>
+        </div>
+        <a class="link-arrow" href="/plan-your-visit">Full visitor guide <Icon name="arrow-right" /></a>
+      </div>
+      <ul class="tips">
+        <li>
+          <Icon name="clock" size={22} class="tips__icon" />
+          <h3 class="tips__title">Arriving</h3>
+          {visit.arriving ? <p>{visit.arriving}</p> : <p class="ph">[Suggested arrival time and where to go]</p>}
+        </li>
+        <li>
+          <Icon name="car" size={22} class="tips__icon" />
+          <h3 class="tips__title">Getting here</h3>
+          <p>{site.address.lines.join(', ')}. <a href="/plan-your-visit#location">Directions</a></p>
+        </li>
+        <li>
+          <Icon name="baby" size={22} class="tips__icon" />
+          <h3 class="tips__title">Children</h3>
+          {visit.children ? <p>{visit.children}</p> : <p class="ph">[What the Children Department provides during services]</p>}
+        </li>
+        <li>
+          <Icon name="radio" size={22} class="tips__icon" />
+          <h3 class="tips__title">Can't make it?</h3>
+          <p>Watch live from the GMI Digital Library. <a href="/library/live">Go to Live Services</a></p>
+        </li>
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .services { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .service { display: grid; grid-template-columns: 300px 1fr auto; gap: var(--s-6); align-items: center; padding: var(--s-5) 0; border-bottom: 1px solid var(--line); }
+  .service__img { aspect-ratio: 3 / 2; }
+  .service__num { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: var(--s-2); }
+  .service h2 { margin-bottom: var(--s-2); }
+  .service__when { text-align: right; }
+  .service__day { font-family: var(--font-serif); font-size: var(--fs-h3); color: var(--blue-900); margin-bottom: 4px; }
+  .service__time { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+  .service__time :global(svg) { color: var(--gold-700); }
+  .service__mode { font-size: var(--fs-small); color: var(--ink-3); }
+  .lead { margin-top: var(--s-3); }
+  .tips { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-6); }
+  :global(.tips__icon) { color: var(--gold-700); margin-bottom: var(--s-3); }
+  .tips__title { font-size: 1.1875rem; margin-bottom: var(--s-2); }
+  .tips p { font-size: var(--fs-small); }
+  @media (max-width: 1024px) {
+    .service { grid-template-columns: 220px 1fr; }
+    .service__when { grid-column: 2; text-align: left; }
+    .tips { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .service { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
+    .service__when { grid-column: auto; }
+    .tips { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>

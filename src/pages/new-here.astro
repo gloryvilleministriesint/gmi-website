@@ -1,0 +1,218 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import { departments } from '../data/navigation';
+
+const steps = [
+  { title: 'First-time visitor', text: 'Come to a service in person or online. You will be welcomed and invited to share your details if you would like the church to stay in touch.' },
+  { title: 'Membership information', text: 'Learn what membership at GMI means and register your interest in the next membership class using the form on this page.' },
+  { title: 'Membership class', text: 'Attend the membership class, the first formal step towards becoming a member. The church will share the date with you.' },
+  { title: 'Membership', text: 'After completing the membership class, you become a member of the GMI family.' },
+  { title: 'Discipleship and cells', text: 'As a new member, you are connected to a discipleship group and the cell you belong to, where you grow alongside others.' },
+  { title: 'Department participation', text: 'Members can serve in any of our nine departments, from Music and Arts to Children.' },
+];
+---
+<Base title="New Here? Become a Member" description="From your first visit to the GMI family: the six steps of the membership journey at Gloryville Ministries International, and how to register for the membership class.">
+  <PageHero
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'New Here' }]}
+    eyebrow="New here / Become a member"
+    title="From first visit to <em>family</em>."
+    intro="Whether this is your first time at GMI or you are ready to make it home, here is how membership works."
+  >
+    <a href="#register" class="btn btn--gold btn--sm">Register for the membership class</a>
+    <a href="/plan-your-visit" class="btn btn--outline btn--sm">Plan your first visit</a>
+  </PageHero>
+
+  <section class="section">
+    <div class="container intro">
+      <div class="img-slot arch intro__img">
+        <span class="img-label"><Icon name="image" />Photograph: members welcoming visitors</span>
+      </div>
+      <div>
+        <p class="eyebrow">Welcome</p>
+        <h2 class="h1">Introducing GMI</h2>
+        <p class="intro__text ph">[Short introduction to GMI written for first-time visitors]</p>
+        <a class="link-arrow" href="/about">More about GMI <Icon name="arrow-right" /></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-stone" id="journey">
+    <div class="container">
+      <p class="eyebrow">The membership journey</p>
+      <h2>Six steps to belonging</h2>
+      <p class="lead">Select a step to see what it involves.</p>
+
+      <div class="journey" data-journey>
+        <ol class="journey__steps" role="tablist" aria-label="Membership journey steps">
+          {steps.map((s, i) => (
+            <li role="presentation">
+              <button type="button" role="tab" id={`step-tab-${i}`} aria-controls={`step-panel-${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+                <span class="journey__num">{i + 1}</span>
+                <span class="journey__label">{s.title}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+        {steps.map((s, i) => (
+          <div class="journey__panel" role="tabpanel" id={`step-panel-${i}`} aria-labelledby={`step-tab-${i}`} hidden={i !== 0}>
+            <div class:list={['img-slot journey__img', { 'img-slot--warm': i % 2 === 0 }]}>
+              <span class="img-label"><Icon name="image" />Photograph for this step</span>
+            </div>
+            <div>
+              <p class="journey__count">Step {i + 1} of {steps.length}</p>
+              <h3 class="h2">{s.title}</h3>
+              <p>{s.text}</p>
+              <p class="ph small">[Further detail for this step, supplied by the church]</p>
+              <div class="journey__nav">
+                <button type="button" class="btn btn--sm btn--soft" data-step-prev disabled={i === 0}><Icon name="arrow-left" /> Previous</button>
+                {i < steps.length - 1
+                  ? <button type="button" class="btn btn--sm btn--primary" data-step-next>Next step <Icon name="arrow-right" /></button>
+                  : <a class="btn btn--sm btn--primary" href="/departments">Explore departments <Icon name="arrow-right" /></a>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="register">
+    <div class="container register">
+      <div>
+        <p class="eyebrow">Membership class</p>
+        <h2>Register your interest</h2>
+        <p>The membership class is the first formal step. Leave your details and the church will share the next class date. <span class="ph">[Class format and frequency]</span></p>
+        <ul class="register__meta">
+          <li><Icon name="calendar" size={16} />Next class: <span class="ph">[Date]</span></li>
+          <li><Icon name="map-pin" size={16} /><span class="ph">[Venue]</span></li>
+        </ul>
+      </div>
+
+      <div class="form-card" data-form-wrap>
+        <form class="form-body" action="/api/forms/membership" method="post" data-form>
+          <div class="form-grid">
+            <div class="field">
+              <label for="m-name">Full name</label>
+              <input class="input" id="m-name" name="name" autocomplete="name" required />
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field">
+              <label for="m-email">Email address</label>
+              <input class="input" id="m-email" name="email" type="email" autocomplete="email" required />
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field">
+              <label for="m-phone">Phone number <span class="opt">(optional)</span></label>
+              <input class="input" id="m-phone" name="phone" type="tel" autocomplete="tel" />
+            </div>
+            <div class="field">
+              <label for="m-attended">Have you attended a GMI service?</label>
+              <select id="m-attended" name="attended" required>
+                <option value="">Choose one</option>
+                <option>Yes, in person</option>
+                <option>Yes, online</option>
+                <option>Not yet</option>
+              </select>
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field full">
+              <label for="m-dept">Department you may be interested in <span class="opt">(optional)</span></label>
+              <p class="hint">You can join a department after completing the membership class.</p>
+              <select id="m-dept" name="department">
+                <option>Not sure yet</option>
+                {departments.map((d) => <option>{d.name}</option>)}
+              </select>
+            </div>
+            <div class="field full">
+              <label class="check"><input type="checkbox" name="consent_contact" value="yes" required data-error="Please tick this box so the church can contact you about the class." /> GMI may contact me about the membership class.</label>
+              <p class="field-error" aria-live="polite"></p>
+              <label class="check"><input type="checkbox" name="consent_updates" value="yes" /> Send me Church Updates by email (optional).</label>
+            </div>
+          </div>
+          <input class="hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div class="form-actions">
+            <button class="btn btn--primary btn--sm" type="submit">Register my interest</button>
+          </div>
+          <p class="form-alert" role="alert"></p>
+        </form>
+        <div class="form-success" tabindex="-1">
+          <span class="form-success__icon"><Icon name="check" size={24} /></span>
+          <h3 class="h3">Thank you, your interest is registered.</h3>
+          <p>The church will contact you with the date of the next membership class. A confirmation is on its way to your email.</p>
+          <a class="link-arrow" href="/plan-your-visit">Plan your visit <Icon name="arrow-right" /></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .intro { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: var(--s-8); align-items: center; }
+  .intro__img { aspect-ratio: 3 / 4; max-width: 380px; width: 100%; }
+  .intro h2 { margin-bottom: var(--s-4); }
+  .intro__text { font-family: var(--font-serif); font-size: var(--fs-h3); line-height: 1.4; margin-bottom: var(--s-5); }
+
+  .lead { margin: var(--s-3) 0 var(--s-6); }
+  .journey { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-panel); padding: var(--s-6); }
+  .journey__steps { list-style: none; margin: 0 0 var(--s-6); padding: 0 0 var(--s-5); display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+  .journey__steps li { position: relative; }
+  .journey__steps li:not(:last-child)::after { content: ''; position: absolute; top: 18px; left: 44px; right: 8px; height: 1px; background: var(--line); }
+  .journey__steps button { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; width: 100%; padding: 0 8px 0 0; background: none; border: 0; cursor: pointer; text-align: left; }
+  .journey__num { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--line-strong); background: var(--white); font-family: var(--font-serif); font-size: 1.0625rem; color: var(--blue-900); transition: background-color 0.2s var(--ease), color 0.2s var(--ease); }
+  .journey__label { font-size: 0.8125rem; font-weight: 700; color: var(--ink); line-height: 1.35; }
+  .journey__steps [aria-selected='true'] .journey__num { background: var(--blue-700); border-color: var(--blue-700); color: var(--white); }
+  .journey__steps button:hover .journey__num { border-color: var(--blue-700); }
+  .journey__panel { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: var(--s-6); align-items: center; }
+  .journey__panel[hidden] { display: none; }
+  .journey__img { aspect-ratio: 4 / 3; }
+  .journey__count { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: var(--s-2); }
+  .journey__panel h3 { margin-bottom: var(--s-3); }
+  .journey__nav { display: flex; gap: var(--s-2); margin-top: var(--s-5); }
+  :global(.btn--soft) { background: var(--stone); color: var(--ink-2); }
+  :global(.btn--soft:hover:not([disabled])) { background: var(--line); }
+
+  .register { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: var(--s-8); align-items: start; }
+  .register h2 { margin-bottom: var(--s-4); }
+  .register__meta { list-style: none; margin: var(--s-4) 0 0; padding: 0; display: grid; gap: 8px; font-size: var(--fs-small); }
+  .register__meta li { display: flex; align-items: center; gap: 8px; }
+  .register__meta :global(svg) { color: var(--gold-700); }
+  .field .check + .check { margin-top: 6px; }
+
+  @media (max-width: 1024px) {
+    .journey__steps { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: var(--s-4); }
+    .journey__steps li::after { display: none; }
+    .register { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+  }
+  @media (max-width: 760px) {
+    .intro, .journey__panel { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
+    .intro__img { max-width: 300px; margin: 0 auto; }
+    .journey { padding: var(--s-4); }
+    .journey__steps { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .journey__steps button { flex-direction: row; align-items: center; gap: 12px; padding: 4px 0; }
+  }
+</style>
+
+<script>
+  // Journey tabs: click, arrow keys, previous/next buttons.
+  const root = document.querySelector<HTMLElement>('[data-journey]');
+  if (root) {
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role=tab]'));
+    const panels = Array.from(root.querySelectorAll<HTMLElement>('[role=tabpanel]'));
+    const select = (i: number, focus = false) => {
+      tabs.forEach((t, j) => { t.setAttribute('aria-selected', String(i === j)); t.tabIndex = i === j ? 0 : -1; });
+      panels.forEach((p, j) => (p.hidden = i !== j));
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); select((i + 1) % tabs.length, true); }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); select((i - 1 + tabs.length) % tabs.length, true); }
+      });
+    });
+    root.querySelectorAll('[data-step-next]').forEach((b, i) => b.addEventListener('click', () => select(i + 1)));
+    root.querySelectorAll('[data-step-prev]').forEach((b, i) => b.addEventListener('click', () => select(Math.max(0, i - 1))));
+  }
+</script>

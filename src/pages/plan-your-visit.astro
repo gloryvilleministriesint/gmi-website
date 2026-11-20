@@ -1,0 +1,150 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import site from '../data/site.json';
+
+const visit = (site as any).visitorInfo ?? {};
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address.mapsQuery)}`;
+const embedUrl = `https://www.google.com/maps?q=${encodeURIComponent(site.address.mapsQuery)}&output=embed`;
+
+const expect = [
+  { icon: 'house', title: 'When you arrive', key: 'arrive', ph: '[How visitors are welcomed: ushers, welcome desk]' },
+  { icon: 'music', title: 'The service', key: 'service', ph: '[What a service is like and roughly how long it lasts]' },
+  { icon: 'baby', title: 'Children', key: 'children', ph: '[What the Children Department offers]' },
+  { icon: 'shirt', title: 'What to wear', key: 'wear', ph: '[Dress guidance, if any]' },
+  { icon: 'clipboard-list', title: 'Visitor card', key: 'card', ph: '[How the Welfare and Registration Department records first-time visitors]' },
+  { icon: 'coffee', title: 'After the service', key: 'after', ph: '[What happens after the service for visitors]' },
+];
+---
+<Base title="Plan Your Visit" description="Everything you need before your first visit to Gloryville Ministries International, Ibadan: service times, how to find us and what to expect.">
+  <PageHero
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Plan Your Visit' }]}
+    eyebrow="Plan your visit"
+    title="Your first visit, made <em>simple</em>."
+    intro="Everything you need before you arrive: when to come, how to get here and what to expect."
+  />
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Service times</p>
+          <h2>When to come</h2>
+        </div>
+        <a class="link-arrow" href="/services">All services <Icon name="arrow-right" /></a>
+      </div>
+      <ul class="times" style={`--cols:${Math.min(site.services.length, 3)}`}>
+        {site.services.map((s) => (
+          <li>
+            <p class="times__name">{s.name}</p>
+            <p class="times__day">{s.day}</p>
+            <p class="times__time"><Icon name="clock" size={15} />{s.time}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section id="location" class="section bg-stone">
+    <div class="container find">
+      <div class="find__map">
+        <iframe
+          title="Map showing Gloryville Ministries International, Ibadan"
+          src={embedUrl}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+      <div>
+        <p class="eyebrow">Location</p>
+        <h2>How to find us</h2>
+        <ul class="find__list">
+          <li><Icon name="map-pin" size={18} /><span>{site.address.lines.map((l) => <span class="line">{l}</span>)}</span></li>
+          <li><Icon name="car" size={18} />{visit.parking ? <span>{visit.parking}</span> : <span class="ph">[Parking information]</span>}</li>
+          <li><Icon name="compass" size={18} />{visit.directions ? <span>{visit.directions}</span> : <span class="ph">[Directions from landmarks or public transport]</span>}</li>
+        </ul>
+        <div class="find__actions">
+          <a class="btn btn--primary btn--sm" href={mapsUrl} target="_blank" rel="noopener">Get directions <Icon name="arrow-right" /></a>
+          <a class="link-arrow" href="/contact">Need help finding us? Contact us <Icon name="arrow-right" /></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">What to expect</p>
+      <h2>Your first Sunday at GMI</h2>
+      <p class="lead">Practical notes so you know what happens when you arrive.</p>
+      <dl class="expect">
+        {expect.map((e) => (
+          <div>
+            <dt><Icon name={e.icon} size={20} />{e.title}</dt>
+            {visit[e.key] ? <dd>{visit[e.key]}</dd> : <dd class="ph">{e.ph}</dd>}
+          </div>
+        ))}
+      </dl>
+
+      <div class="next">
+        <a class="next__card" href="/new-here">
+          <Icon name="user-plus" size={22} class="next__icon" />
+          <h3 class="h3">Thinking about membership?</h3>
+          <p>See the six-step membership journey.</p>
+          <span class="link-arrow">New here? Start here <Icon name="arrow-right" /></span>
+        </a>
+        <a class="next__card" href="/contact">
+          <Icon name="mail" size={22} class="next__icon" />
+          <h3 class="h3">Questions before you come?</h3>
+          <p>
+            {site.phone || site.email
+              ? [site.phone, site.email].filter(Boolean).join(' · ')
+              : <span class="ph">[Phone] · [Email]</span>}
+          </p>
+          <span class="link-arrow">Contact us <Icon name="arrow-right" /></span>
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .times { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: var(--s-4); max-width: calc(var(--cols, 3) * 380px); }
+  .times li { padding: var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); }
+  .times__name { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: var(--s-2); }
+  .times__day { font-family: var(--font-serif); font-size: var(--fs-h3); color: var(--blue-900); margin-bottom: 4px; }
+  .times__time { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--ink); }
+  .times__time :global(svg) { color: var(--gold-700); }
+
+  .find { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-8); align-items: center; }
+  .find__map { aspect-ratio: 4 / 3; border-radius: var(--r-panel); overflow: hidden; background: var(--blue-100); box-shadow: var(--shadow-sm); }
+  .find__map iframe { width: 100%; height: 100%; border: 0; }
+  .find h2 { margin-bottom: var(--s-5); }
+  .find__list { list-style: none; margin: 0 0 var(--s-5); padding: 0; display: grid; gap: var(--s-3); }
+  .find__list li { display: flex; gap: 12px; align-items: flex-start; color: var(--ink); }
+  .find__list :global(svg) { color: var(--gold-700); margin-top: 3px; }
+  .line { display: block; }
+  .find__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-5); }
+
+  .lead { margin-top: var(--s-3); }
+  .expect { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--s-7); margin: var(--s-6) 0 0; border-top: 1px solid var(--line); }
+  .expect > div { padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  .expect dt { display: flex; align-items: center; gap: 10px; font-family: var(--font-serif); font-size: 1.1875rem; color: var(--blue-900); margin-bottom: 4px; }
+  .expect dt :global(svg) { color: var(--gold-700); }
+  .expect dd { margin: 0 0 0 30px; font-size: var(--fs-small); }
+
+  .next { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); margin-top: var(--section-y-compact); }
+  .next__card { display: block; padding: var(--s-6); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-panel); color: var(--ink-2); text-decoration: none; transition: box-shadow 0.25s var(--ease); }
+  .next__card:hover { box-shadow: var(--shadow-md); color: var(--ink-2); }
+  :global(.next__icon) { color: var(--gold-700); margin-bottom: var(--s-4); }
+  .next__card h3 { margin-bottom: var(--s-2); }
+  .next__card p { margin-bottom: var(--s-4); }
+
+  @media (max-width: 1024px) {
+    .find { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+  }
+  @media (max-width: 760px) {
+    .times, .expect, .next { grid-template-columns: minmax(0, 1fr); }
+    .next__card { padding: var(--s-5); }
+  }
+</style>
