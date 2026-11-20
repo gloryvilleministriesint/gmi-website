@@ -16,7 +16,15 @@ const events = defineCollection({
     summary: z.string().optional(),
     department: z.string().optional(),
     image: z.string().optional(),
+    // Repeating activities (e.g. a department meeting). Weekly services come from src/data/site.json.
+    repeat: z.enum(['weekly']).optional(),
+    repeatUntil: z.coerce.date().optional(),
+    // Programme outline shown on the event page.
+    outline: z.array(z.object({ time: z.string(), session: z.string() })).default([]),
+    // Registration: shown only when true. Set `registrationStatus` to close it or mark it full.
     registration: z.boolean().default(false),
+    registrationStatus: z.enum(['open', 'closed', 'full']).default('open'),
+    maxAttending: z.number().int().min(1).max(20).default(5),
     sample: z.boolean().default(false),
   }),
 });

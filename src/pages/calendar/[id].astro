@@ -1,0 +1,297 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import GloryRays from '../../components/GloryRays.astro';
+import departments from '../../data/departments.json';
+import { render } from 'astro:content';
+import { getEvents, dateLine, timeLine, venueOf, googleCalendarUrl, longDate, type EventEntry } from '../../lib/calendar';
+
+export async function getStaticPaths() {
+  return (await getEvents()).map((e) => ({ params: { id: e.id }, props: { e } }));
+}
+
+const { e } = Astro.props as { e: EventEntry };
+const d = e.data;
+const { Content } = await render(e);
+const hasBody = Boolean(e.body?.trim());
+
+const now = new Date();
+const isPast = d.repeat !== 'weekly' && +(d.end ?? d.start) < +now;
+const time = timeLine(e);
+const venue = venueOf(e);
+const pageUrl = new URL(`/calendar/${e.id}`, Astro.site).href;
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue)}`;
+const dept = d.department ? departments.find((x) => x.name === d.department) : undefined;
+const chipClass = d.category === 'Programme' ? 'chip chip--gold' : 'chip';
+
+const related = (await getEvents())
+  .filter((x) => x.id !== e.id && x.data.category === d.category && (x.data.repeat === 'weekly' || +(x.data.end ?? x.data.start) >= +now))
+  .slice(0, 3);
+
+const status = isPast ? 'past' : d.registrationStatus;
+const attendingOptions = Array.from({ length: d.maxAttending }, (_, i) => i + 1);
+---
+<Base title={d.title} description={d.summary ?? `${d.category} at Gloryville Ministries International, Ibadan: ${dateLine(e)}.`}>
+  <section class="hero on-dark">
+    <GloryRays class="hero__rays" opacity={0.25} color="var(--gold-400)" />
+    <div class="container hero__inner">
+      <nav aria-label="Breadcrumb">
+        <ol class="crumbs">
+          <li><a href="/">Home</a></li>
+          <li><a href="/calendar">Church Calendar</a></li>
+          <li><span aria-current="page">Event details</span></li>
+        </ol>
+      </nav>
+      <p class="hero__chips">
+        <span class={chipClass}>{d.category}</span>
+        {d.repeat === 'weekly' && <span class="chip">Every week</span>}
+        {d.sample && <span class="chip">Sample event</span>}
+      </p>
+      <h1>{d.title}</h1>
+      {d.summary ? <p class="hero__summary">{d.summary}</p> : d.sample && <p class="hero__summary ph">[One-sentence summary of the {d.category.toLowerCase()}]</p>}
+      {d.registration && status === 'open' && <a class="btn btn--gold btn--sm hero__reg" href="#register">Register for this event</a>}
+      <dl class="facts">
+        <div>
+          <dt><Icon name="calendar" size={18} />Date</dt>
+          <dd>{d.sample ? <span class="ph">[Date or date range]</span> : dateLine(e)}</dd>
+        </div>
+        <div>
+          <dt><Icon name="clock" size={18} />Time</dt>
+          <dd>{time ?? <span class="ph">[Start and end time]</span>}</dd>
+        </div>
+        <div>
+          <dt><Icon name="map-pin" size={18} />Venue</dt>
+          <dd>
+            {d.sample && !d.venue ? <span class="ph">[Venue or online link]</span> : d.venue ?? 'GMI, Ojurin, Ashi-Bodija, Ibadan'}
+            {!d.sample && <a class="facts__map" href={mapsUrl} target="_blank" rel="noopener">Get directions<span class="sr-only"> (opens Google Maps)</span></a>}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  {isPast && (
+    <div class="past-note" role="status">
+      <div class="container">
+        <Icon name="info" size={18} />
+        <p>This event took place on {longDate(d.start)}. Messages and photos from it, if any, are in the <a href="/library">Digital Library</a>.</p>
+      </div>
+    </div>
+  )}
+
+  <section class="section">
+    <div class="container layout">
+      <div class="main">
+        <div class="img-slot banner">
+          {d.image ? <img src={d.image} alt="" /> : <span class="img-label"><Icon name="image" />Event banner or photograph</span>}
+        </div>
+
+        <p class="eyebrow">About this event</p>
+        <h2>What to expect</h2>
+        <div class="prose">
+          {hasBody ? <Content /> : <p class="ph">[Full description of the event supplied by the organising department]</p>}
+        </div>
+
+        {d.outline.length > 0 && (
+          <>
+            <p class="eyebrow outline__eyebrow">Programme outline</p>
+            <ol class="outline">
+              {d.outline.map((o) => (
+                <li>
+                  <span class:list={['outline__time', { ph: d.sample }]}>{o.time}</span>
+                  <span class:list={['outline__session', { ph: d.sample }]}>{o.session}</span>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
+
+        {dept && (
+          <p class="organiser">
+            <Icon name="users" size={18} />
+            <span>Organised by the <a href={`/departments/${dept.slug}`}>{dept.name} Department</a></span>
+          </p>
+        )}
+
+        <a class="link-arrow back" href="/calendar"><Icon name="arrow-left" />Back to the calendar</a>
+      </div>
+
+      <aside class="side">
+        {d.registration && (
+          <div class="form-card reg" id="register" data-form-wrap>
+            <p class="eyebrow">Registration</p>
+            <h2 class="h3 reg__title">Register for this event</h2>
+
+            {status === 'open' && (
+              <>
+                <form class="form-body" action="/api/forms/event" method="post" data-form>
+                  <input type="hidden" name="event_id" value={e.id} />
+                  <input type="hidden" name="event_title" value={d.title} />
+                  <div class="field">
+                    <label for="r-name">Full name</label>
+                    <input class="input" id="r-name" name="name" autocomplete="name" required />
+                    <p class="field-error" aria-live="polite"></p>
+                  </div>
+                  <div class="field">
+                    <label for="r-email">Email address</label>
+                    <input class="input" id="r-email" name="email" type="email" autocomplete="email" required />
+                    <p class="field-error" aria-live="polite"></p>
+                  </div>
+                  <div class="field">
+                    <label for="r-phone">Phone number <span class="opt">(optional)</span></label>
+                    <input class="input" id="r-phone" name="phone" type="tel" autocomplete="tel" />
+                  </div>
+                  <div class="field">
+                    <label for="r-count">Number attending</label>
+                    <select id="r-count" name="attending" required data-error="Please choose how many people are coming.">
+                      <option value="">Choose</option>
+                      {attendingOptions.map((n) => <option value={n}>{n}</option>)}
+                    </select>
+                    <p class="field-error" aria-live="polite"></p>
+                  </div>
+                  <input class="hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+                  <button class="btn btn--primary reg__submit" type="submit">Register</button>
+                  <p class="form-alert" role="alert"></p>
+                  <p class="small reg__note">We only use these details for this event.</p>
+                </form>
+                <div class="form-success" tabindex="-1">
+                  <span class="form-success__icon"><Icon name="check" size={24} /></span>
+                  <h3 class="h3">You are registered.</h3>
+                  <p>A confirmation is on its way to your email. We look forward to seeing you.</p>
+                  <a class="link-arrow" href={`/calendar/${e.id}.ics`} download>Add to your calendar <Icon name="arrow-right" /></a>
+                </div>
+              </>
+            )}
+            {status === 'full' && <p class="reg__state">This event is full and registration has closed. You can <a href="/contact">contact the church</a> to ask about a waiting list, or see <a href="/calendar">other events</a>.</p>}
+            {status === 'closed' && <p class="reg__state">Registration for this event has closed. Please <a href="/contact">contact the church</a> with any questions.</p>}
+            {status === 'past' && <p class="reg__state">This event has already taken place, so registration is closed.</p>}
+          </div>
+        )}
+
+        {!isPast && (
+          <div class="actions">
+            <p class="actions__title">Save or share</p>
+            <a class="action" href={`/calendar/${e.id}.ics`} download><Icon name="calendar-plus" size={18} />Add to calendar (Apple, Outlook)</a>
+            <a class="action" href={googleCalendarUrl(e, venue, pageUrl)} target="_blank" rel="noopener"><Icon name="calendar" size={18} />Add to Google Calendar</a>
+            <a class="action" href={mapsUrl} target="_blank" rel="noopener"><Icon name="map-pin" size={18} />Get directions</a>
+            <button type="button" class="action" data-share={pageUrl} data-title={d.title}><Icon name="share-2" size={18} /><span data-share-label>Share this event</span></button>
+          </div>
+        )}
+      </aside>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="section bg-stone">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">More {d.category.toLowerCase()}s</p>
+            <h2>You might also like</h2>
+          </div>
+          <a class="link-arrow" href="/calendar">Open the church calendar <Icon name="arrow-right" /></a>
+        </div>
+        <ul class="related">
+          {related.map((r) => (
+            <li>
+              <a href={`/calendar/${r.id}`}>
+                <span class="related__date">{r.data.sample ? <span class="ph">[Date]</span> : dateLine(r)}</span>
+                <span class="related__title">{r.data.title}</span>
+                <span class="link-arrow">View event <Icon name="arrow-right" /></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .hero { position: relative; overflow: hidden; background: var(--blue-950); padding: var(--s-7) 0 var(--s-7); }
+  :global(.hero__rays) { right: -120px; bottom: -60px; width: 600px; height: 380px; }
+  .hero__inner { position: relative; }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0 0 var(--s-4); padding: 0; font-size: 0.8125rem; color: rgba(255, 255, 255, 0.7); }
+  .crumbs li + li::before { content: '/'; margin-right: 6px; opacity: 0.5; }
+  .crumbs a { color: rgba(255, 255, 255, 0.85); text-decoration: none; }
+  .crumbs a:hover { color: var(--white); text-decoration: underline; }
+  .hero__chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--s-4); }
+  .hero__chips :global(.chip--gold) { background: var(--gold-100); color: #5e470f; border-color: transparent; }
+  .hero h1 { max-width: 880px; }
+  .hero__summary { max-width: 640px; margin-top: var(--s-4); font-size: var(--fs-body-lg); }
+  .hero__reg { display: none; margin-top: var(--s-5); }
+  .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-5); margin: var(--s-6) 0 0; padding-top: var(--s-5); border-top: 1px solid rgba(255, 255, 255, 0.16); }
+  .facts dt { display: flex; align-items: center; gap: 10px; font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-400); margin-bottom: 6px; }
+  .facts dd { margin: 0 0 0 28px; font-size: 1.125rem; color: var(--white); }
+  .facts__map { display: block; margin-top: 4px; font-size: var(--fs-small); color: var(--gold-400); }
+
+  .past-note { background: var(--gold-100); color: #5e470f; }
+  .past-note .container { display: flex; align-items: center; gap: 12px; padding-top: 14px; padding-bottom: 14px; }
+  .past-note p { margin: 0; font-size: var(--fs-small); font-weight: 600; }
+  .past-note a { color: inherit; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--s-7); align-items: start; }
+  .banner { aspect-ratio: 16 / 9; margin-bottom: var(--s-7); background-color: var(--blue-100); }
+  .main h2 { margin-bottom: var(--s-4); }
+  .prose { max-width: var(--reading); }
+  .prose :global(p) { margin-bottom: var(--s-4); }
+  .outline__eyebrow { margin-top: var(--s-6); }
+  .outline { list-style: none; margin: var(--s-4) 0 0; padding: 0; border-top: 1px solid var(--line); }
+  .outline li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: var(--s-5); padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  .outline__time { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); padding-top: 4px; }
+  .outline__session { font-size: 1.125rem; color: var(--ink); }
+  .organiser { display: flex; align-items: center; gap: 10px; margin-top: var(--s-6); color: var(--ink-2); }
+  .back { margin-top: var(--s-6); }
+
+  .side { display: flex; flex-direction: column; gap: var(--s-4); position: sticky; top: 100px; }
+  .reg__title { margin: 4px 0 var(--s-3); }
+  .reg .form-body { display: flex; flex-direction: column; gap: var(--s-4); margin-top: var(--s-4); }
+  .reg__submit { width: 100%; }
+  .reg__note { color: var(--ink-3); margin: 0; }
+  .reg__state { margin-top: var(--s-3); padding: var(--s-4); border-radius: var(--r-input); background: var(--stone); color: var(--ink-2); font-size: var(--fs-small); }
+
+  .actions { padding: var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-panel); }
+  .actions__title { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: var(--s-2); }
+  .action { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 0; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--blue-700); font: inherit; font-weight: 600; font-size: 0.9375rem; text-align: left; text-decoration: none; cursor: pointer; }
+  .action:last-child { border-bottom: 0; }
+  .action:hover { color: var(--blue-900); text-decoration: underline; }
+
+  .related { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); }
+  .related a { display: flex; flex-direction: column; gap: 6px; height: 100%; padding: var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); text-decoration: none; }
+  .related a:hover { box-shadow: var(--shadow-md); }
+  .related__date { font-size: var(--fs-small); color: var(--gold-700); font-weight: 600; }
+  .related__title { font-family: var(--font-serif); font-size: 1.375rem; color: var(--blue-900); }
+  .related .link-arrow { margin-top: auto; padding-top: var(--s-3); }
+
+  @media (max-width: 1024px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .side { position: static; }
+    .hero__reg { display: inline-flex; }
+    .related { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 760px) {
+    .facts { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
+    .outline li { grid-template-columns: 84px minmax(0, 1fr); gap: var(--s-4); }
+    .banner { margin-bottom: var(--s-6); }
+  }
+</style>
+
+<script>
+  // Share: native share sheet where available, otherwise copy the link.
+  document.querySelectorAll<HTMLButtonElement>('[data-share]').forEach((btn) => {
+    const label = btn.querySelector<HTMLElement>('[data-share-label]');
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.share!;
+      if (navigator.share) {
+        try { await navigator.share({ title: btn.dataset.title, url }); } catch { /* cancelled */ }
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(url);
+        if (label) { label.textContent = 'Link copied'; setTimeout(() => (label.textContent = 'Share this event'), 2500); }
+      } catch {
+        prompt('Copy this link:', url);
+      }
+    });
+  });
+</script>

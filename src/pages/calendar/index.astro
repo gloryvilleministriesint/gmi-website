@@ -1,0 +1,224 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import site from '../../data/site.json';
+import departments from '../../data/departments.json';
+import { categories, getCalendarItems, isoDay } from '../../lib/calendar';
+
+const items = await getCalendarItems();
+const today = isoDay(new Date());
+const upcoming = items.filter((i) => i.weekday === undefined && (i.to ?? '') >= today).sort((a, b) => (a.from! < b.from! ? -1 : 1));
+---
+<Base title="Church Calendar" description="Weekly activities, special meetings, programmes, church events and department meetings at Gloryville Ministries International, Ibadan.">
+  <PageHero
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Church Calendar' }]}
+    eyebrow="Church calendar"
+    title="What is happening at GMI."
+    intro="Weekly activities, special meetings, programmes, church events and department meetings in one calendar. Select a day or an event to see details."
+  />
+
+  <section class="section section--compact rhythm-section">
+    <div class="container">
+      <p class="eyebrow">Every week</p>
+      <h2 class="h3 rhythm__title">Weekly rhythm</h2>
+      <ul class="rhythm">
+        {site.services.map((s) => (
+          <li>
+            <a href="/services" class="rhythm__card">
+              <span class="rhythm__icon"><Icon name="repeat" size={18} /></span>
+              <span>
+                <strong>{s.name}</strong>
+                <span class="rhythm__when">Every {s.day} · {s.time}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+        <li>
+          <a href="/departments" class="rhythm__card">
+            <span class="rhythm__icon"><Icon name="users" size={18} /></span>
+            <span>
+              <strong>Department meetings</strong>
+              <span class="rhythm__when"><span class="ph">[Frequency]</span> · see each department</span>
+            </span>
+          </a>
+        </li>
+      </ul>
+      <p class="small rhythm__note">Recurring activities sit here and appear as light text in the calendar, so one-off events stand out.</p>
+    </div>
+  </section>
+
+  <section class="section cal-section" data-calendar data-today={today}>
+    <div class="container">
+      <div class="cal-bar">
+        <div class="cal-nav">
+          <button type="button" class="round-btn" data-prev aria-label="Previous month"><Icon name="chevron-left" size={18} /></button>
+          <h2 class="cal-month" data-month-label aria-live="polite">Calendar</h2>
+          <button type="button" class="round-btn" data-next aria-label="Next month"><Icon name="chevron-right" size={18} /></button>
+          <button type="button" class="btn btn--outline btn--sm today-btn" data-today-btn>Today</button>
+        </div>
+        <div class="view-toggle" role="group" aria-label="Calendar view">
+          <button type="button" data-view="month" aria-pressed="true"><Icon name="layout-grid" size={16} />Month</button>
+          <button type="button" data-view="list" aria-pressed="false"><Icon name="list" size={16} />List</button>
+        </div>
+      </div>
+
+      <div class="filters" role="group" aria-label="Show categories">
+        {categories.map((c) => (
+          <button type="button" class="filter" data-filter={c.key} aria-pressed="true">
+            <span class={`dot dot--${c.key}`} aria-hidden="true"></span>{c.name}
+          </button>
+        ))}
+        <span class="dept-filter" data-dept-wrap>
+          <label for="dept-select" class="sr-only">Department meetings for</label>
+          <select id="dept-select" data-dept>
+            <option value="">All departments</option>
+            {departments.map((d) => <option value={d.name}>{d.name}</option>)}
+          </select>
+        </span>
+      </div>
+
+      <div class="cal-body" data-month-view>
+        <div class="grid-wrap">
+          <table class="month">
+            <caption class="sr-only" data-caption>Month view</caption>
+            <thead>
+              <tr>{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => <th scope="col"><abbr title={d}>{d}</abbr></th>)}</tr>
+            </thead>
+            <tbody data-grid></tbody>
+          </table>
+          <p class="small legend">Filled labels are one-off events. Light labels with a dot are recurring.</p>
+        </div>
+        <aside class="day-panel" aria-live="polite" data-day-panel></aside>
+      </div>
+
+      <div class="list-view" data-list-view hidden></div>
+
+      <noscript>
+        <h3 class="h3">Coming up</h3>
+        <ul class="noscript-list">
+          {upcoming.map((e) => <li><a href={e.href}>{e.title}</a> · {e.from}{e.time && ` · ${e.time}`}</li>)}
+        </ul>
+      </noscript>
+    </div>
+    <script type="application/json" data-cal-items set:html={JSON.stringify(items)} />
+  </section>
+</Base>
+
+<style>
+  .rhythm-section { padding-bottom: 0; }
+  .rhythm__title { margin-bottom: var(--s-5); }
+  .rhythm { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); }
+  .rhythm__card { display: flex; align-items: center; gap: var(--s-4); height: 100%; padding: var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); text-decoration: none; color: var(--ink); transition: box-shadow 0.2s var(--ease); }
+  .rhythm__card:hover { box-shadow: var(--shadow-md); color: var(--ink); }
+  .rhythm__card strong { display: block; font-size: 1.0625rem; font-weight: 700; margin-bottom: 2px; }
+  .rhythm__icon { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: var(--blue-100); color: var(--blue-700); }
+  .rhythm__when { font-size: var(--fs-small); color: var(--ink-2); }
+  .rhythm__note { margin-top: var(--s-4); color: var(--ink-3); }
+
+  .cal-bar { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); flex-wrap: wrap; margin-bottom: var(--s-5); }
+  .cal-nav { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+  .cal-month { font-size: var(--fs-h3); min-width: 9.5em; text-align: center; margin: 0; }
+  .round-btn { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--white); color: var(--ink); cursor: pointer; }
+  .round-btn:hover { border-color: var(--blue-700); color: var(--blue-700); }
+  .today-btn { min-height: 40px; }
+
+  .view-toggle { display: inline-flex; padding: 4px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--white); }
+  .view-toggle button { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 0; border-radius: var(--r-pill); background: none; color: var(--ink-2); font-weight: 600; font-size: 0.875rem; cursor: pointer; }
+  .view-toggle [aria-pressed='true'] { background: var(--blue-900); color: var(--white); }
+
+  .filters { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-5); }
+  .filter { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 18px; border-radius: var(--r-pill); border: 1.5px solid var(--blue-900); background: var(--white); color: var(--blue-900); font-weight: 600; font-size: 0.9375rem; cursor: pointer; }
+  .filter[aria-pressed='true'] { background: var(--blue-900); color: var(--white); }
+  .filter[aria-pressed='false'] { border-color: var(--line); color: var(--ink-3); }
+
+  .dept-filter select { min-height: 44px; padding: 0 40px 0 16px; border: 1.5px solid var(--line-strong); border-radius: var(--r-pill); font: inherit; font-size: 0.9375rem; font-weight: 600; color: var(--ink); appearance: none; background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23161c2c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center; cursor: pointer; }
+  .dept-filter[hidden] { display: none; }
+
+  :global(.dot) { flex: none; display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+  :global(.dot--weekly) { background: var(--blue-700); }
+  :global(.dot--special) { background: var(--blue-950); box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.5); }
+  :global(.dot--programme) { background: var(--gold-500); }
+  :global(.dot--church) { background: #6f86d6; }
+  :global(.dot--department) { background: var(--ink-3); }
+
+  .cal-body[hidden], .list-view[hidden] { display: none; }
+  .cal-body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--s-6); align-items: start; }
+  .month { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; }
+  .month th { padding: 12px; background: var(--stone); text-align: left; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+  .month abbr { text-decoration: none; }
+  .month :global(td) { height: 112px; padding: 0; vertical-align: top; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .month :global(td:last-child) { border-right: 0; }
+  .month :global(tr:last-child td) { border-bottom: 0; }
+  .month :global(td.is-out) { background: var(--paper); }
+  .month :global(td.is-out .day-num) { color: var(--ink-3); }
+  .month :global(td.is-selected) { box-shadow: inset 0 0 0 2px var(--blue-700); }
+  .month :global(.day-btn) { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; width: 100%; height: 100%; min-height: 112px; padding: 10px; border: 0; background: none; text-align: left; cursor: pointer; font: inherit; }
+  .month :global(.day-btn:hover) { background: rgba(228, 234, 246, 0.45); }
+  .month :global(.day-btn:focus-visible) { outline: 2px solid var(--gold-500); outline-offset: -2px; }
+  .month :global(.day-num) { display: inline-grid; place-items: center; min-width: 28px; height: 28px; margin: -4px 0 6px -4px; border-radius: 50%; font-size: 0.875rem; font-weight: 700; color: var(--ink); }
+  .month :global(.is-today .day-num) { background: var(--gold-500); color: var(--blue-950); }
+  .month :global(.labels) { display: flex; flex-direction: column; gap: 4px; width: 100%; min-width: 0; }
+  .month :global(.day-btn) { overflow: hidden; }
+  .month :global(.label) { display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; line-height: 1.5; color: var(--ink-2); }
+  .month :global(.label span:last-child) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .month :global(.label--recurring) { padding-left: 0; font-weight: 500; }
+  .month :global(.label--special) { background: var(--blue-900); color: var(--white); }
+  .month :global(.label--programme) { background: var(--gold-100); color: #5e470f; }
+  .month :global(.label--church) { background: var(--blue-100); color: var(--blue-900); }
+  .month :global(.label--department) { background: var(--stone); color: var(--ink); }
+  .month :global(.more) { font-size: 0.75rem; color: var(--ink-3); padding-left: 2px; }
+  .legend { margin-top: var(--s-3); color: var(--ink-3); }
+
+  .day-panel { position: sticky; top: 100px; padding: var(--s-6) var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-panel); }
+  .day-panel :global(.dp-weekday) { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 4px; }
+  .day-panel :global(.dp-date) { font-size: var(--fs-h3); margin-bottom: var(--s-4); }
+  .day-panel :global(ul) { list-style: none; margin: 0; padding: 0; }
+  .day-panel :global(li) { display: flex; gap: 12px; padding: var(--s-3) 0; border-bottom: 1px solid var(--line); }
+  .day-panel :global(li .dot) { margin-top: 8px; width: 10px; height: 10px; }
+  .day-panel :global(.dp-title) { font-weight: 700; color: var(--ink); text-decoration: none; font-size: 1.0625rem; }
+  .day-panel :global(.dp-title:hover) { color: var(--blue-700); text-decoration: underline; }
+  .day-panel :global(.dp-meta) { font-size: var(--fs-small); color: var(--ink-3); margin: 2px 0 0; }
+  .day-panel :global(.dp-empty) { color: var(--ink-3); font-size: var(--fs-small); }
+
+  .list-view :global(.lv-group) { margin-bottom: var(--s-7); }
+  .list-view { margin-top: var(--s-6); }
+  .list-view :global(.lv-heading) { font-family: var(--font-sans); font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-700); margin-bottom: var(--s-3); }
+  .list-view :global(ul) { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .list-view :global(li) { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: var(--s-5); align-items: center; padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+  .list-view :global(.lv-date) { display: grid; place-items: center; width: 64px; height: 64px; border-radius: var(--r-card); background: var(--stone); color: var(--blue-900); text-transform: uppercase; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.1em; }
+  .list-view :global(.lv-date strong) { display: block; font-family: var(--font-serif); font-size: 1.625rem; font-weight: 500; letter-spacing: 0; line-height: 1; }
+  .list-view :global(.lv-date--repeat) { background: var(--blue-100); color: var(--blue-700); }
+  .list-view :global(.lv-title) { font-family: var(--font-serif); font-size: 1.375rem; color: var(--blue-900); text-decoration: none; }
+  .list-view :global(.lv-title:hover) { text-decoration: underline; }
+  .list-view :global(.lv-meta) { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 4px 0 0; font-size: var(--fs-small); color: var(--ink-2); }
+  .list-view :global(.lv-cat) { display: inline-flex; align-items: center; gap: 6px; }
+  .list-view :global(.lv-empty) { padding: var(--s-5); background: var(--stone); border-radius: var(--r-card); color: var(--ink-2); }
+
+  @media (max-width: 1024px) {
+    .rhythm { grid-template-columns: minmax(0, 1fr); }
+    .cal-body { grid-template-columns: minmax(0, 1fr); }
+    .day-panel { position: static; }
+  }
+  @media (max-width: 760px) {
+    .cal-month { min-width: 0; flex: 1; font-size: 1.5rem; }
+    .cal-nav { width: 100%; }
+    .today-btn { order: 4; }
+    .filter { min-height: 38px; padding: 0 14px; font-size: 0.8125rem; }
+    .month th { padding: 8px 0; text-align: center; font-size: 0.625rem; letter-spacing: 0.04em; }
+    .month :global(td), .month :global(.day-btn) { height: 56px; min-height: 56px; }
+    .month :global(.day-btn) { padding: 6px 2px; text-align: center; }
+    .month :global(.day-num) { margin: 0 0 2px; min-width: 26px; height: 26px; font-size: 0.8125rem; }
+    .month :global(.labels) { flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 3px; }
+    .month :global(.label) { padding: 0; background: none !important; }
+    .month :global(.label span:last-child), .month :global(.more) { display: none; }
+    .list-view :global(li) { grid-template-columns: 56px minmax(0, 1fr); gap: var(--s-4); }
+    .list-view :global(.lv-date) { width: 56px; height: 56px; }
+    .list-view :global(.lv-go) { display: none; }
+  }
+</style>
+
+<script>
+  import { initCalendar } from '../../scripts/calendar';
+  document.querySelectorAll<HTMLElement>('[data-calendar]').forEach(initCalendar);
+</script>
