@@ -1,0 +1,136 @@
+[
+  {
+    "slug": "music-and-arts",
+    "name": "Music and Arts",
+    "icon": "music",
+    "summary": "Worship Team, Dance Group and Rap Group.",
+    "intro": "",
+    "description": [],
+    "meets": "",
+    "contact": "",
+    "responsibilities": [],
+    "activities": [],
+    "image": "",
+    "teams": [
+      {
+        "name": "Worship Team",
+        "description": "",
+        "rehearsals": ""
+      },
+      {
+        "name": "Dance Group",
+        "description": "",
+        "rehearsals": ""
+      },
+      {
+        "name": "Rap Group",
+        "description": "",
+        "rehearsals": ""
+      }
+    ]
+  },
+  {
+    "slug": "media-and-publicity",
+    "name": "Media and Publicity",
+    "icon": "megaphone",
+    "summary": "",
+    "intro": "",
+    "description": [],
+    "meets": "",
+    "contact": "",
+    "responsibilities": [],
+    "activities": [],
+    "image": ""
+  },
+  {
+    "slug": "technical",
+    "name": "Technical",
+    "icon": "sliders-horizontal",
+    "summary": "",
+    "intro": "",
+    "description": [],
+    "meets": "",
+    "contact": "",
+    "responsibilities": [],
+    "activities": [],
+    "image": ""
+  },
+  {
+    "slug": "ushering-and-protocol",
+    "name": "Ushering and Protocol",
+    "icon": "door-open",
+    "summary": "",
+    "intro": "",
+    "description": [],
+    "meets": "",
+    "contact": "",
+    "responsibilities": [],
+    "activities": [],
+    "image": ""
+  },
+  {
+    "slug": "setup",
+    "name": "Setup",
+    "icon": "layout-panel-top",
+    "summary": "",
+    "intro": "",
+    "description": [],
+    "meets": "",
+    "contact": "",
+    "responsibilities": [],
+    "activities": [],
+    "image": ""
+  },
+  {
+    "slug": "welfare-and-registration",
+    "name": "Welfare and Registration",
+    "icon": "clipboard-list",
+    "summary": "",
+    "intro": "",
+    "description": [],
+    "meets": "",
+    "contact": "",
+    "responsibilities": [],
+    "activities": [],
+    "image": ""
+  },
+  {
+    "slug": "decoration-and-aesthetics",
+    "name": "Decoration and Aesthetics",
+    "icon": "flower-2",
+    "summary": "",
+    "intro": "",
+    "description": [],
+    "meets": "",
+    "contact": "",
+    "responsibilities": [],
+    "activities": [],
+    "image": ""
+  },
+  {
+    "slug": "archives",
+    "name": "Archives",
+    "icon": "archive",
+    "summary": "",
+    "intro": "",
+    "description": [],
+    "meets": "",
+    "contact": "",
+    "responsibilities": [],
+    "activities": [],
+    "image": ""
+  },
+  {
+    "slug": "children",
+    "name": "Children",
+    "icon": "baby",
+    "summary": "",
+    "intro": "",
+    "description": [],
+    "meets": "",
+    "contact": "",
+    "responsibilities": [],
+    "activities": [],
+    "image": ""
+  }
+]

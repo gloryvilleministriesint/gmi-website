@@ -1,0 +1,335 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import GloryRays from '../../components/GloryRays.astro';
+import departments from '../../data/departments.json';
+
+export function getStaticPaths() {
+  return departments.map((d, i) => ({ params: { slug: d.slug }, props: { index: i } }));
+}
+
+const { index } = Astro.props as { index: number };
+const d = departments[index] as (typeof departments)[number] & { teams?: { name: string; description: string; rehearsals: string }[] };
+const total = departments.length;
+const prev = departments[(index - 1 + total) % total];
+const next = departments[(index + 1) % total];
+const num = (n: number) => String(n).padStart(2, '0');
+
+const responsibilities = d.responsibilities.length
+  ? (d.responsibilities as { title: string; text: string }[])
+  : [1, 2, 3].map((n) => ({ title: `[Responsibility ${n}]`, text: '[Short explanation]' }));
+const respPh = !d.responsibilities.length;
+const activities = d.activities.length ? (d.activities as string[]) : ['[Activity 1]', '[Activity 2]', '[Activity 3]'];
+const actPh = !d.activities.length;
+---
+<Base title={`${d.name} Department`} description={`The ${d.name} Department at Gloryville Ministries International: what it does, how it serves and how to express interest in joining.`}>
+  <section class="hero on-dark">
+    <GloryRays class="hero__rays" opacity={0.28} color="var(--gold-400)" />
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <nav aria-label="Breadcrumb">
+          <ol class="crumbs">
+            <li><a href="/">Home</a></li>
+            <li><a href="/departments">Departments</a></li>
+            <li><span aria-current="page">{d.name}</span></li>
+          </ol>
+        </nav>
+        <p class="eyebrow eyebrow--icon"><Icon name={d.icon} size={16} />Department {num(index + 1)} of {num(total)}</p>
+        <h1>{d.name} Department</h1>
+        {d.intro ? <p class="hero__intro">{d.intro}</p> : <p class="hero__intro ph">[Introduction to the department, one or two sentences]</p>}
+        <div class="hero__btns">
+          <a href="#interest" class="btn btn--gold btn--sm">Express interest</a>
+          <a href="#media" class="btn btn--outline btn--sm">View media</a>
+        </div>
+      </div>
+      <div class="img-slot img-slot--dark arch hero__img">
+        {d.image ? <img src={d.image} alt={`${d.name} Department at work`} /> : <span class="img-label"><Icon name="image" />Photograph: {d.name} Department at work</span>}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container about">
+      <div>
+        <p class="eyebrow">About the department</p>
+        <h2>What we do</h2>
+        {d.description.length
+          ? (d.description as string[]).map((p) => <p>{p}</p>)
+          : <>
+              <p class="about__lead ph">[Department description, first paragraph]</p>
+              <p class="ph small">[Further description supplied by the department]</p>
+            </>}
+      </div>
+      <dl class="about__facts">
+        <div>
+          <dt>Meets</dt>
+          <dd>{d.meets ? d.meets : <span class="ph">[Meeting day and time]</span>}</dd>
+          <dd><a href="/calendar">See it in the calendar</a></dd>
+        </div>
+        <div>
+          <dt>Department contact</dt>
+          <dd>{d.contact ? d.contact : <span class="ph">[Contact name or email, if the church chooses to publish it]</span>}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  {d.teams && (
+    <section class="section bg-stone" id="teams">
+      <div class="container">
+        <p class="eyebrow">Teams</p>
+        <h2>Three teams, one <br />sound of worship</h2>
+        <p class="teams__intro">The {d.name} Department is made up of the {d.teams.map((t) => t.name).join(', ').replace(/, ([^,]*)$/, ' and $1')}.</p>
+        <div class="teams" data-tabs>
+          <div class="teams__tabs" role="tablist" aria-label={`${d.name} teams`}>
+            {d.teams.map((t, i) => (
+              <button type="button" role="tab" id={`team-tab-${i}`} aria-controls={`team-panel-${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>{t.name}</button>
+            ))}
+          </div>
+          {d.teams.map((t, i) => (
+            <div class="teams__panel" role="tabpanel" id={`team-panel-${i}`} aria-labelledby={`team-tab-${i}`} hidden={i !== 0}>
+              <div class="img-slot arch teams__img"><span class="img-label"><Icon name="image" />Photograph: {t.name}</span></div>
+              <div>
+                <p class="teams__label">{t.name}</p>
+                <h3 class="h2">{t.name}</h3>
+                {t.description ? <p>{t.description}</p> : <p class="ph">[Description of this team: its role in services and how it serves]</p>}
+                {t.rehearsals ? <p class="small">{t.rehearsals}</p> : <p class="ph small">[When and how the team rehearses, if the church wants to share it]</p>}
+                <a class="link-arrow" href={`?team=${encodeURIComponent(t.name)}#interest`} data-team={t.name}>Express interest in the {t.name} <Icon name="arrow-right" /></a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Responsibilities</p>
+      <h2>How the department serves</h2>
+      <ol class="resp">
+        {responsibilities.map((r, i) => (
+          <li>
+            <span class="resp__num">{i + 1}</span>
+            <h3 class:list={['resp__title', { ph: respPh }]}>{r.title}</h3>
+            <p class:list={['small', { ph: respPh }]}>{r.text}</p>
+          </li>
+        ))}
+      </ol>
+
+      <p class="eyebrow activities__eyebrow">Activities</p>
+      <h3 class="h3">Regular activities</h3>
+      <ul class="activities">
+        {activities.map((a) => <li><Icon name="circle-check" size={18} /><span class:list={{ ph: actPh }}>{a}</span></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section bg-stone" id="media">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Media</p>
+          <h2>Photos and videos</h2>
+        </div>
+        <a class="link-arrow" href="/library/gallery">Open the gallery <Icon name="arrow-right" /></a>
+      </div>
+      <div class="media">
+        <div class="img-slot img-slot--dark media__main"><span class="img-label"><Icon name="video" />Video: department highlight</span></div>
+        {[0, 1, 2, 3].map((i) => (
+          <div class:list={['img-slot', { 'img-slot--warm': i === 0 || i === 3 }]}><span class="img-label"><Icon name="image" />Photo</span></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="interest">
+    <div class="container interest">
+      <div>
+        <p class="eyebrow">Take part</p>
+        <h2>Interested in serving <br />in {d.name}?</h2>
+        <p>Leave your details and the department will be in touch. Department participation follows the membership class, so new visitors are pointed to the membership journey first.</p>
+        <a class="link-arrow" href="/new-here">How membership works <Icon name="arrow-right" /></a>
+      </div>
+
+      <div class="form-card" data-form-wrap>
+        <form class="form-body" action="/api/forms/department" method="post" data-form>
+          <input type="hidden" name="department" value={d.name} />
+          <input type="hidden" name="team" value="" data-team-input />
+          <p class="team-note" data-team-note hidden></p>
+          <div class="form-grid">
+            <div class="field">
+              <label for="d-name">Full name</label>
+              <input class="input" id="d-name" name="name" autocomplete="name" required />
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field">
+              <label for="d-email">Email address</label>
+              <input class="input" id="d-email" name="email" type="email" autocomplete="email" required />
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <div class="field">
+              <label for="d-phone">Phone number <span class="opt">(optional)</span></label>
+              <input class="input" id="d-phone" name="phone" type="tel" autocomplete="tel" />
+            </div>
+            <div class="field">
+              <label for="d-member">Are you a GMI member?</label>
+              <select id="d-member" name="member" required data-member>
+                <option value="">Choose one</option>
+                <option>Yes</option>
+                <option>Not yet</option>
+              </select>
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+            <p class="member-hint full" data-member-hint hidden>
+              Serving in a department follows membership. You can still send your details, and we suggest starting with the <a href="/new-here">membership journey</a>.
+            </p>
+            <div class="field full">
+              <label for="d-message">Anything you would like us to know? <span class="opt">(optional)</span></label>
+              <textarea id="d-message" name="message"></textarea>
+            </div>
+            <div class="field full">
+              <label class="check"><input type="checkbox" name="consent_contact" value="yes" required data-error="Please tick this box so the department can contact you." /> The {d.name} Department may contact me about serving.</label>
+              <p class="field-error" aria-live="polite"></p>
+            </div>
+          </div>
+          <input class="hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div class="form-actions">
+            <button class="btn btn--primary btn--sm" type="submit">Send my interest</button>
+          </div>
+          <p class="form-alert" role="alert"></p>
+        </form>
+        <div class="form-success" tabindex="-1">
+          <span class="form-success__icon"><Icon name="check" size={24} /></span>
+          <h3 class="h3">Thank you, your interest has been sent.</h3>
+          <p>The {d.name} Department will be in touch. A confirmation is on its way to your email.</p>
+          <a class="link-arrow" href="/departments">See all departments <Icon name="arrow-right" /></a>
+        </div>
+      </div>
+    </div>
+
+    <nav class="container pager" aria-label="Other departments">
+      <a href={`/departments/${prev.slug}`} class="pager__link">
+        <span class="pager__label">Previous department</span>
+        <span class="pager__name">{prev.name}</span>
+      </a>
+      <a href={`/departments/${next.slug}`} class="pager__link pager__link--next">
+        <span class="pager__label">Next department</span>
+        <span class="pager__name">{next.name}</span>
+      </a>
+    </nav>
+  </section>
+</Base>
+
+<style>
+  .hero { position: relative; overflow: hidden; background: var(--blue-950); padding: var(--s-7) 0 0; }
+  :global(.hero__rays) { left: -220px; bottom: -80px; width: 640px; height: 420px; }
+  .hero__grid { position: relative; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--s-7); align-items: end; }
+  .hero__copy { padding-bottom: var(--s-8); }
+  .crumbs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0 0 var(--s-5); padding: 0; font-size: 0.8125rem; color: rgba(255, 255, 255, 0.7); }
+  .crumbs li + li::before { content: '/'; margin-right: 6px; opacity: 0.5; }
+  .crumbs a { color: rgba(255, 255, 255, 0.8); text-decoration: none; }
+  .crumbs a:hover { color: var(--white); text-decoration: underline; }
+  .eyebrow--icon::before { display: none; }
+  .hero__intro { max-width: 520px; margin-top: var(--s-4); font-size: var(--fs-body-lg); }
+  .hero__btns { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-5); }
+  .hero__img { aspect-ratio: 4 / 3; width: min(100%, 420px); justify-self: end; border-radius: 999px 999px 0 0; }
+
+  .about { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--s-8); }
+  .about h2 { margin-bottom: var(--s-4); }
+  .about__lead { font-family: var(--font-serif); font-size: var(--fs-h3); line-height: 1.4; }
+  .about__facts { margin: 0; border-top: 1px solid var(--line); }
+  .about__facts > div { padding: var(--s-4) 0; }
+  .about__facts dt { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+  .about__facts dd { margin: 0 0 4px; color: var(--ink); }
+
+  .teams__intro { max-width: 520px; margin-top: var(--s-3); }
+  .teams__tabs { display: flex; gap: var(--s-2); margin: var(--s-6) 0 var(--s-6); border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .teams__tabs button { padding: 12px 10px; background: none; border: 0; border-bottom: 2px solid transparent; cursor: pointer; font-size: 0.875rem; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+  .teams__tabs [aria-selected='true'] { color: var(--blue-900); border-bottom-color: var(--gold-500); }
+  .teams__panel { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: var(--s-7); align-items: center; }
+  .teams__panel[hidden] { display: none; }
+  .teams__img { aspect-ratio: 4 / 3; }
+  .teams__label { font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: var(--s-2); }
+  .teams__panel h3 { margin-bottom: var(--s-3); }
+
+  .resp { list-style: none; margin: var(--s-6) 0 var(--s-8); padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); }
+  .resp li { padding: var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); }
+  .resp__num { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--gold-100); color: var(--gold-700); font-family: var(--font-serif); font-size: 1rem; margin-bottom: var(--s-3); }
+  .resp__title { font-size: 1.25rem; margin-bottom: 4px; }
+  .activities__eyebrow { margin-top: 0; }
+  .activities { list-style: none; margin: var(--s-5) 0 0; padding: 0; border-top: 1px solid var(--line); }
+  .activities li { display: flex; align-items: center; gap: 12px; padding: var(--s-3) 0; border-bottom: 1px solid var(--line); color: var(--ink); }
+  .activities :global(svg) { color: var(--ink-3); }
+
+  .media { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: var(--s-3); }
+  .media > div { aspect-ratio: 4 / 3; }
+  .media__main { grid-row: span 2; aspect-ratio: auto !important; }
+
+  .interest { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: var(--s-8); align-items: start; }
+  .interest h2 { margin-bottom: var(--s-4); }
+  .interest p { margin-bottom: var(--s-4); }
+  .team-note { margin: 0 0 var(--s-4); padding: 10px 14px; border-radius: var(--r-input); background: var(--gold-100); color: #5e470f; font-size: var(--fs-small); font-weight: 600; }
+  .member-hint { margin: 0; padding: 12px 14px; border-radius: var(--r-input); background: var(--blue-100); color: var(--blue-900); font-size: var(--fs-small); }
+
+  .pager { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); margin-top: var(--section-y-compact); }
+  .pager__link { display: flex; flex-direction: column; gap: 4px; padding: var(--s-4) var(--s-5); background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); text-decoration: none; transition: box-shadow 0.2s var(--ease); }
+  .pager__link:hover { box-shadow: var(--shadow-md); }
+  .pager__link--next { text-align: right; }
+  .pager__label { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .pager__name { font-family: var(--font-serif); font-size: 1.375rem; color: var(--blue-900); }
+
+  @media (max-width: 1024px) {
+    .about, .interest { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+  }
+  @media (max-width: 760px) {
+    .hero__grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .hero__copy { padding-bottom: var(--s-6); }
+    .hero__img { justify-self: center; width: min(100%, 320px); }
+    .teams__panel { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
+    .resp { grid-template-columns: minmax(0, 1fr); }
+    .media { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; }
+    .media__main { grid-column: 1 / -1; grid-row: auto; aspect-ratio: 16 / 9 !important; }
+    .pager { grid-template-columns: minmax(0, 1fr); }
+    .pager__link--next { text-align: left; }
+  }
+</style>
+
+<script>
+  // Team tabs (Music and Arts).
+  document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((root) => {
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role=tab]'));
+    const panels = Array.from(root.querySelectorAll<HTMLElement>('[role=tabpanel]'));
+    const select = (i: number, focus = false) => {
+      tabs.forEach((t, j) => { t.setAttribute('aria-selected', String(i === j)); t.tabIndex = i === j ? 0 : -1; });
+      panels.forEach((p, j) => (p.hidden = i !== j));
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); select((i + 1) % tabs.length, true); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); select((i - 1 + tabs.length) % tabs.length, true); }
+      });
+    });
+  });
+
+  // Carry a chosen team into the interest form.
+  const teamInput = document.querySelector<HTMLInputElement>('[data-team-input]');
+  const teamNote = document.querySelector<HTMLElement>('[data-team-note]');
+  const setTeam = (team: string | null) => {
+    if (!teamInput || !teamNote || !team) return;
+    teamInput.value = team;
+    teamNote.textContent = `Expressing interest in the ${team}`;
+    teamNote.hidden = false;
+  };
+  setTeam(new URLSearchParams(location.search).get('team'));
+  document.querySelectorAll<HTMLAnchorElement>('[data-team]').forEach((a) =>
+    a.addEventListener('click', () => setTeam(a.dataset.team ?? null)),
+  );
+
+  // Guidance for non-members (serving follows membership).
+  const member = document.querySelector<HTMLSelectElement>('[data-member]');
+  const hint = document.querySelector<HTMLElement>('[data-member-hint]');
+  member?.addEventListener('change', () => { if (hint) hint.hidden = member.value !== 'Not yet'; });
+</script>

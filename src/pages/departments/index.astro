@@ -1,0 +1,96 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import departments from '../../data/departments.json';
+
+const [first, ...rest] = departments;
+---
+<Base title="Departments" description="The nine departments of Gloryville Ministries International, Ibadan, and how members can take part.">
+  <PageHero
+    crumbs={[{ label: 'Home', href: '/' }, { label: 'Departments' }]}
+    eyebrow="Departments"
+    title="Nine departments. <br /><em>One</em> church at work."
+    intro="Every department serves the life of GMI. Explore what each one does and how you can take part."
+  />
+
+  <section class="section">
+    <div class="container grid">
+      <a class="card card--feature" href={`/departments/${first.slug}`}>
+        <div class="img-slot card__img">
+          {first.image ? <img src={first.image} alt="" loading="lazy" /> : <span class="img-label"><Icon name="image" />Photograph: {first.name} Department</span>}
+        </div>
+        <div class="card__body">
+          <span class="card__icon"><Icon name={first.icon} size={18} /></span>
+          <p class="card__num">01</p>
+          <h2 class="card__title card__title--lg">{first.name} Department</h2>
+          {first.intro ? <p class="small">{first.intro}</p> : <p class="small ph">[One-sentence description of the department]</p>}
+          {first.teams && <p class="chips">{first.teams.map((t) => <span class="chip">{t.name}</span>)}</p>}
+          <span class="link-arrow">Explore the department <Icon name="arrow-right" /></span>
+        </div>
+      </a>
+      {rest.map((d, i) => (
+        <a class="card" href={`/departments/${d.slug}`}>
+          <div class:list={['img-slot card__img', { 'img-slot--warm': i % 2 === 0 }]}>
+            {d.image ? <img src={d.image} alt="" loading="lazy" /> : <span class="img-label img-label--top"><Icon name="image" />Photograph: {d.name}</span>}
+          </div>
+          <div class="card__body">
+            <span class="card__icon card__icon--float"><Icon name={d.icon} size={18} /></span>
+            <p class="card__num">{String(i + 2).padStart(2, '0')}</p>
+            <h2 class="card__title">{d.name} Department</h2>
+            {d.summary ? <p class="small">{d.summary}</p> : <p class="small ph">[One-sentence description]</p>}
+            <span class="link-arrow">View department <Icon name="arrow-right" /></span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="section bg-stone">
+    <div class="container involve">
+      <div>
+        <p class="eyebrow">Getting involved</p>
+        <h2>Serving starts <br />with membership</h2>
+        <p class="involve__text">Department participation is the final step of the GMI membership journey. If you are new, begin there.</p>
+      </div>
+      <div class="involve__btns">
+        <a class="btn btn--primary btn--sm" href="/new-here">See the membership journey</a>
+        <a class="btn btn--outline btn--sm" href="/contact">Ask a question</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); }
+  .card { display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--line); border-radius: var(--r-card); overflow: hidden; text-decoration: none; color: var(--ink-2); transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease); }
+  .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); color: var(--ink-2); }
+  .card__img { aspect-ratio: 16 / 9; border-radius: 0; }
+  .card__body { position: relative; display: flex; flex-direction: column; flex: 1; padding: var(--s-5); }
+  .card__body .link-arrow { margin-top: auto; padding-top: var(--s-4); }
+  .card__icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--blue-100); color: var(--blue-700); margin-bottom: var(--s-3); }
+  .card__icon--float { position: absolute; top: -17px; left: var(--s-5); margin: 0; border: 3px solid var(--white); width: 38px; height: 38px; }
+  .card__num { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; color: var(--gold-700); margin: var(--s-2) 0 4px; }
+  .card__title { font-size: 1.375rem; margin-bottom: var(--s-2); }
+  .card__title--lg { font-size: var(--fs-h2); line-height: 1.1; margin-bottom: var(--s-3); }
+  .card--feature { grid-column: span 2; flex-direction: row; }
+  .card--feature .card__img { aspect-ratio: auto; flex: 1; min-height: 320px; }
+  .card--feature .card__body { flex: 1; justify-content: center; padding: var(--s-6); }
+  .card--feature .card__body .link-arrow { margin-top: var(--s-2); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: var(--s-2) 0; }
+  .img-label--top { bottom: 10px; }
+
+  .involve { display: flex; align-items: center; justify-content: space-between; gap: var(--s-6); flex-wrap: wrap; }
+  .involve__text { max-width: 460px; margin-top: var(--s-3); }
+  .involve__btns { display: flex; gap: var(--s-3); flex-wrap: wrap; }
+
+  @media (max-width: 1024px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .card--feature { grid-column: auto; flex-direction: column; }
+    .card--feature .card__img { min-height: 0; aspect-ratio: 16 / 9; }
+    .card--feature .card__body { padding: var(--s-5); }
+  }
+</style>

@@ -1,15 +1,7 @@
 // Main navigation, in the approved order. Labels follow the UI design.
-export const departments = [
-  { slug: 'music-and-arts', name: 'Music and Arts', summary: 'Worship Team, Dance Group and Rap Group.' },
-  { slug: 'media-and-publicity', name: 'Media and Publicity', summary: '' },
-  { slug: 'technical', name: 'Technical', summary: '' },
-  { slug: 'ushering-and-protocol', name: 'Ushering and Protocol', summary: '' },
-  { slug: 'setup', name: 'Setup', summary: '' },
-  { slug: 'welfare-and-registration', name: 'Welfare and Registration', summary: '' },
-  { slug: 'decoration-and-aesthetics', name: 'Decoration and Aesthetics', summary: '' },
-  { slug: 'archives', name: 'Archives', summary: '' },
-  { slug: 'children', name: 'Children', summary: '' },
-];
+import departmentData from './departments.json';
+
+export const departments = departmentData.map((d) => ({ slug: d.slug, name: d.name, summary: d.summary }));
 
 export const libraryCategories = [
   { href: '/library/messages', name: 'Messages and Sermons', summary: 'Latest messages, archive and series' },
