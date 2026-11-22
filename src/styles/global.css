@@ -16,7 +16,8 @@ body {
   color: var(--ink-2);
   font-family: var(--font-sans);
   font-size: var(--fs-body);
-  line-height: 1.65;
+  line-height: 1.7;
+  padding-left: var(--rail);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -28,30 +29,32 @@ p { margin: 0 0 1em; }
 p:last-child { margin-bottom: 0; }
 
 /* ---------- Type ---------- */
+/* Headings: light weight with bold emphasis words, e.g. "Building Jesus' Community <strong>Globally</strong>". */
 h1, h2, h3, .display {
-  font-family: var(--font-serif);
-  font-weight: 500;
+  font-family: var(--font-sans);
+  font-weight: 400;
   color: var(--blue-900);
   margin: 0;
   text-wrap: balance;
-  font-optical-sizing: auto;
 }
-.display { font-size: var(--fs-display); line-height: 1.02; letter-spacing: -0.025em; }
-h1, .h1 { font-size: var(--fs-h1); line-height: 1.06; letter-spacing: -0.02em; }
-h2, .h2 { font-size: var(--fs-h2); line-height: 1.12; letter-spacing: -0.015em; }
-h3, .h3 { font-size: var(--fs-h3); line-height: 1.22; letter-spacing: -0.01em; }
+.display { font-size: var(--fs-display); line-height: 1.04; letter-spacing: -0.035em; font-weight: 800; }
+h1, .h1 { font-size: var(--fs-h1); line-height: 1.08; letter-spacing: -0.03em; }
+h2, .h2 { font-size: var(--fs-h2); line-height: 1.14; letter-spacing: -0.025em; }
+h3, .h3 { font-size: var(--fs-h3); line-height: 1.25; letter-spacing: -0.015em; font-weight: 600; }
 h4, .h4 { font-family: var(--font-sans); font-size: var(--fs-h4); line-height: 1.35; font-weight: 700; color: var(--blue-900); margin: 0; }
-.display em, h1 em, h2 em { font-style: italic; color: var(--gold-700); }
-.on-dark .display em, .on-dark h1 em, .on-dark h2 em { color: var(--gold-400); }
+h1 em, h2 em, h1 strong, h2 strong, .display em, .h1 em, .h2 em, .h1 strong, .h2 strong { font-style: normal; font-weight: 800; color: inherit; }
+.display em { color: var(--gold-500); }
+.on-dark .display em { color: var(--gold-400); }
+.quote-serif { font-family: var(--font-quote); font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
 .body-lg { font-size: var(--fs-body-lg); line-height: 1.6; }
 .small { font-size: var(--fs-small); line-height: 1.55; }
 
 .eyebrow {
-  display: inline-flex; align-items: center; gap: 12px;
-  font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--gold-700); margin: 0 0 var(--s-3);
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 0.9375rem; font-weight: 700; letter-spacing: 0.01em;
+  color: var(--gold-700); margin: 0 0 var(--s-4);
 }
-.eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--gold-500); }
+.eyebrow::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--gold-500); box-shadow: 0 0 0 4px rgba(217, 166, 58, 0.18); }
 .on-dark .eyebrow { color: var(--gold-400); }
 
 /* Honest placeholders: missing facts show as [bracketed italic] text. */
@@ -83,22 +86,24 @@ a:hover { color: var(--blue-900); }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  min-height: 52px; padding: 0 26px; border-radius: var(--r-pill);
+  min-height: 52px; padding: 0 28px; border-radius: var(--r-btn);
   font-family: var(--font-sans); font-size: var(--fs-nav); font-weight: 700; line-height: 1;
   text-decoration: none; border: 1.5px solid transparent; cursor: pointer; white-space: nowrap;
-  transition: background-color 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  transition: background-color 0.25s var(--ease), color 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
 }
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
 .btn svg { width: 16px; height: 16px; }
 .btn--sm { min-height: 44px; padding: 0 20px; }
 .btn--primary { background: var(--blue-700); color: var(--white); }
 .btn--primary:hover { background: var(--blue-900); color: var(--white); }
-.btn--gold { background: var(--gold-500); color: var(--blue-950); }
-.btn--gold:hover { background: var(--gold-400); color: var(--blue-950); }
+.btn--gold { background: var(--gold-500); color: var(--blue-950); box-shadow: 0 10px 24px -12px rgba(217, 166, 58, 0.8); }
+.btn--gold:hover { background: var(--gold-400); color: var(--blue-950); box-shadow: 0 16px 30px -12px rgba(217, 166, 58, 0.9); }
 .btn--outline { background: transparent; border-color: var(--blue-700); color: var(--blue-900); }
 .btn--outline:hover { background: var(--blue-100); color: var(--blue-900); }
 .on-dark .btn--outline, .btn--outline-light { border-color: rgba(255, 255, 255, 0.55); color: var(--white); }
 .on-dark .btn--outline:hover, .btn--outline-light:hover { background: rgba(255, 255, 255, 0.1); color: var(--white); }
-.btn[disabled] { background: var(--stone); color: var(--ink-3); cursor: not-allowed; }
+.btn[disabled] { background: var(--stone); color: var(--ink-3); cursor: not-allowed; transform: none; }
 
 /* ---------- Chips ---------- */
 .chip {
@@ -169,4 +174,47 @@ a:hover { color: var(--blue-900); }
 @media (max-width: 760px) {
   .form-grid { grid-template-columns: minmax(0, 1fr); }
   .form-card { padding: var(--s-5); }
+}
+
+/* ---------- Motion (Nov 2026 redesign) ----------
+   Content fades up as it enters the viewport (classes added by src/scripts/motion.ts, so nothing is hidden without JS).
+   Everything here is switched off for people who ask for reduced motion. */
+.rv { opacity: 0; transform: translateY(28px); transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out); transition-delay: calc(var(--rv-i, 0) * 80ms); }
+.rv.rv--in { opacity: 1; transform: none; }
+.rv--scale { transform: scale(0.96); }
+.rv--left { transform: translateX(-36px); }
+.rv--right { transform: translateX(36px); }
+
+/* Giant faded watermark word behind a section (drifts sideways on scroll). */
+.watermark-host { position: relative; overflow: hidden; isolation: isolate; }
+.watermark {
+  position: absolute; z-index: -1; left: 50%; top: 50%; translate: -50% -50%;
+  font-family: var(--font-sans); font-weight: 800; font-size: clamp(5rem, 17vw, 15rem); line-height: 1; letter-spacing: -0.04em;
+  white-space: nowrap; color: var(--blue-900); opacity: 0.045; pointer-events: none; user-select: none;
+  will-change: transform;
+}
+.watermark--top { top: 22%; }
+.on-dark .watermark, .watermark--light { color: var(--white); opacity: 0.06; }
+
+/* Pulsing ring (play buttons, giving icon). */
+.ping { position: relative; display: inline-grid; place-items: center; border-radius: 50%; }
+.ping::before, .ping::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--gold-300); z-index: -1; animation: ping 2.6s var(--ease-out) infinite; }
+.ping::after { animation-delay: 1.3s; }
+@keyframes ping { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(2.2); opacity: 0; } }
+
+/* Slow drifting glow for dark gradient blocks. */
+.glow-drift { background: var(--glow-hero); background-size: 140% 140%; animation: glowDrift 18s ease-in-out infinite alternate; }
+@keyframes glowDrift { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
+
+/* Images zoom gently on hover inside a link/card. */
+.zoom-media { overflow: hidden; }
+.zoom-media img { transition: transform 0.8s var(--ease-out); }
+a:hover .zoom-media img, .zoom-media:hover img { transform: scale(1.05); }
+
+@media (prefers-reduced-motion: reduce) {
+  .rv { opacity: 1 !important; transform: none !important; }
+  .watermark { transform: none !important; }
+  .ping::before, .ping::after { display: none; }
+  .glow-drift { animation: none; }
+  .btn:hover { transform: none; }
 }

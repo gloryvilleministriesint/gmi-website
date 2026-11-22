@@ -1,28 +1,33 @@
-/* GMI design system: "Sanctuary Editorial".
-   Values come from GMI_Church_Website_DESIGN.pdf. Change brand colours here only. */
+/* GMI design system: "Glory Blend" (Nov 2026 redesign).
+   Structure and motion inspired by petracc.org; colours blended from the GMI logo.
+   Petra's logic: a neutral base (white, cool grey, near-black) + one vivid accent + vivid gradient banners.
+   GMI version: logo gold is the accent, logo royal blue drives the dark tones and the hero glow.
+   Change brand colours here only. Token names are kept from the first system so every page re-skins. */
 :root {
-  /* Blues */
-  --blue-700: #1b3b8c; /* primary: nav, headings, primary buttons */
-  --blue-900: #0f2150; /* headings, hover states */
-  --blue-950: #0a1633; /* dark sections, footer, utility bar */
-  --blue-100: #e4eaf6; /* tints, selected states */
-  --blue-800: #142c6e; /* feature cards, CTA band */
+  /* Blues (from the logo's house outline and dove) */
+  --blue-500: #3550c8; /* bright logo blue: glows, gradients, hover accents */
+  --blue-700: #1e3282; /* royal: primary buttons, links */
+  --blue-800: #172766; /* feature blocks */
+  --blue-900: #111a44; /* headings: navy-black, reads as near-black with a blue tint */
+  --blue-950: #0a0f26; /* dark sections, footer (Petra's near-black, blended to blue) */
+  --blue-100: #e9edf9; /* tints, selected states */
 
-  /* Golds */
-  --gold-500: #c8a24a; /* CTA fill, rules, focus ring */
-  --gold-400: #d9bc74; /* gold on dark backgrounds */
-  --gold-700: #82621b; /* gold text on light (eyebrows, numbers) */
-  --gold-100: #f5ecd6; /* soft highlight backgrounds */
+  /* Golds (from the logo wordmark, warmer than the first system) */
+  --gold-300: #f0cf86; /* ping rings, glow highlights */
+  --gold-500: #d9a63a; /* accent: CTAs, labels, focus ring (Petra's orange role) */
+  --gold-400: #eac06a; /* gold on dark backgrounds */
+  --gold-700: #85600f; /* gold text on light (meets 4.5:1 on white) */
+  --gold-100: #fbf1dc; /* soft highlight backgrounds */
 
-  /* Neutrals */
-  --paper: #fbfaf7;
-  --stone: #f3f0e9;
+  /* Neutrals (Petra: white + gray-50 bands) */
+  --paper: #ffffff;
+  --stone: #f5f6fa;
   --white: #ffffff;
-  --line: #e2ddd2;
-  --line-strong: #8a8272;
-  --ink: #161c2c;
-  --ink-2: #4a5163;
-  --ink-3: #636979;
+  --line: #e5e7ee;
+  --line-strong: #8b90a0;
+  --ink: #12182e;
+  --ink-2: #3c4258;
+  --ink-3: #676c80;
 
   /* Feedback */
   --success: #1e7a4c;
@@ -30,47 +35,64 @@
   --error: #b3261e;
   --error-bg: #fbeae8;
 
-  /* Type */
-  --font-serif: 'Newsreader Variable', 'Newsreader', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Manrope Variable', 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Signature gradients (hero glow, CTA blocks) */
+  --glow-hero:
+    radial-gradient(60% 70% at 85% 15%, rgba(217, 166, 58, 0.55), transparent 60%),
+    radial-gradient(55% 60% at 10% 90%, rgba(53, 80, 200, 0.75), transparent 65%),
+    radial-gradient(80% 80% at 60% 60%, #1e3282 0%, transparent 70%),
+    linear-gradient(135deg, #0a0f26 0%, #111a44 45%, #1e3282 100%);
+  --glow-gold: linear-gradient(120deg, #d9a63a 0%, #eac06a 55%, #d9a63a 100%);
+  --glow-blue: linear-gradient(135deg, #172766 0%, #1e3282 55%, #3550c8 100%);
 
-  --fs-display: clamp(2.75rem, 1.6rem + 4.6vw, 5.125rem); /* 44–82 */
-  --fs-h1: clamp(2.375rem, 1.7rem + 2.7vw, 3.75rem); /* 38–60 */
-  --fs-h2: clamp(1.875rem, 1.45rem + 1.7vw, 2.75rem); /* 30–44 */
-  --fs-h3: clamp(1.375rem, 1.2rem + 0.7vw, 1.75rem); /* 22–28 */
-  --fs-h4: 1.1875rem; /* 19 */
-  --fs-body-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem); /* 18–21 */
-  --fs-body: 1.0625rem; /* 17 */
-  --fs-small: 0.90625rem; /* 14.5 */
-  --fs-label: 0.78125rem; /* 12.5 */
-  --fs-nav: 0.9375rem; /* 15 */
+  /* Type: one modern sans, headings mix light and bold words (Petra style).
+     Newsreader is kept only for scripture and pull quotes. */
+  --font-sans: 'Manrope Variable', 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: var(--font-sans); /* legacy name: titles across the site now use the sans */
+  --font-quote: 'Newsreader Variable', 'Newsreader', Georgia, serif;
+
+  --fs-display: clamp(2.5rem, 1.4rem + 4.4vw, 4.75rem); /* 40–76 */
+  --fs-h1: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem); /* 36–56 */
+  --fs-h2: clamp(1.875rem, 1.4rem + 1.8vw, 2.75rem); /* 30–44 */
+  --fs-h3: clamp(1.3125rem, 1.15rem + 0.6vw, 1.625rem); /* 21–26 */
+  --fs-h4: 1.1875rem;
+  --fs-body-lg: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+  --fs-body: 1.0625rem;
+  --fs-small: 0.90625rem;
+  --fs-label: 0.8125rem;
+  --fs-nav: 0.9375rem;
 
   /* Space */
   --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
   --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
   --s-9: 96px; --s-10: 128px;
-  --section-y: clamp(64px, 4rem + 4vw, 120px);
-  --section-y-compact: clamp(48px, 3rem + 2vw, 72px);
+  --section-y: clamp(72px, 4rem + 5vw, 128px);
+  --section-y-compact: clamp(48px, 3rem + 2vw, 80px);
 
   /* Layout */
   --container: 1240px;
   --gutter: clamp(20px, 5vw, 64px);
   --reading: 720px;
+  --rail: 0px; /* fixed side rail width (set on wide screens) */
 
-  /* Shape */
-  --r-input: 8px;
-  --r-card: 12px;
-  --r-panel: 18px;
+  /* Shape (Petra: rounded rectangles rather than pills for buttons) */
+  --r-input: 10px;
+  --r-btn: 10px;
+  --r-card: 16px;
+  --r-panel: 22px;
   --r-pill: 999px;
 
   /* Shadow */
-  --shadow-sm: 0 1px 2px rgba(10, 22, 51, 0.06), 0 1px 1px rgba(10, 22, 51, 0.04);
-  --shadow-md: 0 8px 24px -8px rgba(10, 22, 51, 0.18);
-  --shadow-lg: 0 24px 48px -16px rgba(10, 22, 51, 0.28);
+  --shadow-sm: 0 1px 2px rgba(10, 15, 38, 0.06), 0 1px 1px rgba(10, 15, 38, 0.04);
+  --shadow-md: 0 14px 34px -14px rgba(10, 15, 38, 0.25);
+  --shadow-lg: 0 30px 60px -20px rgba(10, 15, 38, 0.35);
 
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@media (min-width: 1181px) {
+  :root { --rail: 64px; }
+}
 @media (max-width: 760px) {
   :root { --fs-body: 1rem; }
 }

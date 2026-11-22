@@ -9,6 +9,20 @@ const socials = ['youtube', 'telegram', 'instagram', 'facebook'].filter((k) => (
 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address.mapsQuery)}`;
 ---
 <footer class="footer on-dark">
+  <div class="touch glow-drift">
+    <div class="container touch__inner">
+      <div class="touch__head">
+        <p class="eyebrow">Get in touch</p>
+        <h2 class="touch__title">We would love to <strong>hear from you</strong></h2>
+      </div>
+      <ul class="touch__list">
+        <li><span class="touch__icon"><Icon name="map-pin" size={18} /></span><a href={mapsUrl} target="_blank" rel="noopener">{site.address.lines.join(', ')}</a></li>
+        <li><span class="touch__icon"><Icon name="mail" size={18} /></span>{site.email ? <a href={`mailto:${site.email}`}>{site.email}</a> : <span class="ph">[Email address]</span>}</li>
+        <li><span class="touch__icon"><Icon name="phone" size={18} /></span>{site.phone ? <a href={`tel:${site.phone.replace(/\s/g, '')}`}>{site.phone}</a> : <span class="ph">[Phone number]</span>}</li>
+      </ul>
+      <a class="btn btn--gold touch__btn" href="/contact">Contact us <Icon name="arrow-right" /></a>
+    </div>
+  </div>
   <div class="container">
     <div class="footer__top">
       <div class="footer__brand">
@@ -16,11 +30,6 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComp
         {site.identityLine
           ? <p class="footer__identity">{site.identityLine}</p>
           : <p class="footer__identity ph">[One-line statement of GMI's identity, supplied by the church]</p>}
-        <ul class="footer__contact">
-          <li><Icon name="map-pin" size={16} /><a href={mapsUrl} target="_blank" rel="noopener">{site.address.lines.join(', ')}</a></li>
-          <li><Icon name="phone" size={16} />{site.phone ? <a href={`tel:${site.phone.replace(/\s/g, '')}`}>{site.phone}</a> : <span class="ph">[Phone number]</span>}</li>
-          <li><Icon name="mail" size={16} />{site.email ? <a href={`mailto:${site.email}`}>{site.email}</a> : <span class="ph">[Email address]</span>}</li>
-        </ul>
         {socials.length > 0 && (
           <ul class="footer__social" aria-label="GMI on social media">
             {socials.map((k) => <li><a href={(site.social as Record<string, string>)[k]} target="_blank" rel="noopener"><Icon name={k} size={18} label={k[0].toUpperCase() + k.slice(1)} /></a></li>)}
@@ -58,10 +67,18 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComp
 </footer>
 
 <style>
-  .footer { background: var(--blue-950); color: rgba(255, 255, 255, 0.72); padding-top: var(--s-9); font-size: var(--fs-small); }
+  .footer { background: var(--blue-950); color: rgba(255, 255, 255, 0.72); font-size: var(--fs-small); }
+  .footer > .container { padding-top: var(--s-8); }
+  .touch { position: relative; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+  .touch__inner { display: grid; grid-template-columns: 1fr 1.1fr auto; gap: var(--s-7); align-items: center; padding-block: var(--s-8); }
+  .touch__title { font-size: var(--fs-h2); color: var(--white); line-height: 1.12; }
+  .touch__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-4); font-size: 1rem; }
+  .touch__list li { display: flex; align-items: center; gap: var(--s-4); }
+  .touch__icon { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14); color: var(--gold-400); }
+  .touch__btn { white-space: nowrap; }
   .footer a { color: var(--white); text-decoration: none; }
   .footer a:hover { color: var(--gold-400); }
-  .footer__top { display: grid; grid-template-columns: 1.25fr 1.5fr 1.15fr; gap: var(--s-7); padding-bottom: var(--s-8); }
+  .footer__top { display: grid; grid-template-columns: 1.1fr 1.5fr 1.15fr; gap: var(--s-7); padding-bottom: var(--s-8); }
   .footer__identity { margin: var(--s-5) 0; max-width: 300px; }
   .footer__contact { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
   .footer__contact li { display: flex; gap: 10px; align-items: flex-start; }
@@ -70,9 +87,10 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComp
   .footer__social a { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; }
   .footer__social a:hover { background: rgba(255, 255, 255, 0.08); }
   .footer__nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5); }
-  .footer__heading { font-family: var(--font-sans); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-400); margin: 0 0 var(--s-4); }
+  .footer__heading { font-family: var(--font-sans); font-size: 1.125rem; font-weight: 700; letter-spacing: -0.01em; color: var(--white); margin: 0 0 var(--s-4); }
   .footer__nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-  .footer__nav a { font-weight: 500; }
+  .footer__nav a { font-weight: 500; color: rgba(255, 255, 255, 0.78); transition: color 0.2s var(--ease), padding 0.2s var(--ease); }
+  .footer__nav a:hover { color: var(--gold-400); padding-left: 4px; }
   .newsletter { align-self: start; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--r-panel); padding: var(--s-5); }
   .newsletter__title { font-size: 1.375rem; line-height: 1.25; color: var(--white); margin-bottom: var(--s-2); }
   .newsletter__form { display: flex; gap: var(--s-2); margin-top: var(--s-4); }
@@ -89,6 +107,8 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComp
   .footer__bottom a { color: rgba(255, 255, 255, 0.72); }
 
   @media (max-width: 1024px) {
+    .touch__inner { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
+    .touch__btn { justify-self: start; }
     .footer__top { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .footer__nav { order: 3; grid-column: 1 / -1; }
   }

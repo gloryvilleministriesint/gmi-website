@@ -1,164 +1,177 @@
 ---
+// Home (Nov 2026 redesign): structure and motion inspired by petracc.org, colours from the GMI logo.
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import GloryRays from '../components/GloryRays.astro';
+import MessageCard from '../components/MessageCard.astro';
 import site from '../data/site.json';
+import about from '../data/about.json';
+import departments from '../data/departments.json';
 import { getCollection } from 'astro:content';
+import { getMessages } from '../lib/messages';
 
 const tz = 'Africa/Lagos';
 const now = new Date();
+const fmt = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('en-GB', { timeZone: tz, ...o }).format(d);
 
 const events = (await getCollection('events'))
-  .filter((e) => (e.data.end ?? e.data.start) >= now)
+  .filter((e) => e.data.repeat !== 'weekly' && (e.data.end ?? e.data.start) >= now)
   .sort((a, b) => +a.data.start - +b.data.start)
   .slice(0, 3);
+const messages = (await getMessages()).slice(0, 8);
+const nextEvent = events.find((e) => !e.data.sample);
 
-const messages = (await getCollection('messages')).sort((a, b) => +b.data.date - +a.data.date);
-const featured = messages.find((m) => m.data.featured) ?? messages[0];
-const moreMessages = messages.filter((m) => m !== featured).slice(0, 3);
+// Hero slides. Facts come from site.json; slide copy beyond the facts is kept short and factual.
+const sunday = site.services.find((s) => s.day === 'Sunday') ?? site.services[0];
+const midweek = site.services.find((s) => s.day !== sunday.day);
+type Slide = { eyebrow: string; title: string; text?: string; ph?: string; ctas: { label: string; href: string; style: 'gold' | 'outline' }[]; art: string; image?: string };
+const slides: Slide[] = [
+  {
+    eyebrow: 'Gloryville Ministries International',
+    title: 'You are <em>welcome</em> at Gloryville.',
+    text: site.tagline || undefined,
+    ph: '[One or two sentences introducing GMI or the theme for the year, supplied by the church]',
+    ctas: [{ label: 'Plan Your Visit', href: '/plan-your-visit', style: 'gold' }, { label: 'New here? Start here', href: '/new-here', style: 'outline' }],
+    art: 'a',
+  },
+  {
+    eyebrow: sunday.name,
+    title: `${sunday.day}s at <em>${sunday.time}</em>`,
+    text: `Worship, prayer and the Word at ${site.address.lines.slice(-2).join(', ')}. Come as you are.`,
+    ctas: [{ label: 'Plan Your Visit', href: '/plan-your-visit', style: 'gold' }, { label: 'Watch online', href: '/library/live', style: 'outline' }],
+    art: 'b',
+  },
+  ...(midweek ? [{
+    eyebrow: midweek.name,
+    title: `${midweek.day}s at <em>${midweek.time}</em>`,
+    text: 'Pause in the middle of the week for worship and the Word.',
+    ctas: [{ label: 'Our Services', href: '/services', style: 'gold' as const }, { label: 'Church Calendar', href: '/calendar', style: 'outline' as const }],
+    art: 'c',
+  }] : []),
+  nextEvent
+    ? {
+        eyebrow: nextEvent.data.category,
+        title: nextEvent.data.title,
+        text: `${fmt(nextEvent.data.start, { weekday: 'long', day: 'numeric', month: 'long' })}${nextEvent.data.summary ? `. ${nextEvent.data.summary}` : ''}`,
+        ctas: [{ label: nextEvent.data.registration ? 'Register now' : 'Learn more', href: `/calendar/${nextEvent.id}`, style: 'gold' }, { label: 'Church Calendar', href: '/calendar', style: 'outline' }],
+        art: 'd',
+        image: nextEvent.data.image,
+      }
+    : {
+        eyebrow: 'GMI Digital Library',
+        title: 'Hear the Word, <em>wherever you are.</em>',
+        text: 'Messages, music, live services and resources from GMI.',
+        ctas: [{ label: 'Open the Library', href: '/library', style: 'gold' }, { label: 'Watch live', href: '/library/live', style: 'outline' }],
+        art: 'd',
+      },
+];
 
-const updates = (await getCollection('updates'))
-  .filter((u) => !u.data.expires || u.data.expires >= now)
-  .sort((a, b) => +b.data.date - +a.data.date)
-  .slice(0, 4);
-const [leadUpdate, ...otherUpdates] = updates;
+const experience = [
+  { icon: 'mic', title: 'Messages', text: 'Sermons to watch or hear', href: '/library' },
+  { icon: 'music', title: 'Music', text: 'Worship and praise', href: '/library/music' },
+  { icon: 'radio', title: 'Live', text: 'Join services online', href: '/library/live' },
+  { icon: 'users', title: 'Connect', text: 'Our official channels', href: '/library/connect' },
+];
 
-const fmt = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('en-GB', { timeZone: tz, ...o }).format(d);
-const longDate = (d: Date) => fmt(d, { day: 'numeric', month: 'long', year: 'numeric' });
-const chipClass: Record<string, string> = { Programme: 'chip chip--gold' };
+const featureSlugs = ['music-and-arts', 'media-and-publicity', 'children', 'ushering-and-protocol'];
+const features = featureSlugs.map((slug) => departments.find((d) => d.slug === slug)).filter((d): d is (typeof departments)[number] => Boolean(d));
+const splitName = (name: string) => {
+  const words = name.split(' ');
+  return { light: words.slice(0, -1).join(' '), bold: words.at(-1) };
+};
 
-const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address.mapsQuery)}`;
-const serviceLine = site.services.map((s) => `${s.day} · ${s.time}`);
-
-const quickLinks = [
-  { icon: 'church', title: 'Our Services', text: 'When we gather and what each service is for.', href: '/services' },
-  { icon: 'calendar', title: 'Church Calendar', text: 'Weekly activities, meetings and programmes.', href: '/calendar' },
-  { icon: 'users', title: 'Departments', text: 'Nine departments that serve the church.', href: '/departments' },
-  { icon: 'mic', title: 'Digital Library', text: 'Messages, music, live services and resources.', href: '/library' },
-  { icon: 'gift', title: 'Giving & Partnership', text: 'Tithes, offerings, partnership and seed sowing.', href: '/give' },
-  { icon: 'quote', title: 'Testimonies', text: 'Read testimonies or share your own.', href: '/testimonies' },
-  { icon: 'sparkles', title: 'About GMI', text: 'Our story, vision, mission and beliefs.', href: '/about' },
-  { icon: 'mail', title: 'Contact Us', text: 'Enquiries, directions and FAQs.', href: '/contact' },
+const steps = [
+  { title: 'Plan your first visit', text: `Join us on ${site.services.map((s) => `${s.day}s at ${s.time}`).join(' or ')}. See what to expect, where to find us and how to prepare.`, href: '/plan-your-visit', cta: 'Plan your visit' },
+  { title: 'Start the membership journey', text: 'From your first visit to the membership class and beyond: the six steps to becoming part of the GMI family.', href: '/new-here', cta: 'See the journey' },
+  { title: 'Serve in a department', text: 'Nine departments serve the life of the church, from music and media to ushering and children.', href: '/departments', cta: 'Explore departments' },
+  { title: 'Share your testimony', text: 'Tell the church what God has done. Every testimony is reviewed before it is published.', href: '/testimonies', cta: 'Read and share testimonies' },
+  { title: 'Give and partner with GMI', text: 'Tithes, offerings, partnership and seed sowing.', href: '/give', cta: 'Give online' },
 ];
 ---
-<Base>
-  <!-- Hero -->
-  <section class="hero">
-    <div class="container hero__grid">
-      <div class="hero__copy">
-        <p class="eyebrow">Gloryville Ministries International</p>
-        <h1 class="display">You are <em>welcome</em> at&nbsp;Gloryville.</h1>
-        {site.tagline
-          ? <p class="hero__intro">{site.tagline}</p>
-          : <p class="hero__intro ph">[One or two sentences introducing GMI, its vision or theme for the year, supplied by the church]</p>}
-        <div class="hero__ctas">
-          <a href="/plan-your-visit" class="btn btn--gold">Plan Your Visit <Icon name="arrow-right" /></a>
-          <a href="/new-here" class="btn btn--outline">New here? Start here</a>
-        </div>
-        <dl class="hero__facts">
-          <div>
-            <dt><Icon name="clock" size={18} /> Service times</dt>
-            <dd>{serviceLine.map((l) => <span>{l}</span>)}</dd>
-            <dd><a href="/services">All services</a></dd>
+<Base overlay>
+  <!-- 1. Hero slider -->
+  <section class="hero on-dark" aria-roledescription="carousel" aria-label="Welcome to GMI" data-hero data-no-reveal>
+    <div class="hero__slides">
+      {slides.map((s, i) => (
+        <div class:list={['slide', `slide--${s.art}`, { 'is-active': i === 0 }]} role="group" aria-roledescription="slide" aria-label={`${i + 1} of ${slides.length}`} aria-hidden={i === 0 ? undefined : 'true'} inert={i === 0 ? undefined : true} data-slide>
+          <div class="slide__bg" aria-hidden="true">
+            {s.image && <img src={s.image} alt="" />}
+            <GloryRays class="slide__rays" opacity={0.35} color="var(--gold-400)" />
           </div>
-          <div>
-            <dt><Icon name="map-pin" size={18} /> Location</dt>
-            <dd><span>{site.address.lines.slice(0, 2).join(', ')}</span><span>{site.address.lines.slice(2).join(', ')}</span></dd>
-            <dd><a href={mapsUrl} target="_blank" rel="noopener">Get directions</a></dd>
-          </div>
-        </dl>
-      </div>
-      <div class="hero__media">
-        <GloryRays class="hero__rays" opacity={0.55} />
-        <div class="img-slot arch hero__arch">
-          <span class="img-label"><Icon name="image" />Photograph: GMI congregation in worship</span>
-        </div>
-        <a class="live-card" href="/library/live">
-          <span class="live-card__icon"><Icon name="radio" size={20} /></span>
-          <span>
-            <strong>{site.live.isLive ? 'We are live now' : 'Join us live'}</strong>
-            <span>{site.live.isLive ? 'Tap to watch the service.' : 'Services stream on YouTube. Status shows here when live.'}</span>
-          </span>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Visitor pathways -->
-  <section class="pathways">
-    <div class="container pathways__grid">
-      <a class="path-card path-card--dark on-dark" href="/plan-your-visit">
-        <span class="path-card__icon"><Icon name="compass" size={20} /></span>
-        <p class="eyebrow">First time with us?</p>
-        <h2 class="h2">Plan your visit</h2>
-        <p>Service times, how to find us and what to expect when you arrive, all in one place.</p>
-        <span class="link-arrow">Plan your visit <Icon name="arrow-right" /></span>
-      </a>
-      <a class="path-card" href="/new-here">
-        <span class="path-card__icon path-card__icon--gold"><Icon name="user-plus" size={20} /></span>
-        <p class="eyebrow">New here</p>
-        <h2 class="h2">Become a member</h2>
-        <p>From your first visit to the membership class, discipleship and cell groups, and serving in a department.</p>
-        <span class="link-arrow">See the membership journey <Icon name="arrow-right" /></span>
-      </a>
-    </div>
-  </section>
-
-  <!-- Word of welcome -->
-  <section class="section welcome">
-    <div class="container welcome__grid">
-      <div class="img-slot arch welcome__portrait">
-        <span class="img-label"><Icon name="image" />Portrait: Senior Pastor and wife</span>
-      </div>
-      <div>
-        <p class="eyebrow">A word of welcome</p>
-        <h2 class="h1">From our <br />Senior Pastor</h2>
-        <hr class="rule" />
-        <p class="welcome__quote ph">[A short personal welcome message from the Senior Pastor and his wife, two to four sentences]</p>
-        <p class="welcome__names"><span class="ph">[Senior Pastor's name]</span> &amp; <span class="ph">[Wife's name]</span></p>
-        <p class="small">Senior Pastor, Gloryville Ministries International</p>
-        <a class="link-arrow" href="/about#our-story">Read our story <Icon name="arrow-right" /></a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Featured messages -->
-  <section class="section bg-dark on-dark">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Featured messages</p>
-          <h2>Hear the Word, wherever you are</h2>
-          <p class="body-lg sub">Watch or listen to recent messages from the GMI Digital Library.</p>
-        </div>
-        <a class="link-arrow" href="/library">Browse the Digital Library <Icon name="arrow-right" /></a>
-      </div>
-      <div class="messages">
-        {featured && (
-          <a class="msg-feature" href={`/library/messages/${featured.id}`}>
-            <div class="img-slot img-slot--dark msg-feature__media">
-              <span class="play"><Icon name="play" size={22} /></span>
-              <span class="img-label"><Icon name="video" />Featured message thumbnail</span>
+          <div class="container slide__inner">
+            <div class="slide__copy">
+              <p class="eyebrow slide__anim">{s.eyebrow}</p>
+              {i === 0 ? <h1 class="display slide__anim" set:html={s.title} /> : <h2 class="display slide__anim" set:html={s.title} />}
+              {s.text ? <p class="slide__text slide__anim">{s.text}</p> : s.ph && <p class="slide__text slide__anim ph">{s.ph}</p>}
+              <div class="slide__ctas slide__anim">
+                {s.ctas.map((c) => <a class={`btn btn--${c.style}`} href={c.href} tabindex={i === 0 ? undefined : -1}>{c.label}{c.style === 'gold' && <Icon name="arrow-right" />}</a>)}
+              </div>
             </div>
-            <div class="msg-feature__chips"><span class="chip">Featured</span>{featured.data.sample && <span class="chip">Sample content</span>}</div>
-            <h3 class="h2">{featured.data.title}</h3>
-            <p class="msg-meta">
-              {featured.data.sample
-                ? <span class="ph">[Speaker] · [Series] · [Date]</span>
-                : [featured.data.speaker, featured.data.series, longDate(featured.data.date)].filter(Boolean).join(' · ')}
-            </p>
-          </a>
-        )}
-        <ul class="msg-list">
-          {moreMessages.map((m) => (
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="container hero__controls">
+      <ol class="hero__dots" aria-label="Choose slide">
+        {slides.map((s, i) => (
+          <li><button type="button" data-go={i} aria-label={`Slide ${i + 1}: ${s.eyebrow}`} aria-current={i === 0 ? 'true' : undefined}><span class="hero__num">{String(i + 1).padStart(2, '0')}</span><span class="hero__bar"><span></span></span></button></li>
+        ))}
+      </ol>
+      <div class="hero__btns">
+        <button type="button" class="hero__btn" data-prev aria-label="Previous slide"><Icon name="arrow-left" size={18} /></button>
+        <button type="button" class="hero__btn" data-pause aria-label="Pause slideshow"><Icon name="pause" size={16} class="i-pause" /><Icon name="play" size={16} class="i-play" /></button>
+        <button type="button" class="hero__btn" data-next aria-label="Next slide"><Icon name="arrow-right" size={18} /></button>
+      </div>
+    </div>
+    <a class="hero__scroll" href="#about" aria-label="Scroll to content"><span></span></a>
+  </section>
+
+  <!-- 2. About -->
+  <section class="section about watermark-host" id="about">
+    <span class="watermark watermark--top" aria-hidden="true">GLORYVILLE</span>
+    <div class="container about__grid">
+      <div class="about__copy" data-reveal>
+        <p class="eyebrow">About GMI</p>
+        <h2>Welcome to <strong>Gloryville</strong> Ministries International</h2>
+        <p class="about__quote ph">[A short word or quote from the Senior Pastor]</p>
+        {about.intro ? <p class="about__text">{about.intro}</p> : <p class="about__text ph">[Two or three sentences about who GMI is, its vision and mission, supplied by the church]</p>}
+        <div class="about__ctas">
+          <a class="btn btn--primary" href="/about">Learn more about us</a>
+          <a class="link-arrow" href="/new-here">New here? Start here <Icon name="arrow-right" /></a>
+        </div>
+      </div>
+      <div class="about__media" data-reveal="right">
+        <span class="about__halo" aria-hidden="true"></span>
+        <div class="img-slot arch about__img"><span class="img-label"><Icon name="image" />Photograph: Senior Pastor</span></div>
+        <div class="about__badge">
+          <span class="about__badge-icon"><Icon name="clock" size={18} /></span>
+          <span><strong>{site.services.map((s) => `${s.day.slice(0, 3)} ${s.time}`).join(' · ')}</strong>Service times</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Experience (Library pathways) -->
+  <section class="section experience bg-stone watermark-host">
+    <span class="watermark" aria-hidden="true" data-dir="right">ENCOUNTER</span>
+    <div class="container experience__grid">
+      <div class="experience__copy" data-reveal>
+        <p class="eyebrow">GMI Digital Library</p>
+        <h2>Grow in the Word, <strong>wherever you are</strong></h2>
+        <p>Messages, music and live services from GMI, ready when you are: on your phone, at home or on the road.</p>
+        <a class="btn btn--gold" href="/library">Open the Digital Library <Icon name="arrow-right" /></a>
+      </div>
+      <div class="experience__panel">
+        <span class="experience__block glow-drift" aria-hidden="true"></span>
+        <ul class="experience__cards" data-reveal-group>
+          {experience.map((x) => (
             <li>
-              <a href={`/library/messages/${m.id}`}>
-                <div class="img-slot img-slot--dark msg-list__thumb"><span class="img-label"><Icon name="video" />Thumbnail</span></div>
-                <div>
-                  {m.data.series && <p class="msg-series">{m.data.series}</p>}
-                  <h3 class="msg-title">{m.data.title}</h3>
-                  <p class="msg-meta">{m.data.sample ? <span class="ph">[Speaker] · [Date]</span> : [m.data.speaker, longDate(m.data.date)].filter(Boolean).join(' · ')}</p>
-                </div>
+              <a class="xcard" href={x.href}>
+                <span class="xcard__icon"><Icon name={x.icon} size={22} /></span>
+                <span class="xcard__title">{x.title}</span>
+                <span class="xcard__text">{x.text}</span>
+                <span class="xcard__go" aria-hidden="true"><Icon name="arrow-up-right" size={18} /></span>
               </a>
             </li>
           ))}
@@ -167,242 +180,340 @@ const quickLinks = [
     </div>
   </section>
 
-  <!-- Programmes and events -->
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Upcoming</p>
-          <h2>Programmes and events</h2>
+  <!-- 4. Latest messages (swipeable row) -->
+  {messages.length > 0 && (
+    <section class="section messages" aria-labelledby="msgs-h" data-carousel>
+      <div class="container">
+        <div class="row-head" data-reveal>
+          <div>
+            <p class="eyebrow">Messages and Sermons</p>
+            <h2 id="msgs-h">Latest <strong>Messages</strong></h2>
+          </div>
+          <div class="row-head__ctl">
+            <a class="link-arrow" href="/library">All messages <Icon name="arrow-right" /></a>
+            <button type="button" class="round" data-scroll="-1" aria-label="Scroll messages back"><Icon name="arrow-left" size={18} /></button>
+            <button type="button" class="round" data-scroll="1" aria-label="Scroll messages forward"><Icon name="arrow-right" size={18} /></button>
+          </div>
         </div>
-        <a class="link-arrow" href="/calendar">Open the church calendar <Icon name="arrow-right" /></a>
       </div>
-      {events.length === 0 ? (
-        <p>New programmes will appear here soon. See the <a href="/calendar">church calendar</a> for weekly activities.</p>
-      ) : (
-        <ul class="events">
-          {events.map((e) => (
-            <li class="event">
-              <div class="event__date" aria-hidden="true">
-                <span>{fmt(e.data.start, { month: 'short' })}</span>
-                <strong>{fmt(e.data.start, { day: '2-digit' })}</strong>
-              </div>
-              <div class="event__body">
-                <div class="event__chips">
-                  <span class={chipClass[e.data.category] ?? 'chip'}>{e.data.category}</span>
-                  {e.data.sample && <span class="chip chip--sample">Sample</span>}
-                </div>
-                <h3 class="event__title"><a href={`/calendar/${e.id}`}>{e.data.title}</a></h3>
-                <p class="event__meta">
-                  <span class="sr-only">{longDate(e.data.start)}. </span>
-                  <span><Icon name="clock" size={14} />{e.data.time ?? <span class="ph">[Time]</span>}</span>
-                  <span><Icon name="map-pin" size={14} />{e.data.venue ?? <span class="ph">[Venue]</span>}</span>
-                </p>
-              </div>
-              <a class="link-arrow event__link" href={`/calendar/${e.id}`} aria-hidden="true" tabindex="-1">Details <Icon name="arrow-right" /></a>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul class="track" data-track tabindex="0" aria-label="Latest messages">
+        {messages.map((m) => <li class="track__item"><MessageCard m={m} /></li>)}
+      </ul>
+    </section>
+  )}
+
+  <!-- 5. Giving -->
+  <section class="section giving bg-stone watermark-host">
+    <span class="watermark" aria-hidden="true">GIVING</span>
+    <div class="container giving__inner" data-reveal>
+      <span class="ping giving__icon"><span class="giving__icon-core"><Icon name="gift" size={26} /></span></span>
+      <blockquote class="giving__quote">
+        <p>“Every man according as he purposeth in his heart, so let him give; not grudgingly, or of necessity: for God loveth <strong>a cheerful giver</strong>.”</p>
+        <cite>2 Corinthians 9:7 (KJV)</cite>
+      </blockquote>
+      <a class="btn btn--gold" href="/give">Give online <Icon name="arrow-right" /></a>
     </div>
   </section>
 
-  <!-- Church updates -->
-  {leadUpdate && (
-    <section class="section bg-stone">
-      <div class="container">
-        <p class="eyebrow">Church updates</p>
-        <h2 class="news__heading">News from GMI</h2>
-        <div class="news">
-          <article class="news__lead">
-            <div class="img-slot img-slot--warm news__lead-img"><span class="img-label"><Icon name="image" />Photograph: church update</span></div>
-            <p class="news__date">{leadUpdate.data.sample ? <span class="ph">[Date]</span> : longDate(leadUpdate.data.date)} · Church update</p>
-            <h3 class:list={['h3', { ph: leadUpdate.data.sample }]}>{leadUpdate.data.sample ? '[Lead church update headline]' : leadUpdate.data.title}</h3>
-            {leadUpdate.data.summary && <p class:list={{ ph: leadUpdate.data.sample }}>{leadUpdate.data.sample ? `[${leadUpdate.data.summary}]` : leadUpdate.data.summary}</p>}
-          </article>
-          <ul class="news__list">
-            {otherUpdates.map((u) => (
-              <li>
-                <div class="img-slot img-slot--warm news__thumb"><span class="img-label"><Icon name="image" />Photo</span></div>
-                <div>
-                  <p class="news__date">{u.data.sample ? <span class="ph">[Date]</span> : longDate(u.data.date)}</p>
-                  <h3 class:list={['news__title', { ph: u.data.sample }]}>{u.data.sample ? '[Church update headline]' : u.data.title}</h3>
+  <!-- 6. Departments: staggered feature blocks -->
+  <section class="section depts">
+    <div class="container">
+      <div class="depts__intro" data-reveal>
+        <p class="eyebrow">Departments</p>
+        <h2>Nine departments. <strong>One church at work.</strong></h2>
+        <p>Every department serves the life of GMI. Find where you fit, after the membership class.</p>
+      </div>
+      <div class="depts__grid">
+        {features.map((d, i) => {
+          const n = splitName(d.name);
+          const isMedia = d.slug === 'media-and-publicity';
+          return (
+            <article class:list={['feature', { 'feature--offset': i % 2 === 1 }]} data-reveal>
+              <a class="feature__media zoom-media" href={`/departments/${d.slug}`} tabindex="-1" aria-hidden="true">
+                <div class:list={['img-slot', { 'img-slot--warm': i % 3 === 1 }]}>
+                  {d.image ? <img src={d.image} alt="" loading="lazy" /> : <span class="img-label"><Icon name="image" />Photograph: {d.name}</span>}
                 </div>
-              </li>
-            ))}
-          </ul>
+              </a>
+              {isMedia && (
+                <a class="feature__play ping" href="/library/live" aria-label="Watch services live">
+                  <span><Icon name="play" size={22} /></span>
+                </a>
+              )}
+              <h3 class="feature__title"><a href={`/departments/${d.slug}`}>{n.light} <strong>{n.bold}</strong></a></h3>
+              {d.summary ? <p>{d.summary}</p> : <p class="ph">[One or two sentences about the department]</p>}
+              <a class="link-arrow" href={`/departments/${d.slug}`}>{isMedia ? 'Explore Media and Publicity' : `Explore ${d.name}`} <Icon name="arrow-right" /></a>
+            </article>
+          );
+        })}
+      </div>
+      <p class="depts__all"><a class="btn btn--outline" href="/departments">See all nine departments</a></p>
+    </div>
+  </section>
+
+  <!-- 7. Upcoming programmes -->
+  {events.length > 0 && (
+    <section class="section events bg-dark on-dark watermark-host">
+      <span class="watermark" aria-hidden="true" data-dir="right">GATHER</span>
+      <div class="container">
+        <div class="row-head" data-reveal>
+          <div>
+            <p class="eyebrow">Church Calendar</p>
+            <h2>Upcoming <strong>Programmes</strong></h2>
+          </div>
+          <a class="link-arrow" href="/calendar">Open the calendar <Icon name="arrow-right" /></a>
         </div>
+        <ul class="events__list" data-reveal-group>
+          {events.map((e) => (
+            <li>
+              <a class="ev" href={`/calendar/${e.id}`}>
+                <span class="ev__date">
+                  {e.data.sample ? <span class="ph">[Date]</span> : <><strong>{fmt(e.data.start, { day: 'numeric' })}</strong>{fmt(e.data.start, { month: 'short' })}</>}
+                </span>
+                <span class="ev__body">
+                  <span class="chip">{e.data.category}</span>
+                  <span class="ev__title">{e.data.title}</span>
+                  <span class="ev__meta">{e.data.sample ? <span class="ph">[Time · Venue]</span> : `${e.data.time ?? fmt(e.data.start, { hour: 'numeric', minute: '2-digit' })}${e.data.venue ? ` · ${e.data.venue}` : ''}`}</span>
+                </span>
+                <span class="ev__go" aria-hidden="true"><Icon name="arrow-up-right" size={20} /></span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   )}
 
-  <!-- Quick links -->
-  <section class="section">
-    <div class="container">
-      <p class="eyebrow">Quick links</p>
-      <h2 class="quick__heading">Find your way around</h2>
-      <ul class="quick">
-        {quickLinks.map((q) => (
-          <li>
-            <a href={q.href}>
-              <Icon name={q.icon} size={22} class="quick__icon" />
-              <h3 class="quick__title">{q.title}</h3>
-              <p>{q.text}</p>
-              <span class="link-arrow">Open <Icon name="arrow-right" /></span>
-            </a>
-          </li>
+  <!-- 8. Get involved -->
+  <section class="section involved">
+    <div class="container involved__grid">
+      <div data-reveal>
+        <p class="eyebrow">Next steps</p>
+        <h2>Get <strong>Involved</strong></h2>
+        <p class="involved__lead">Take your next step at GMI. Wherever you are on the journey, there is a place for you.</p>
+      </div>
+      <div class="acc" data-reveal-group>
+        {steps.map((s, i) => (
+          <details class="acc__item" open={i === 0}>
+            <summary><span>{s.title}</span><span class="acc__pm" aria-hidden="true"></span></summary>
+            <div class="acc__body">
+              <p>{s.text}</p>
+              <a class="link-arrow" href={s.href}>{s.cta} <Icon name="arrow-right" /></a>
+            </div>
+          </details>
         ))}
-      </ul>
-
-      <div class="cta-band on-dark">
-        <GloryRays class="cta-band__rays" opacity={0.35} color="var(--gold-400)" />
-        <div class="cta-band__copy">
-          <p class="eyebrow">Come as you are</p>
-          <h2 class="cta-band__title">We would love to welcome you in person.</h2>
-        </div>
-        <div class="cta-band__btns">
-          <a href="/plan-your-visit" class="btn btn--gold">Plan Your Visit</a>
-          <a href="/contact" class="btn btn--outline">Contact us</a>
-        </div>
       </div>
     </div>
   </section>
 </Base>
 
 <style>
-  /* Hero */
-  .hero { position: relative; overflow: hidden; padding: clamp(48px, 7vw, 96px) 0 var(--s-8); }
-  .hero__grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--s-8); align-items: center; }
-  .hero__intro { margin: var(--s-5) 0 var(--s-6); max-width: 480px; font-size: var(--fs-body-lg); line-height: 1.6; }
-  .hero__ctas { display: flex; flex-wrap: wrap; gap: var(--s-3); }
-  .hero__facts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5); margin: var(--s-6) 0 0; padding-top: var(--s-5); border-top: 1px solid var(--line); max-width: 520px; }
-  .hero__facts dt { display: flex; align-items: center; gap: 8px; font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px; }
-  .hero__facts dt :global(svg) { color: var(--gold-700); }
-  .hero__facts dd { margin: 0 0 4px 26px; font-size: var(--fs-small); color: var(--ink); }
-  .hero__facts dd span { display: block; }
-  .hero__facts a { font-weight: 600; }
-  .hero__media { position: relative; display: flex; justify-content: center; min-height: 520px; }
-  :global(.hero__rays) { inset: -60px -120px -40px -80px; width: calc(100% + 200px); height: calc(100% + 100px); }
-  .hero__arch { position: relative; width: min(100%, 400px); aspect-ratio: 3 / 4; margin-left: auto; }
-  .live-card {
-    position: absolute; left: 0; bottom: 48px; display: flex; gap: 14px; align-items: center; max-width: 260px;
-    padding: 16px 18px; background: var(--white); border-radius: var(--r-card); box-shadow: var(--shadow-md); text-decoration: none;
+  /* ---------- 1. Hero slider ---------- */
+  .hero { position: relative; height: 100svh; min-height: 640px; max-height: 1000px; overflow: hidden; background: var(--blue-950); }
+  .hero__slides { position: absolute; inset: 0; }
+  .slide { position: absolute; inset: 0; display: flex; align-items: center; opacity: 0; visibility: hidden; transition: opacity 1s var(--ease), visibility 0s 1s; }
+  .slide.is-active { opacity: 1; visibility: visible; transition: opacity 1s var(--ease); }
+  .slide__bg { position: absolute; inset: -4%; background: var(--glow-hero); transform: scale(1.06); transition: transform 8s linear; }
+  .slide.is-active .slide__bg { transform: scale(1); }
+  .slide--b .slide__bg { background:
+      radial-gradient(55% 65% at 15% 20%, rgba(217, 166, 58, 0.5), transparent 60%),
+      radial-gradient(60% 70% at 90% 85%, rgba(53, 80, 200, 0.8), transparent 65%),
+      linear-gradient(160deg, #111a44 0%, #1e3282 60%, #0a0f26 100%); }
+  .slide--c .slide__bg { background:
+      radial-gradient(50% 60% at 75% 75%, rgba(234, 192, 106, 0.55), transparent 60%),
+      radial-gradient(70% 70% at 20% 30%, rgba(53, 80, 200, 0.7), transparent 70%),
+      linear-gradient(200deg, #0a0f26 0%, #172766 55%, #111a44 100%); }
+  .slide--d .slide__bg { background:
+      radial-gradient(60% 60% at 50% 110%, rgba(217, 166, 58, 0.6), transparent 60%),
+      radial-gradient(60% 60% at 85% 10%, rgba(53, 80, 200, 0.75), transparent 65%),
+      linear-gradient(135deg, #1e3282 0%, #111a44 55%, #0a0f26 100%); }
+  .slide__bg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; mix-blend-mode: luminosity; opacity: 0.45; }
+  .slide__bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10, 15, 38, 0.75) 0%, rgba(10, 15, 38, 0.2) 70%), linear-gradient(0deg, rgba(10, 15, 38, 0.6), transparent 40%); }
+  :global(.slide__rays) { right: -6%; bottom: -10%; width: 70%; height: 90%; z-index: 1; }
+  .slide__inner { position: relative; z-index: 2; }
+  .slide__copy { max-width: 760px; padding-top: 60px; }
+  .slide .display { color: var(--white); }
+  .slide__text { max-width: 560px; margin-top: var(--s-5); font-size: var(--fs-body-lg); color: rgba(255, 255, 255, 0.86); }
+  .slide__ctas { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
+  .slide__anim { opacity: 0; transform: translateY(26px); }
+  .slide.is-active .slide__anim { opacity: 1; transform: none; transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out); }
+  .slide.is-active .slide__anim:nth-child(2) { transition-delay: 0.12s; }
+  .slide.is-active .slide__anim:nth-child(3) { transition-delay: 0.24s; }
+  .slide.is-active .slide__anim:nth-child(4) { transition-delay: 0.36s; }
+
+  .hero__controls { position: absolute; left: 0; right: 0; bottom: var(--s-7); z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: var(--s-5); }
+  .hero__dots { display: flex; gap: var(--s-4); list-style: none; margin: 0; padding: 0; }
+  .hero__dots button { display: flex; flex-direction: column; gap: 8px; min-width: 64px; padding: 6px 0; background: none; border: 0; cursor: pointer; color: rgba(255, 255, 255, 0.6); text-align: left; }
+  .hero__num { font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.1em; }
+  .hero__dots [aria-current='true'] { color: var(--white); }
+  .hero__bar { display: block; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, 0.22); overflow: hidden; }
+  .hero__bar span { display: block; height: 100%; width: 0; background: var(--gold-500); }
+  .hero__dots [aria-current='true'] .hero__bar span { width: 100%; transition: width var(--hero-dur, 7s) linear; }
+  :global(.hero.is-paused) .hero__dots [aria-current='true'] .hero__bar span { width: 100%; transition: none; }
+  .hero__btns { display: flex; gap: var(--s-2); }
+  .hero__btn { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.35); background: rgba(255, 255, 255, 0.06); color: var(--white); cursor: pointer; backdrop-filter: blur(6px); transition: background 0.2s var(--ease), border-color 0.2s var(--ease); }
+  .hero__btn:hover { background: var(--gold-500); border-color: var(--gold-500); color: var(--blue-950); }
+  .hero__btn :global(.i-play) { display: none; }
+  :global(.hero.is-paused) .hero__btn :global(.i-play) { display: block; }
+  :global(.hero.is-paused) .hero__btn :global(.i-pause) { display: none; }
+  .hero__btn :global(svg) { fill: none; }
+  .hero__scroll { position: absolute; left: 50%; bottom: 22px; z-index: 3; translate: -50% 0; width: 24px; height: 38px; border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 14px; }
+  .hero__scroll span { position: absolute; left: 50%; top: 7px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: var(--gold-400); animation: scrollCue 1.8s var(--ease) infinite; }
+  @keyframes scrollCue { 0% { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(12px); } }
+
+  /* ---------- 2. About ---------- */
+  .about__grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--s-9); align-items: center; }
+  .about h2 { font-size: var(--fs-h1); margin-bottom: var(--s-5); }
+  .about__quote { font-size: 1.25rem; font-weight: 600; font-style: italic; color: var(--ink); margin-bottom: var(--s-4); }
+  .about__text { font-size: var(--fs-body-lg); }
+  .about__ctas { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-5); margin-top: var(--s-6); }
+  .about__media { position: relative; justify-self: center; width: min(100%, 460px); }
+  .about__halo { position: absolute; inset: 8% -8% -6% 8%; border-radius: 999px 999px var(--r-panel) var(--r-panel); background: var(--glow-gold); opacity: 0.9; transform: rotate(4deg); }
+  .about__img { position: relative; aspect-ratio: 4 / 5; border-radius: 999px 999px var(--r-panel) var(--r-panel); box-shadow: var(--shadow-lg); }
+  .about__badge { position: absolute; left: -36px; bottom: 40px; display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: var(--white); border-radius: var(--r-card); box-shadow: var(--shadow-md); font-size: 0.8125rem; color: var(--ink-3); animation: floaty 6s ease-in-out infinite; }
+  .about__badge strong { display: block; color: var(--blue-900); font-size: 0.9375rem; }
+  .about__badge-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--gold-100); color: var(--gold-700); }
+  @keyframes floaty { 50% { transform: translateY(-10px); } }
+
+  /* ---------- 3. Experience ---------- */
+  .experience__grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: var(--s-8); align-items: center; }
+  .experience h2 { margin-bottom: var(--s-4); }
+  .experience__copy p:not(.eyebrow) { margin-bottom: var(--s-6); font-size: var(--fs-body-lg); }
+  .experience__panel { position: relative; padding: var(--s-7) 0 var(--s-7) var(--s-7); }
+  .experience__block { position: absolute; left: 0; top: 0; bottom: 20%; right: 18%; border-radius: var(--r-panel); }
+  .experience__cards { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); }
+  .experience__cards li:nth-child(even) { transform: translateY(40px); }
+  .experience__cards li.rv:nth-child(even) { transform: translateY(68px); }
+  .experience__cards li.rv--in:nth-child(even) { transform: translateY(40px); }
+  .xcard { position: relative; display: flex; flex-direction: column; gap: 4px; height: 100%; padding: var(--s-6) var(--s-5); background: var(--white); border-radius: var(--r-card); box-shadow: var(--shadow-md); text-decoration: none; transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out); }
+  .xcard:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+  .xcard__icon { display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: var(--s-4); border-radius: 50%; border: 1.5px solid var(--line); color: var(--blue-700); transition: background 0.3s var(--ease), color 0.3s var(--ease), border-color 0.3s var(--ease); }
+  .xcard:hover .xcard__icon { background: var(--gold-500); border-color: var(--gold-500); color: var(--blue-950); }
+  .xcard__title { font-size: 0.9375rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold-700); }
+  .xcard__text { font-size: var(--fs-small); color: var(--ink-3); }
+  .xcard__go { position: absolute; top: var(--s-5); right: var(--s-5); color: var(--line-strong); transition: color 0.3s var(--ease), transform 0.3s var(--ease); }
+  .xcard:hover .xcard__go { color: var(--blue-700); transform: translate(2px, -2px); }
+
+  /* ---------- 4. Messages row ---------- */
+  .row-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--s-5); flex-wrap: wrap; margin-bottom: var(--s-7); }
+  .row-head__ctl { display: flex; align-items: center; gap: var(--s-2); }
+  .row-head__ctl .link-arrow { margin-right: var(--s-3); }
+  .round { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--white); color: var(--blue-900); cursor: pointer; transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease); }
+  .round:hover { background: var(--blue-900); border-color: var(--blue-900); color: var(--white); }
+  .round:disabled { opacity: 0.35; cursor: default; background: var(--white); color: var(--blue-900); border-color: var(--line); }
+  .track {
+    --edge: max(var(--gutter), calc((100vw - var(--rail) - var(--container)) / 2));
+    display: grid; grid-auto-flow: column; grid-auto-columns: clamp(270px, 28vw, 360px); gap: var(--s-5);
+    list-style: none; margin: 0; padding: 0 var(--edge) var(--s-4); scroll-padding-inline: var(--edge);
+    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
   }
-  .live-card strong { display: block; color: var(--blue-950); font-size: var(--fs-small); }
-  .live-card span span { display: block; color: var(--ink-3); font-size: 0.8125rem; line-height: 1.45; }
-  .live-card__icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--blue-800); color: var(--white); }
+  .track::-webkit-scrollbar { display: none; }
+  .track:focus-visible { outline-offset: -3px; }
+  .track__item { scroll-snap-align: start; }
 
-  /* Pathways */
-  .pathways { padding-bottom: var(--section-y-compact); }
-  .pathways__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); }
-  .path-card {
-    display: block; padding: var(--s-6); border-radius: var(--r-panel); background: var(--white); border: 1px solid var(--line);
-    text-decoration: none; color: var(--ink-2); transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
-  }
-  .path-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); color: var(--ink-2); }
-  .path-card--dark { background: var(--blue-800); border-color: var(--blue-800); color: rgba(255, 255, 255, 0.82); }
-  .path-card--dark:hover { color: rgba(255, 255, 255, 0.82); }
-  .path-card h2 { margin-bottom: var(--s-3); }
-  .path-card p:not(.eyebrow) { max-width: 420px; margin-bottom: var(--s-5); }
-  .path-card__icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); color: var(--gold-400); margin-bottom: var(--s-6); }
-  .path-card__icon--gold { background: var(--gold-100); color: var(--gold-700); margin-bottom: var(--s-4); }
-  .path-card:not(.path-card--dark) .link-arrow { color: var(--blue-700); }
+  /* ---------- 5. Giving ---------- */
+  .giving__inner { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 900px; }
+  .giving__icon { width: 84px; height: 84px; margin-bottom: var(--s-6); z-index: 0; }
+  .giving__icon-core { display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; background: var(--gold-500); color: var(--blue-950); box-shadow: 0 16px 34px -12px rgba(217, 166, 58, 0.8); }
+  .giving__quote { margin: 0 0 var(--s-6); }
+  .giving__quote p { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.375rem); font-weight: 300; line-height: 1.35; letter-spacing: -0.02em; color: var(--blue-900); }
+  .giving__quote strong { font-weight: 800; }
+  .giving__quote cite { display: block; margin-top: var(--s-4); font-style: normal; font-size: var(--fs-small); font-weight: 700; color: var(--gold-700); letter-spacing: 0.04em; }
 
-  /* Welcome */
-  .welcome__grid { display: grid; grid-template-columns: 0.75fr 1fr; gap: var(--s-8); align-items: center; }
-  .welcome__portrait { aspect-ratio: 3 / 4; max-width: 380px; }
-  .rule { border: 0; border-top: 1px solid var(--gold-500); margin: var(--s-5) 0; }
-  .welcome__quote { font-family: var(--font-serif); font-size: var(--fs-h3); line-height: 1.4; margin-bottom: var(--s-5); }
-  .welcome__names { margin: 0; font-weight: 700; color: var(--ink); }
-  .welcome__names + .small { margin: 2px 0 var(--s-5); }
+  /* ---------- 6. Departments ---------- */
+  .depts__intro { max-width: 760px; margin: 0 auto var(--s-8); text-align: center; }
+  .depts__intro .eyebrow { justify-content: center; }
+  .depts__intro h2 { margin-bottom: var(--s-4); }
+  .depts__intro p:last-child { font-size: var(--fs-body-lg); }
+  .depts__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-8) var(--s-8); }
+  .feature { position: relative; }
+  .feature--offset { margin-top: 140px; }
+  .feature--offset.rv { transform: translateY(60px); }
+  .feature__media { display: block; border-radius: var(--r-panel); margin-bottom: var(--s-5); }
+  .feature__media .img-slot { aspect-ratio: 5 / 4; border-radius: var(--r-panel); }
+  .feature__play { position: absolute; left: 50%; top: 0; z-index: 1; width: 76px; height: 76px; margin: calc((100% * 0.8) / 2 - 38px) 0 0 -38px; text-decoration: none; }
+  .feature__play > span { display: grid; place-items: center; width: 76px; height: 76px; border-radius: 50%; background: var(--gold-500); color: var(--blue-950); box-shadow: var(--shadow-md); transition: transform 0.25s var(--ease); }
+  .feature__play:hover > span { transform: scale(1.08); }
+  .feature__play :global(svg) { fill: currentColor; margin-left: 3px; }
+  .feature__title { font-size: var(--fs-h2); font-weight: 300; letter-spacing: -0.025em; margin-bottom: var(--s-3); }
+  .feature__title a { color: inherit; text-decoration: none; }
+  .feature__title strong { font-weight: 800; }
+  .feature__title a:hover { color: var(--blue-700); }
+  .feature p { max-width: 520px; margin-bottom: var(--s-4); }
+  .depts__all { display: flex; justify-content: center; margin-top: calc(var(--s-9) + 40px); }
 
-  /* Messages */
-  .sub { margin-top: var(--s-3); color: rgba(255, 255, 255, 0.72); }
-  .messages { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--s-6); }
-  .msg-feature { text-decoration: none; color: inherit; }
-  .msg-feature__media { aspect-ratio: 16 / 9; display: grid; place-items: center; }
-  .play { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--gold-500); color: var(--blue-950); transition: transform 0.2s var(--ease); }
-  .play :global(svg) { fill: currentColor; margin-left: 3px; }
-  .msg-feature:hover .play { transform: scale(1.08); }
-  .msg-feature__chips { display: flex; gap: 6px; margin: var(--s-4) 0 var(--s-3); }
-  .msg-feature h3 { margin-bottom: var(--s-2); }
-  .msg-meta { font-size: var(--fs-small); color: rgba(255, 255, 255, 0.7); margin: 0; }
-  .msg-list { list-style: none; margin: 0; padding: 0; }
-  .msg-list li { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-  .msg-list a { display: grid; grid-template-columns: 136px 1fr; gap: var(--s-4); align-items: center; padding: var(--s-4) 0; text-decoration: none; color: inherit; }
-  .msg-list li:first-child a { padding-top: 0; }
-  .msg-list__thumb { aspect-ratio: 16 / 9; border-radius: var(--r-input); }
-  .msg-series { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-400); margin: 0 0 4px; }
-  .msg-title { font-size: 1.1875rem; color: var(--white); margin-bottom: 4px; }
-  .msg-list a:hover .msg-title { color: var(--gold-400); }
+  /* ---------- 7. Events ---------- */
+  .events { background: var(--blue-950); }
+  .events__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
+  .ev { display: grid; grid-template-columns: 88px minmax(0, 1fr) auto; gap: var(--s-6); align-items: center; padding: var(--s-5) var(--s-6); border-radius: var(--r-card); background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.78); text-decoration: none; transition: background 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.3s var(--ease-out); }
+  .ev:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(234, 192, 106, 0.5); transform: translateX(6px); color: rgba(255, 255, 255, 0.78); }
+  .ev__date { display: grid; place-items: center; text-align: center; width: 88px; height: 88px; border-radius: var(--r-card); background: var(--gold-500); color: var(--blue-950); font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.1; }
+  .ev__date strong { display: block; font-size: 2rem; letter-spacing: -0.02em; }
+  .ev__date .ph { color: var(--blue-950); opacity: 0.7; font-size: 0.75rem; letter-spacing: 0; text-transform: none; }
+  .ev__body { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .ev__title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: var(--white); }
+  .ev__meta { font-size: var(--fs-small); }
+  .ev__go { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.25); color: var(--gold-400); transition: background 0.3s var(--ease), color 0.3s var(--ease); }
+  .ev:hover .ev__go { background: var(--gold-500); color: var(--blue-950); border-color: var(--gold-500); }
 
-  /* Events */
-  .events { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-  .event { position: relative; display: grid; grid-template-columns: 64px 1fr auto; gap: var(--s-5); align-items: center; padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
-  .event__date { display: grid; place-items: center; align-content: center; height: 64px; border: 1px solid var(--line); border-radius: var(--r-input); background: var(--white); }
-  .event__date span { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-700); line-height: 1; }
-  .event__date strong { font-family: var(--font-serif); font-weight: 500; font-size: 1.75rem; color: var(--blue-900); line-height: 1.05; }
-  .event__chips { display: flex; gap: 6px; margin-bottom: 6px; }
-  .event__title { font-size: 1.375rem; margin-bottom: 4px; }
-  .event__title a { color: inherit; text-decoration: none; }
-  .event__title a::after { content: ''; position: absolute; inset: 0; }
-  .event:hover .event__title { color: var(--blue-700); }
-  .event__meta { display: flex; gap: var(--s-4); margin: 0; font-size: var(--fs-small); }
-  .event__meta > span { display: inline-flex; align-items: center; gap: 6px; }
-  .event__meta :global(svg) { color: var(--ink-3); }
+  /* ---------- 8. Get involved ---------- */
+  .involved__grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: var(--s-8); align-items: start; }
+  .involved h2 { font-size: var(--fs-h1); margin-bottom: var(--s-4); }
+  .involved__lead { max-width: 380px; }
+  .acc { border-top: 1px solid var(--line); }
+  .acc__item { border-bottom: 1px solid var(--line); }
+  .acc__item summary { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); min-height: 76px; cursor: pointer; list-style: none; font-size: 1.1875rem; font-weight: 700; color: var(--blue-900); transition: color 0.2s var(--ease), padding 0.3s var(--ease-out); }
+  .acc__item summary::-webkit-details-marker { display: none; }
+  .acc__item summary:hover { color: var(--blue-700); padding-left: 6px; }
+  .acc__pm { position: relative; flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--line); transition: background 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.4s var(--ease-out); }
+  .acc__pm::before, .acc__pm::after { content: ''; position: absolute; left: 50%; top: 50%; width: 12px; height: 2px; margin: -1px 0 0 -6px; background: currentColor; border-radius: 2px; }
+  .acc__pm::after { transform: rotate(90deg); transition: transform 0.3s var(--ease); }
+  .acc__item[open] .acc__pm { background: var(--gold-500); border-color: var(--gold-500); color: var(--blue-950); transform: rotate(180deg); }
+  .acc__item[open] .acc__pm::after { transform: rotate(0); }
+  .acc__body { padding: 0 var(--s-8) var(--s-5) 0; animation: accIn 0.45s var(--ease-out); }
+  .acc__body p { margin-bottom: var(--s-3); }
+  @keyframes accIn { from { opacity: 0; transform: translateY(-8px); } }
 
-  /* News */
-  .news__heading { margin-bottom: var(--s-7); }
-  .news { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--s-6); }
-  .news__lead-img { aspect-ratio: 3 / 2; margin-bottom: var(--s-4); }
-  .news__date { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: var(--s-2); }
-  .news__lead h3 { margin-bottom: var(--s-2); }
-  .news__list { list-style: none; margin: 0; padding: 0; }
-  .news__list li { display: grid; grid-template-columns: 100px 1fr; gap: var(--s-4); padding-bottom: var(--s-4); margin-bottom: var(--s-4); border-bottom: 1px solid var(--line); }
-  .news__thumb { aspect-ratio: 4 / 3; border-radius: var(--r-input); }
-  .news__title { font-size: 1.1875rem; }
-
-  /* Quick links */
-  .quick__heading { margin-bottom: var(--s-7); }
-  .quick { list-style: none; margin: 0 0 var(--section-y); padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
-  .quick li { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  .quick a { display: flex; flex-direction: column; height: 100%; padding: var(--s-5); text-decoration: none; color: var(--ink-3); font-size: var(--fs-small); transition: background-color 0.2s var(--ease); }
-  .quick a:hover { background: var(--white); }
-  :global(.quick__icon) { color: var(--gold-700); margin-bottom: var(--s-3); }
-  .quick__title { font-size: 1.1875rem; margin-bottom: var(--s-2); }
-  .quick p { flex: 1; margin-bottom: var(--s-4); }
-
-  /* CTA band */
-  .cta-band { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: var(--s-6); flex-wrap: wrap; padding: var(--s-8) var(--s-8); border-radius: var(--r-panel); background: var(--blue-800); }
-  .cta-band__copy { position: relative; max-width: 600px; }
-  .cta-band__title { font-size: clamp(2rem, 1.5rem + 2vw, 3rem); line-height: 1.08; letter-spacing: -0.02em; }
-  .cta-band__btns { position: relative; display: flex; gap: var(--s-3); flex-wrap: wrap; }
-  :global(.cta-band__rays) { right: -60px; bottom: -120px; width: 620px; height: 420px; }
-
-  /* Responsive */
+  /* ---------- Responsive ---------- */
   @media (max-width: 1024px) {
-    .hero__grid { grid-template-columns: 1fr; gap: var(--s-7); }
-    .hero__media { min-height: 0; }
-    .hero__arch { margin: 0 auto; width: min(100%, 360px); }
-    .live-card { left: 50%; transform: translateX(-130%); bottom: 32px; }
-    .messages, .news { grid-template-columns: 1fr; }
-    .quick { grid-template-columns: repeat(2, 1fr); }
+    .about__grid, .experience__grid, .involved__grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-7); }
+    .about__badge { left: 0; }
+    .experience__panel { padding-left: var(--s-5); }
+    .depts__grid { gap: var(--s-7) var(--s-5); }
+    .feature--offset { margin-top: 90px; }
   }
   @media (max-width: 760px) {
-    .hero__facts { grid-template-columns: 1fr; }
-    .hero__ctas .btn { flex: 1 1 100%; }
-    .live-card { position: relative; left: auto; bottom: auto; transform: none; margin: var(--s-4) auto 0; }
-    .hero__media { flex-direction: column; align-items: center; }
-    .pathways__grid, .welcome__grid { grid-template-columns: 1fr; }
-    .welcome__portrait { max-width: 300px; }
-    .path-card, .cta-band { padding: var(--s-5); }
-    .msg-list a { grid-template-columns: 104px 1fr; }
-    .event { grid-template-columns: 56px 1fr; gap: var(--s-4); }
-    .event__date { height: 56px; }
-    .event__link { display: none; }
-    .event__meta { flex-wrap: wrap; gap: 4px var(--s-4); }
-    .quick { grid-template-columns: 1fr; }
-    .quick a { padding: var(--s-4); }
-    .cta-band__btns .btn { flex: 1; }
+    .hero { min-height: 600px; }
+    .slide__copy { padding-top: 40px; }
+    .slide__ctas .btn { flex: 1 1 auto; }
+    .hero__controls { bottom: var(--s-6); }
+    .hero__dots { gap: var(--s-2); }
+    .hero__dots button { min-width: 40px; }
+    .hero__btn[data-prev], .hero__btn[data-next], .hero__scroll { display: none; }
+    .about__badge { left: 12px; bottom: 20px; }
+    .experience__panel { padding: var(--s-5) 0 var(--s-8) var(--s-4); }
+    .experience__block { right: 10%; }
+    .xcard { padding: var(--s-5) var(--s-4); }
+    .xcard__icon { width: 46px; height: 46px; }
+    .xcard__title { font-size: 0.8125rem; }
+    .row-head__ctl .round { display: none; }
+    .depts__grid { grid-template-columns: minmax(0, 1fr); }
+    .feature--offset { margin-top: 0; }
+    .depts__all { margin-top: var(--s-7); }
+    .ev { grid-template-columns: 64px minmax(0, 1fr); gap: var(--s-4); padding: var(--s-4); }
+    .ev__date { width: 64px; height: 64px; }
+    .ev__date strong { font-size: 1.5rem; }
+    .ev__title { font-size: 1.1875rem; }
+    .ev__go { display: none; }
+    .acc__body { padding-right: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide__bg, .slide__anim { transition: none !important; transform: none !important; opacity: 1; }
+    .about__badge, .hero__scroll span { animation: none; }
   }
 </style>
+
+<script>
+  import { initHero, initTrack } from '../scripts/home';
+  initHero();
+  initTrack();
+</script>

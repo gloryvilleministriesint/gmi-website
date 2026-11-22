@@ -4,8 +4,9 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import site from '../data/site.json';
 
-interface Props { title?: string; description?: string; current?: string }
-const { title, description = 'Gloryville Ministries International (GMI), Ibadan. Service times, how to find us, messages, events and how to become part of the GMI family.', current } = Astro.props;
+interface Props { title?: string; description?: string; current?: string; overlay?: boolean }
+// overlay: the header sits transparent over a dark hero and turns solid on scroll (Home).
+const { overlay = false, title, description = 'Gloryville Ministries International (GMI), Ibadan. Service times, how to find us, messages, events and how to become part of the GMI family.', current } = Astro.props;
 const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · Ibadan`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -19,19 +20,19 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#0a1633" />
+    <meta name="theme-color" content="#0a0f26" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL('/icon-512.png', Astro.site)} />
   </head>
-  <body>
+  <body class:list={{ 'has-overlay-header': overlay }}>
     <a class="skip-link" href="#main">Skip to main content</a>
-    <Header current={current} />
+    <Header current={current} overlay={overlay} />
     <main id="main" tabindex="-1">
       <slot />
     </main>
     <Footer />
-    <script>import '../scripts/forms.ts';</script>
+    <script>import '../scripts/forms.ts'; import '../scripts/motion.ts';</script>
   </body>
 </html>
