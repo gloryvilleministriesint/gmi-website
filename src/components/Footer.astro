@@ -32,7 +32,7 @@ const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComp
           : <p class="footer__identity ph">[One-line statement of GMI's identity, supplied by the church]</p>}
         {socials.length > 0 && (
           <ul class="footer__social" aria-label="GMI on social media">
-            {socials.map((k) => <li><a href={(site.social as Record<string, string>)[k]} target="_blank" rel="noopener"><Icon name={k} size={18} label={k[0].toUpperCase() + k.slice(1)} /></a></li>)}
+            {socials.map((k) => <li><a href={(site.social as Record<string, string>)[k]} target="_blank" rel="noopener"><Icon name={k} size={18} label={k === 'whatsapp' ? 'WhatsApp channel' : k[0].toUpperCase() + k.slice(1)} /></a></li>)}
           </ul>
         )}
       </div>
