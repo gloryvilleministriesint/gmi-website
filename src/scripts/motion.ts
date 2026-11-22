@@ -31,17 +31,47 @@ const GROUPS = [
   'main .related',
 ];
 
+// Generic pass so every page gets motion without per-page markup: short lists of cards/items
+// stagger, and the remaining blocks of each section fade up in turn.
+const SKIP = '[data-no-reveal], .hero, .acc, .track, form, nav, [role=tablist], [role=tabpanel] > ul, .mobile-menu, .mcard, .footer';
+
 function setupReveal() {
   const targets = new Set<HTMLElement>();
-  document.querySelectorAll<HTMLElement>(SINGLE.join(',')).forEach((el) => {
-    if (!el.closest('[data-no-reveal]')) targets.add(el);
+  const add = (el: HTMLElement, i = 0, depth = 0) => {
+    if (el.matches('script, style, .watermark, .sr-only') || el.closest(SKIP)) return;
+    for (const t of targets) if (t.contains(el)) return; // already animated by an ancestor
+    const inner = [...targets].some((t) => el.contains(t));
+    if (inner) {
+      // A block that holds a staggered list: animate its other children instead.
+      if (depth < 2) Array.from(el.children).forEach((c, j) => add(c as HTMLElement, i + j, depth + 1));
+      return;
+    }
+    el.style.setProperty('--rv-i', String(Math.min(i % 6, 5)));
+    targets.add(el);
+  };
+
+  // 1. Explicit groups and lists (staggered).
+  const lists = new Set<HTMLElement>([
+    ...document.querySelectorAll<HTMLElement>(GROUPS.join(',')),
+    ...document.querySelectorAll<HTMLElement>('main section ul, main section ol'),
+  ]);
+  lists.forEach((list) => {
+    if (list.closest(SKIP)) return;
+    const items = Array.from(list.children) as HTMLElement[];
+    if (!list.matches(GROUPS.join(',')) && (items.length < 3 || items.length > 14)) return;
+    items.forEach((li, i) => add(li, i));
   });
-  document.querySelectorAll<HTMLElement>(GROUPS.join(',')).forEach((group) => {
-    if (group.closest('[data-no-reveal]')) return;
-    Array.from(group.children).forEach((child, i) => {
-      const el = child as HTMLElement;
-      el.style.setProperty('--rv-i', String(Math.min(i % 6, 5)));
-      targets.add(el);
+  // 2. Explicit single blocks.
+  document.querySelectorAll<HTMLElement>(SINGLE.join(',')).forEach((el) => add(el));
+  // 3. Every other block in each section container (two/three-column grids reveal per column).
+  document.querySelectorAll<HTMLElement>('main section').forEach((section) => {
+    if (section.closest(SKIP) || section.matches(SKIP)) return;
+    const container = section.querySelector<HTMLElement>(':scope > .container') ?? section;
+    (Array.from(container.children) as HTMLElement[]).forEach((b, i) => {
+      const cs = getComputedStyle(b);
+      const isCols = cs.display === 'grid' && b.children.length >= 2 && b.children.length <= 3;
+      if (isCols) (Array.from(b.children) as HTMLElement[]).forEach((c, j) => add(c, i + j));
+      else add(b, i);
     });
   });
   if (!targets.size) return;
@@ -55,10 +85,9 @@ function setupReveal() {
         }
       });
     },
-    { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+    { rootMargin: '0px 0px -4% 0px', threshold: 0 },
   );
   targets.forEach((el) => {
-    // Elements already well inside the first screen still animate in, just without waiting for scroll.
     el.classList.add('rv');
     if (el.dataset.reveal === 'left') el.classList.add('rv--left');
     if (el.dataset.reveal === 'right') el.classList.add('rv--right');

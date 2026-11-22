@@ -14,7 +14,7 @@ const streamed = site.services.filter((s) => s.streamed);
 const latest = (await getMessages()).find((m) => hasVideo(m));
 ---
 <Base title="Live Services" description="Watch Gloryville Ministries International services live, see when the next stream starts and catch up on the latest recording.">
-  <LibraryHeader title="Live Services" current="/library/live" crumb="Live Services" intro="Join GMI services from wherever you are." />
+  <LibraryHeader title="Live <strong>Services</strong>" current="/library/live" crumb="Live Services" intro="Join GMI services from wherever you are." />
 
   <section class="section">
     <div class="container live-layout">
@@ -31,7 +31,7 @@ const latest = (await getMessages()).find((m) => hasVideo(m));
         ) : (
           <>
             <p class="status">Not live right now</p>
-            <h2>Next live stream</h2>
+            <h2>Next <strong>live stream</strong></h2>
             {live.nextStream
               ? <p class="next">{live.nextStream}</p>
               : <p class="next">Services stream live at these times (West Africa Time):</p>}

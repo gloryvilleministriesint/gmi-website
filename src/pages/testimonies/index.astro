@@ -17,7 +17,7 @@ const featuredPhoto = featured?.data.photo ?? (featured && youtubeId(featured.da
   <PageHero
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Testimonies' }]}
     eyebrow="Testimonies"
-    title="What God has done."
+    title="What <em>God</em> has done."
     intro="Testimonies from the GMI family. Every testimony is reviewed by the church before it is published."
   >
     <a class="btn btn--gold" href={SHARE}>Share your testimony</a>
@@ -51,12 +51,13 @@ const featuredPhoto = featured?.data.photo ?? (featured && youtubeId(featured.da
       </section>
 
       {rest.length > 0 && (
-        <section class="section bg-stone" id="all" data-testimonies>
+        <section class="watermark-host section bg-stone" id="all" data-testimonies>
+    <span class="watermark" aria-hidden="true">STORIES</span>
           <div class="container">
             <div class="list-head">
               <div>
                 <p class="eyebrow">All testimonies</p>
-                <h2>Stories from the GMI family</h2>
+                <h2>Stories from the <strong>GMI family</strong></h2>
               </div>
               <div class="seg" role="group" aria-label="Show testimonies">
                 <button type="button" data-kind="" aria-pressed="true">All</button>
@@ -103,7 +104,7 @@ const featuredPhoto = featured?.data.photo ?? (featured && youtubeId(featured.da
         <GloryRays class="band__rays" opacity={0.3} color="var(--gold-400)" />
         <div class="band__copy">
           <p class="eyebrow">Share your testimony</p>
-          <h2 class="band__title">Has God done something in your life?</h2>
+          <h2 class="band__title">Has God done something <strong>in your life?</strong></h2>
           <p>Tell us. The church reviews every testimony before it appears on the website, and will contact you if anything needs checking.</p>
         </div>
         <a class="btn btn--gold band__btn" href={SHARE}>Share your testimony <Icon name="arrow-right" size={18} /></a>

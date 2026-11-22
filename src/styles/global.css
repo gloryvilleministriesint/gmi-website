@@ -65,8 +65,11 @@ h1 em, h2 em, h1 strong, h2 strong, .display em, .h1 em, .h2 em, .h1 strong, .h2
 .container { width: 100%; max-width: calc(var(--container) + 2 * var(--gutter)); margin-inline: auto; padding-inline: var(--gutter); }
 .section { padding-block: var(--section-y); }
 .section--compact { padding-block: var(--section-y-compact); }
-.bg-stone { background: var(--stone); }
-.bg-dark { background: var(--blue-950); color: rgba(255, 255, 255, 0.78); }
+.bg-stone { position: relative; isolation: isolate; background: var(--stone); }
+/* Soft gold light in the corner of grey bands (Petra's warm accent glow). */
+.bg-stone::before { content: ''; position: absolute; z-index: -1; inset: 0; pointer-events: none; background: radial-gradient(40% 50% at 100% 0%, rgba(217, 166, 58, 0.1), transparent 70%), radial-gradient(35% 45% at 0% 100%, rgba(53, 80, 200, 0.06), transparent 70%); }
+/* Dark bands get the slowly drifting blue-gold glow. */
+.bg-dark { background: var(--glow-hero); background-color: var(--blue-950); background-size: 140% 140%; color: rgba(255, 255, 255, 0.78); animation: glowDrift 18s ease-in-out infinite alternate; }
 .on-dark h1, .on-dark h2, .on-dark h3, .on-dark h4, .on-dark .display { color: var(--white); }
 .section-head { display: flex; align-items: end; justify-content: space-between; gap: var(--s-5); flex-wrap: wrap; margin-bottom: var(--s-7); }
 

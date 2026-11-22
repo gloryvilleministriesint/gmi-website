@@ -25,12 +25,13 @@ const expect = [
     intro="Everything you need before you arrive: when to come, how to get here and what to expect."
   />
 
-  <section class="section">
+  <section class="watermark-host section">
+    <span class="watermark" aria-hidden="true">COME</span>
     <div class="container">
       <div class="section-head">
         <div>
           <p class="eyebrow">Service times</p>
-          <h2>When to come</h2>
+          <h2>When to <strong>come</strong></h2>
         </div>
         <a class="link-arrow" href="/services">All services <Icon name="arrow-right" /></a>
       </div>
@@ -46,7 +47,8 @@ const expect = [
     </div>
   </section>
 
-  <section id="location" class="section bg-stone">
+  <section id="location" class="watermark-host section bg-stone">
+    <span class="watermark" aria-hidden="true" data-dir="right">IBADAN</span>
     <div class="container find">
       <div class="find__map">
         <iframe
@@ -58,7 +60,7 @@ const expect = [
       </div>
       <div>
         <p class="eyebrow">Location</p>
-        <h2>How to find us</h2>
+        <h2>How to <strong>find us</strong></h2>
         <ul class="find__list">
           <li><Icon name="map-pin" size={18} /><span>{site.address.lines.map((l) => <span class="line">{l}</span>)}</span></li>
           <li><Icon name="car" size={18} />{visit.parking ? <span>{visit.parking}</span> : <span class="ph">[Parking information]</span>}</li>
@@ -74,8 +76,8 @@ const expect = [
 
   <section class="section">
     <div class="container">
-      <p class="eyebrow">What to expect</p>
-      <h2>Your first Sunday at GMI</h2>
+      <p class="eyebrow">What to <strong>expect</strong></p>
+      <h2>Your first <strong>Sunday</strong> at GMI</h2>
       <p class="lead">Practical notes so you know what happens when you arrive.</p>
       <dl class="expect">
         {expect.map((e) => (

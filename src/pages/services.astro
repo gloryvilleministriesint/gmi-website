@@ -10,14 +10,15 @@ const visit = (site as any).visitorInfo ?? {};
   <PageHero
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Our Services' }]}
     eyebrow="Our services"
-    title="When we gather."
+    title="When we <em>gather</em>."
     intro="Every service is open to you, whether it's your first time or you've been with us for years. Services are also streamed live, so you can join from wherever you are."
   >
     <a href="/plan-your-visit" class="btn btn--gold btn--sm">Plan Your Visit</a>
     <a href="/calendar" class="btn btn--outline btn--sm">Open the calendar</a>
   </PageHero>
 
-  <section class="section">
+  <section class="watermark-host section">
+    <span class="watermark" aria-hidden="true">WORSHIP</span>
     <div class="container">
       <ul class="services">
         {site.services.map((s, i) => (
@@ -43,12 +44,13 @@ const visit = (site as any).visitorInfo ?? {};
     </div>
   </section>
 
-  <section class="section bg-stone">
+  <section class="watermark-host section bg-stone">
+    <span class="watermark" aria-hidden="true" data-dir="right">WELCOME</span>
     <div class="container">
       <div class="section-head">
         <div>
           <p class="eyebrow">Visitor information</p>
-          <h2>Coming to a service</h2>
+          <h2>Coming to a <strong>service</strong></h2>
           <p class="lead">Practical details for anyone attending for the first time.</p>
         </div>
         <a class="link-arrow" href="/plan-your-visit">Full visitor guide <Icon name="arrow-right" /></a>

@@ -22,7 +22,7 @@ const first = s.messages[0];
     <div class="container series-layout">
       <div>
         <p class="eyebrow">Series · {s.messages.length} {s.messages.length === 1 ? 'message' : 'messages'}</p>
-        <h2>Messages in order</h2>
+        <h2>Messages <strong>in order</strong></h2>
         {!summary && <p class="ph intro-ph">[Short description of the series, supplied by the church]</p>}
         <ol class="parts">
           {s.messages.map((m, i) => (

@@ -45,11 +45,12 @@ const [pastor, wife] = about.leaders;
   </nav>
 
   <!-- 01 Our story -->
-  <section id="our-story" class="section anchor">
+  <section id="our-story" class="watermark-host section anchor">
+    <span class="watermark" aria-hidden="true">STORY</span>
     <div class="container story">
       <div>
         <p class="eyebrow">01 · Our story</p>
-        <h2 class="h1">How Gloryville began</h2>
+        <h2 class="h1">How Gloryville <strong>began</strong></h2>
         {about.story.opening
           ? <p class="story__lead">{about.story.opening}</p>
           : <p class="story__lead ph">[Opening paragraph of GMI's story]</p>}
@@ -64,10 +65,11 @@ const [pastor, wife] = about.leaders;
   </section>
 
   <!-- 02/03 Vision, mission, mandate -->
-  <section id="vision-and-mission" class="section bg-dark on-dark anchor">
+  <section id="vision-and-mission" class="watermark-host section bg-dark on-dark anchor">
+    <span class="watermark" aria-hidden="true" data-dir="right">CALLED</span>
     <div class="container">
       <p class="eyebrow">02 · Vision &amp; Mission</p>
-      <h2 class="h1">What we are called to</h2>
+      <h2 class="h1">What we are <strong>called to</strong></h2>
       <div class="calling">
         <div><p class="calling__label">Vision</p><p class:list={['calling__text', { ph: !about.vision }]}>{about.vision || '[GMI vision statement]'}</p></div>
         <div><p class="calling__label">Mission</p><p class:list={['calling__text', { ph: !about.mission }]}>{about.mission || '[GMI mission statement]'}</p></div>
@@ -77,10 +79,11 @@ const [pastor, wife] = about.leaders;
   </section>
 
   <!-- 04 Core values -->
-  <section id="core-values" class="section anchor">
+  <section id="core-values" class="watermark-host section anchor">
+    <span class="watermark" aria-hidden="true">VALUES</span>
     <div class="container">
       <p class="eyebrow">04 · Core values</p>
-      <h2>The values that shape us</h2>
+      <h2>The values that <strong>shape us</strong></h2>
       {valuesPh && <p class="sub">Each value is shown with a short explanation once the church supplies them.</p>}
       <ol class="values">
         {values.map((v, i) => (
@@ -95,10 +98,11 @@ const [pastor, wife] = about.leaders;
   </section>
 
   <!-- 05 What we believe -->
-  <section id="what-we-believe" class="section bg-stone anchor">
+  <section id="what-we-believe" class="watermark-host section bg-stone anchor">
+    <span class="watermark" aria-hidden="true" data-dir="right">FAITH</span>
     <div class="container beliefs">
       <p class="eyebrow">05 · What we believe</p>
-      <h2>Statement <br />of faith</h2>
+      <h2>Statement <br />of <strong>faith</strong></h2>
       <dl class="beliefs__list">
         {beliefs.map((b) => (
           <div>
@@ -111,11 +115,12 @@ const [pastor, wife] = about.leaders;
   </section>
 
   <!-- 06 Our history -->
-  <section id="our-history" class="section anchor">
+  <section id="our-history" class="watermark-host section anchor">
+    <span class="watermark" aria-hidden="true">HISTORY</span>
     <div class="container history">
       <div>
         <p class="eyebrow">06 · Our history</p>
-        <h2 class="h1">Milestones</h2>
+        <h2 class="h1">Our <strong>milestones</strong></h2>
         <p class="small">Key moments in the life of the ministry, in order.</p>
       </div>
       <ol class="timeline">
@@ -131,10 +136,11 @@ const [pastor, wife] = about.leaders;
   </section>
 
   <!-- 07 Leadership -->
-  <section id="leadership" class="section leaders-wrap anchor">
+  <section id="leadership" class="watermark-host section leaders-wrap anchor">
+    <span class="watermark" aria-hidden="true" data-dir="right">LEADERSHIP</span>
     <div class="container">
       <p class="eyebrow">07 · Leadership</p>
-      <h2>Our Senior Pastor and his wife</h2>
+      <h2>Our <strong>Senior Pastor</strong> and his wife</h2>
       <div class="leaders">
         {[pastor, wife].map((l, i) => (
           <article class:list={['leader', { 'leader--offset': i === 1 }]}>

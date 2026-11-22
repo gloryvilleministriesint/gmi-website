@@ -35,7 +35,7 @@ const actPh = !d.activities.length;
           </ol>
         </nav>
         <p class="eyebrow eyebrow--icon"><Icon name={d.icon} size={16} />Department {num(index + 1)} of {num(total)}</p>
-        <h1>{d.name} Department</h1>
+        <h1>{d.name} <strong>Department</strong></h1>
         {d.intro ? <p class="hero__intro">{d.intro}</p> : <p class="hero__intro ph">[Introduction to the department, one or two sentences]</p>}
         <div class="hero__btns">
           <a href="#interest" class="btn btn--gold btn--sm">Express interest</a>
@@ -48,11 +48,12 @@ const actPh = !d.activities.length;
     </div>
   </section>
 
-  <section class="section">
+  <section class="watermark-host section">
+    <span class="watermark" aria-hidden="true">SERVE</span>
     <div class="container about">
       <div>
         <p class="eyebrow">About the department</p>
-        <h2>What we do</h2>
+        <h2>What we <strong>do</strong></h2>
         {d.description.length
           ? (d.description as string[]).map((p) => <p>{p}</p>)
           : <>
@@ -75,10 +76,11 @@ const actPh = !d.activities.length;
   </section>
 
   {d.teams && (
-    <section class="section bg-stone" id="teams">
+    <section class="watermark-host section bg-stone" id="teams">
+    <span class="watermark" aria-hidden="true" data-dir="right">TEAMS</span>
       <div class="container">
         <p class="eyebrow">Teams</p>
-        <h2>Three teams, one <br />sound of worship</h2>
+        <h2>Three teams, one <br /><strong>sound of worship</strong></h2>
         <p class="teams__intro">The {d.name} Department is made up of the {d.teams.map((t) => t.name).join(', ').replace(/, ([^,]*)$/, ' and $1')}.</p>
         <div class="teams" data-tabs>
           <div class="teams__tabs" role="tablist" aria-label={`${d.name} teams`}>
@@ -106,7 +108,7 @@ const actPh = !d.activities.length;
   <section class="section">
     <div class="container">
       <p class="eyebrow">Responsibilities</p>
-      <h2>How the department serves</h2>
+      <h2>How the department <strong>serves</strong></h2>
       <ol class="resp">
         {responsibilities.map((r, i) => (
           <li>
@@ -125,12 +127,13 @@ const actPh = !d.activities.length;
     </div>
   </section>
 
-  <section class="section bg-stone" id="media">
+  <section class="watermark-host section bg-stone" id="media">
+    <span class="watermark" aria-hidden="true">MOMENTS</span>
     <div class="container">
       <div class="section-head">
         <div>
           <p class="eyebrow">Media</p>
-          <h2>Photos and videos</h2>
+          <h2>Photos and <strong>videos</strong></h2>
         </div>
         <a class="link-arrow" href="/library/gallery">Open the gallery <Icon name="arrow-right" /></a>
       </div>

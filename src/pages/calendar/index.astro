@@ -14,14 +14,15 @@ const upcoming = items.filter((i) => i.weekday === undefined && (i.to ?? '') >= 
   <PageHero
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Church Calendar' }]}
     eyebrow="Church calendar"
-    title="What is happening at GMI."
+    title="What is happening <em>at GMI</em>."
     intro="Weekly activities, special meetings, programmes, church events and department meetings in one calendar. Select a day or an event to see details."
   />
 
-  <section class="section section--compact rhythm-section">
+  <section class="watermark-host section section--compact rhythm-section">
+    <span class="watermark" aria-hidden="true">RHYTHM</span>
     <div class="container">
       <p class="eyebrow">Every week</p>
-      <h2 class="h3 rhythm__title">Weekly rhythm</h2>
+      <h2 class="h3 rhythm__title">Weekly <strong>rhythm</strong></h2>
       <ul class="rhythm">
         {site.services.map((s) => (
           <li>

@@ -26,7 +26,7 @@ const faqs = [
   <PageHero
     crumbs={[{ label: 'Home', href: '/' }, { label: 'Contact Us' }]}
     eyebrow="Contact us"
-    title="We would love to hear from you."
+    title="We would love to <em>hear from you</em>."
     intro="Send an enquiry, find us, or check the frequently asked questions below."
   />
 
@@ -115,14 +115,15 @@ const faqs = [
     </div>
   </section>
 
-  <section class="section bg-stone" id="directions">
+  <section class="watermark-host section bg-stone" id="directions">
+    <span class="watermark" aria-hidden="true">DIRECTIONS</span>
     <div class="container find">
       <div class="find__map">
         <iframe title="Map showing Gloryville Ministries International, Ibadan" src={embedUrl} loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
       <div>
         <p class="eyebrow">Location &amp; directions</p>
-        <h2>Finding GMI</h2>
+        <h2>Finding <strong>GMI</strong></h2>
         <p class="find__addr">{site.address.lines.join(', ')}</p>
         <p class="ph small">[Directions from main roads or landmarks]</p>
         <a class="btn btn--primary btn--sm" href={mapsUrl} target="_blank" rel="noopener">Get directions <Icon name="arrow-right" /></a>
@@ -130,10 +131,11 @@ const faqs = [
     </div>
   </section>
 
-  <section class="section" id="faq">
+  <section class="watermark-host section" id="faq">
+    <span class="watermark" aria-hidden="true" data-dir="right">QUESTIONS</span>
     <div class="container faq">
       <p class="eyebrow">FAQ</p>
-      <h2>Frequently asked questions</h2>
+      <h2>Frequently asked <strong>questions</strong></h2>
       <div class="faq__list">
         {faqs.map((f) => (
           <details>

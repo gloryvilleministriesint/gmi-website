@@ -87,7 +87,7 @@ const attendingOptions = Array.from({ length: d.maxAttending }, (_, i) => i + 1)
         </div>
 
         <p class="eyebrow">About this event</p>
-        <h2>What to expect</h2>
+        <h2>What to <strong>expect</strong></h2>
         <div class="prose">
           {hasBody ? <Content /> : <p class="ph">[Full description of the event supplied by the organising department]</p>}
         </div>
@@ -187,7 +187,7 @@ const attendingOptions = Array.from({ length: d.maxAttending }, (_, i) => i + 1)
         <div class="section-head">
           <div>
             <p class="eyebrow">More {d.category.toLowerCase()}s</p>
-            <h2>You might also like</h2>
+            <h2>You might <strong>also like</strong></h2>
           </div>
           <a class="link-arrow" href="/calendar">Open the church calendar <Icon name="arrow-right" /></a>
         </div>
