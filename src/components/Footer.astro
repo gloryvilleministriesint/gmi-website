@@ -5,7 +5,7 @@ import site from '../data/site.json';
 import { footerNav, legalNav } from '../data/navigation';
 
 const year = new Date().getFullYear();
-const socials = ['youtube', 'telegram', 'instagram', 'facebook'].filter((k) => (site.social as Record<string, string>)[k]);
+const socials = ['youtube', 'telegram', 'instagram', 'whatsapp', 'facebook'].filter((k) => (site.social as Record<string, string>)[k]);
 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.address.mapsQuery)}`;
 ---
 <footer class="footer on-dark">

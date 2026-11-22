@@ -28,8 +28,8 @@ type Slide = { eyebrow: string; title: string; text?: string; ph?: string; ctas:
 const slides: Slide[] = [
   {
     eyebrow: 'Gloryville Ministries International',
-    title: 'You are <em>welcome</em> at Gloryville.',
-    text: site.tagline || undefined,
+    title: site.heroTitle || 'You are <em>welcome</em> at Gloryville.',
+    text: about.intro || undefined,
     ph: '[One or two sentences introducing GMI or the theme for the year, supplied by the church]',
     ctas: [{ label: 'Plan Your Visit', href: '/plan-your-visit', style: 'gold' }, { label: 'New here? Start here', href: '/new-here', style: 'outline' }],
     art: 'a',
@@ -44,7 +44,7 @@ const slides: Slide[] = [
   ...(midweek ? [{
     eyebrow: midweek.name,
     title: `${midweek.day}s at <em>${midweek.time}</em>`,
-    text: 'Pause in the middle of the week for worship and the Word.',
+    text: 'Pause in the middle of the week for prayer, worship and the Word.',
     ctas: [{ label: 'Our Services', href: '/services', style: 'gold' as const }, { label: 'Church Calendar', href: '/calendar', style: 'outline' as const }],
     art: 'c',
   }] : []),
@@ -134,8 +134,11 @@ const steps = [
       <div class="about__copy" data-reveal>
         <p class="eyebrow">About GMI</p>
         <h2>Welcome to <strong>Gloryville</strong> Ministries International</h2>
-        <p class="about__quote ph">[A short word or quote from the Senior Pastor]</p>
-        {about.intro ? <p class="about__text">{about.intro}</p> : <p class="about__text ph">[Two or three sentences about who GMI is, its vision and mission, supplied by the church]</p>}
+        <figure class="about__quote">
+          <blockquote>“{about.pastorQuote.text}”</blockquote>
+          <figcaption>{about.pastorQuote.by}</figcaption>
+        </figure>
+        {about.story.opening ? <p class="about__text">{about.story.opening} Our vision: {about.vision.text.charAt(0).toLowerCase() + about.vision.text.slice(1)}</p> : <p class="about__text ph">[Two or three sentences about who GMI is, its vision and mission, supplied by the church]</p>}
         <div class="about__ctas">
           <a class="btn btn--primary" href="/about">Learn more about us</a>
           <a class="link-arrow" href="/new-here">New here? Start here <Icon name="arrow-right" /></a>
@@ -363,7 +366,9 @@ const steps = [
   /* ---------- 2. About ---------- */
   .about__grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--s-9); align-items: center; }
   .about h2 { font-size: var(--fs-h1); margin-bottom: var(--s-5); }
-  .about__quote { font-size: 1.25rem; font-weight: 600; font-style: italic; color: var(--ink); margin-bottom: var(--s-4); }
+  .about__quote { margin: 0 0 var(--s-5); padding-left: var(--s-5); border-left: 3px solid var(--gold-500); }
+  .about__quote blockquote { margin: 0; font-size: 1.25rem; font-weight: 600; font-style: italic; line-height: 1.45; color: var(--ink); }
+  .about__quote figcaption { margin-top: 6px; font-size: var(--fs-small); font-weight: 700; color: var(--gold-700); }
   .about__text { font-size: var(--fs-body-lg); }
   .about__ctas { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-5); margin-top: var(--s-6); }
   .about__media { position: relative; justify-self: center; width: min(100%, 460px); }

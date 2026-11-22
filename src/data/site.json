@@ -1,8 +1,8 @@
 {
   "name": "Gloryville Ministries International",
   "shortName": "GMI",
-  "tagline": "",
-  "identityLine": "",
+  "tagline": "Welcome to Gloryville, where you are transformed by the Word.",
+  "identityLine": "To see believers reigning in all areas of life, doing exploits in the faith.",
   "address": {
     "lines": [
       "1B Titilayo Crescent",
@@ -13,8 +13,8 @@
     "country": "Nigeria",
     "mapsQuery": "1B Titilayo Crescent, Off Olumbe Bashir Drive, Ojurin, Ashi-Bodija, Ibadan, Nigeria"
   },
-  "phone": "",
-  "email": "",
+  "phone": "0708 386 1210",
+  "email": "gloryvillechristiancenter01@gmail.com",
   "services": [
     {
       "name": "Sunday Service",
@@ -24,23 +24,30 @@
       "streamed": true
     },
     {
-      "name": "Wednesday Service",
+      "name": "Midweek Service",
       "day": "Wednesday",
       "time": "6:00 PM",
-      "description": "",
-      "streamed": true
+      "description": "Our midweek gathering on Wednesdays: some weeks focus on prayer, others on the study of the Word.",
+      "streamed": false
     }
   ],
   "live": {
     "isLive": false,
     "url": "",
-    "youtubeChannel": "",
-    "nextStream": ""
+    "youtubeChannel": "https://www.youtube.com/@gloryvilleglobal",
+    "nextStream": "",
+    "platforms": [
+      "YouTube",
+      "Telegram"
+    ]
   },
   "social": {
-    "youtube": "",
-    "telegram": "",
-    "instagram": "",
-    "facebook": ""
-  }
+    "youtube": "https://www.youtube.com/@gloryvilleglobal",
+    "telegram": "https://t.me/gloryvilleglobal",
+    "instagram": "https://www.instagram.com/gloryvilleglobal",
+    "facebook": "",
+    "whatsapp": ""
+  },
+  "officeHours": "By appointment",
+  "heroTitle": "Welcome to Gloryville, where you are <em>transformed by the Word</em>."
 }

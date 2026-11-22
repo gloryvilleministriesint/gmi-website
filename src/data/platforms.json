@@ -1,7 +1,38 @@
 [
-  { "platform": "YouTube", "icon": "youtube", "url": "", "description": "Live services, recorded messages and church highlights.", "action": "Subscribe" },
-  { "platform": "Telegram", "icon": "telegram", "url": "", "description": "Announcements, reminders and daily encouragement from GMI.", "action": "Join channel" },
-  { "platform": "Instagram", "icon": "instagram", "url": "", "description": "Photos and short videos from church life.", "action": "Follow" },
-  { "platform": "Facebook", "icon": "facebook", "url": "", "description": "News, events and conversation with the GMI family.", "action": "Follow" },
-  { "platform": "Mixlr", "icon": "radio", "url": "", "description": "Audio-only live streams for listeners on low data.", "action": "Listen", "adopted": false }
+  {
+    "platform": "YouTube",
+    "icon": "youtube",
+    "url": "",
+    "description": "Sunday services and special meetings live, plus recorded messages.",
+    "action": "Subscribe"
+  },
+  {
+    "platform": "Telegram",
+    "icon": "telegram",
+    "url": "",
+    "description": "Live Sunday services and special meetings, announcements and reminders.",
+    "action": "Join channel"
+  },
+  {
+    "platform": "Instagram",
+    "icon": "instagram",
+    "url": "",
+    "description": "Photos and short videos from church life.",
+    "action": "Follow"
+  },
+  {
+    "platform": "WhatsApp Channel",
+    "icon": "whatsapp",
+    "url": "",
+    "description": "Church announcements and updates on WhatsApp.",
+    "action": "Follow the channel"
+  },
+  {
+    "platform": "Mixlr",
+    "icon": "radio",
+    "url": "",
+    "description": "Audio-only live streams for listeners on low data.",
+    "action": "Listen",
+    "adopted": false
+  }
 ]

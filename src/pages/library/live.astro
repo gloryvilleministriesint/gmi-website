@@ -34,7 +34,7 @@ const latest = (await getMessages()).find((m) => hasVideo(m));
             <h2>Next <strong>live stream</strong></h2>
             {live.nextStream
               ? <p class="next">{live.nextStream}</p>
-              : <p class="next">Services stream live at these times (West Africa Time):</p>}
+              : <p class="next">Sunday services and special meetings stream live on YouTube and Telegram (West Africa Time):</p>}
             <ul class="times">
               {streamed.map((s) => <li><Icon name="radio" size={18} /><span><strong>{s.name}</strong> · Every {s.day}, {s.time}</span></li>)}
             </ul>
