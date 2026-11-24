@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1122px; height: 1402px; overflow: hidden; background: #070b1f; font-family: 'Montserrat', sans-serif; }
+  .f { position: relative; width: 1122px; height: 1402px; overflow: hidden; color: #fff;
+       background: radial-gradient(70% 45% at 50% 18%, #1e3282 0%, #111a44 45%, #070b1f 80%); }
+  /* photo of the congregation in prayer, toned blue and gold */
+  .photo { position: absolute; left: 0; right: 0; top: 560px; height: 620px;
+           background: url(21-days-bg.jpg) center 30% / cover; filter: grayscale(1) contrast(1.15) brightness(0.95);
+           -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 75%, transparent 100%); }
+  .tone { position: absolute; left: 0; right: 0; top: 560px; height: 620px; mix-blend-mode: color;
+          background: linear-gradient(180deg, #2a3f9e, #d9a63a 85%); opacity: 0.85;
+          -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 75%, transparent 100%); }
+  .fade { position: absolute; left: 0; right: 0; top: 540px; height: 680px;
+          background: linear-gradient(180deg, transparent 0%, rgba(7,11,31,0.1) 40%, rgba(7,11,31,0.75) 90%, #070b1f 100%); }
+  /* light breaking through from above */
+  .rays { position: absolute; left: 50%; top: -120px; width: 1400px; height: 1100px; transform: translateX(-50%);
+          background: conic-gradient(from 180deg at 50% 0%, transparent 0deg, rgba(234,192,106,0.0) 150deg, rgba(234,192,106,0.22) 165deg, transparent 172deg,
+          rgba(234,192,106,0.16) 178deg, transparent 184deg, rgba(234,192,106,0.22) 192deg, transparent 205deg, transparent 360deg);
+          -webkit-mask-image: radial-gradient(60% 70% at 50% 0%, #000 30%, transparent 75%); }
+  .glow { position: absolute; left: 50%; top: 520px; width: 900px; height: 420px; transform: translateX(-50%);
+          background: radial-gradient(50% 50% at 50% 50%, rgba(234,192,106,0.45), transparent 70%); filter: blur(10px); }
+  .grain { position: absolute; inset: 0; opacity: 0.18; mix-blend-mode: overlay;
+           background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+  .top { position: absolute; top: 46px; left: 0; right: 0; text-align: center; }
+  .top img { height: 150px; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.5)); }
+  .org { margin-top: 26px; font-weight: 800; font-size: 27px; letter-spacing: 0.18em; }
+  .presents { display: flex; align-items: center; justify-content: center; gap: 22px; margin-top: 12px; font-weight: 600; font-size: 17px; letter-spacing: 0.55em; color: #eac06a; }
+  .presents::before, .presents::after { content: ''; width: 130px; height: 2px; background: linear-gradient(90deg, transparent, #d9a63a); }
+  .presents::after { transform: scaleX(-1); }
+
+  .title { position: absolute; top: 338px; left: 0; right: 0; text-align: center; font-family: 'Anton', sans-serif; line-height: 0.88; text-transform: uppercase; }
+  .num { display: block; font-size: 300px; letter-spacing: 0.01em;
+         background: linear-gradient(180deg, #fff3cf 0%, #eac06a 38%, #d9a63a 62%, #a87818 100%); -webkit-background-clip: text; color: transparent;
+         filter: drop-shadow(0 10px 22px rgba(0,0,0,0.55)); }
+  .num small { font-size: 0.62em; margin-left: 0.04em; }
+  .of { display: block; margin-top: 6px; font-size: 96px; letter-spacing: 0.02em; color: #fff; text-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+  .of b { color: #eac06a; font-weight: 400; }
+  .verse { position: absolute; top: 852px; left: 0; right: 0; text-align: center; font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 30px; color: rgba(255,255,255,0.92); text-shadow: 0 2px 12px rgba(0,0,0,0.8); }
+  .verse span { display: block; margin-top: 6px; font-family: 'Montserrat'; font-style: normal; font-weight: 700; font-size: 18px; letter-spacing: 0.2em; color: #eac06a; }
+
+  /* torn paper strip, as on the Prayer Convocation flyer */
+  .paper { position: absolute; left: 44px; right: 44px; top: 1000px; height: 196px; background: #f6f1e6; color: #111a44;
+           display: grid; grid-template-columns: 1fr 2px 1.1fr; align-items: center; gap: 30px; padding: 0 48px;
+           clip-path: polygon(0% 8%, 3% 3%, 7% 9%, 12% 2%, 18% 7%, 24% 1%, 31% 8%, 38% 3%, 45% 9%, 52% 2%, 59% 7%, 66% 1%, 73% 8%, 80% 2%, 87% 9%, 93% 3%, 100% 7%,
+           99% 50%, 100% 92%, 94% 98%, 88% 92%, 81% 99%, 74% 93%, 67% 100%, 60% 94%, 53% 99%, 46% 92%, 39% 98%, 32% 93%, 25% 100%, 18% 94%, 11% 99%, 5% 92%, 0% 97%, 1% 50%);
+           box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
+  .paper .rule { height: 120px; background: #111a44; }
+  .cell { display: flex; align-items: center; gap: 22px; }
+  .cell svg { flex: none; }
+  .k { font-weight: 800; font-size: 19px; letter-spacing: 0.1em; color: #a87818; }
+  .v { font-weight: 800; font-size: 31px; line-height: 1.12; text-transform: uppercase; }
+  .s { margin-top: 6px; font-weight: 700; font-size: 18px; line-height: 1.3; text-transform: uppercase; color: #2a356b; }
+  .addr { font-weight: 800; font-size: 21px; line-height: 1.22; text-transform: uppercase; }
+
+  .note { position: absolute; top: 1218px; left: 0; right: 0; display: flex; justify-content: center; }
+  .note div { padding: 14px 34px; border-radius: 999px; border: 2px solid #d9a63a; background: rgba(17,26,68,0.85); font-weight: 700; font-size: 20px; letter-spacing: 0.02em; text-align: center; }
+  .note b { color: #eac06a; }
+
+  .social { position: absolute; bottom: 38px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: 36px; font-weight: 600; font-size: 22px; }
+  .social span { display: flex; align-items: center; gap: 14px; }
+  .social i { width: 2px; height: 36px; background: #d9a63a; }
+</style></head>
+<body>
+<div class="f">
+  <div class="rays"></div>
+  <div class="photo"></div><div class="tone"></div><div class="glow"></div><div class="fade"></div>
+  <div class="grain"></div>
+
+  <div class="top">
+    <img src="../../public/images/brand/gmi-logo-full-dark.png" alt="">
+    <p class="org">GLORYVILLE MINISTRIES INTERNATIONAL</p>
+    <p class="presents">PRESENTS</p>
+  </div>
+
+  <h1 class="title"><span class="num">21<small> DAYS</small></span><span class="of">OF FASTING <b>&amp;</b> PRAYER</span></h1>
+
+  <p class="verse">“Turn ye even to me with all your heart, and with fasting”<span>JOEL 2:12</span></p>
+
+  <div class="paper">
+    <div class="cell">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#111a44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>
+      <div>
+        <p class="v">MON 30 NOV –<br>SUN 20 DEC 2026</p>
+        <p class="s">Monday to Friday, daily<br>Time to be announced</p>
+      </div>
+    </div>
+    <div class="rule"></div>
+    <div class="cell">
+      <svg width="58" height="64" viewBox="0 0 24 24" fill="#111a44"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+      <div>
+        <p class="k">VENUE</p>
+        <p class="addr">Gloryville Ministries Int'l,<br>1B Titilayo Crescent, Olumbe<br>Bashir Drive, Ojurin, Bodija, Ibadan</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><div><b>4–6 DEC:</b> We pray together at the <b>Prayer Convocation</b>, Foursquare Gospel Camp, Ajebo</div></div>
+
+  <div class="social">
+    <span><svg width="44" height="31" viewBox="0 0 44 31"><rect width="44" height="31" rx="8" fill="#ff0000"/><path d="M18 9v13l11-6.5z" fill="#fff"/></svg>@gloryvilleglobal</span>
+    <i></i>
+    <span><svg width="36" height="36" viewBox="0 0 36 36"><defs><linearGradient id="ig" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#feda75"/><stop offset=".35" stop-color="#fa7e1e"/><stop offset=".6" stop-color="#d62976"/><stop offset="1" stop-color="#4f5bd5"/></linearGradient></defs><rect width="36" height="36" rx="10" fill="url(#ig)"/><rect x="8" y="8" width="20" height="20" rx="6" fill="none" stroke="#fff" stroke-width="2.6"/><circle cx="18" cy="18" r="4.8" fill="none" stroke="#fff" stroke-width="2.6"/><circle cx="24.6" cy="11.4" r="1.6" fill="#fff"/></svg>@gloryvilleglobal</span>
+    <i></i>
+    <span><svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="#29a9eb"/><path d="M8 17.5l18-7-3 16-6-4.5-3 3v-4.5l9-8-11 6.5z" fill="#fff"/></svg>@gloryvilleglobal</span>
+  </div>
+</div>
+</body></html>
