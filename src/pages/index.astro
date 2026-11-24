@@ -15,7 +15,7 @@ const fmt = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(
 const events = (await getCollection('events'))
   .filter((e) => e.data.repeat !== 'weekly' && (e.data.end ?? e.data.start) >= now)
   .sort((a, b) => +a.data.start - +b.data.start)
-  .slice(0, 3);
+  .slice(0, 6);
 import { latestVideos } from '../lib/youtube-build';
 import { cardHtml, shortHtml, split } from '../lib/youtube';
 import '../styles/youtube.css';
