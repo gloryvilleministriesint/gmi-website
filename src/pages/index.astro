@@ -33,6 +33,7 @@ const slides: Slide[] = [
     ph: '[One or two sentences introducing GMI or the theme for the year, supplied by the church]',
     ctas: [{ label: 'Plan Your Visit', href: '/plan-your-visit', style: 'gold' }, { label: 'New here? Start here', href: '/new-here', style: 'outline' }],
     art: 'a',
+    image: '/images/photos/hero-welcome.webp',
   },
   {
     eyebrow: sunday.name,
@@ -40,6 +41,7 @@ const slides: Slide[] = [
     text: `Worship, prayer and the Word at ${site.address.lines.slice(-2).join(', ')}. Come as you are.`,
     ctas: [{ label: 'Plan Your Visit', href: '/plan-your-visit', style: 'gold' }, { label: 'Watch online', href: '/library/live', style: 'outline' }],
     art: 'b',
+    image: '/images/photos/hero-sunday.webp',
   },
   ...(midweek ? [{
     eyebrow: midweek.name,
@@ -47,6 +49,7 @@ const slides: Slide[] = [
     text: 'Pause in the middle of the week for prayer, worship and the Word.',
     ctas: [{ label: 'Our Services', href: '/services', style: 'gold' as const }, { label: 'Church Calendar', href: '/calendar', style: 'outline' as const }],
     art: 'c',
+    image: '/images/photos/hero-midweek.webp',
   }] : []),
   nextEvent
     ? {
@@ -55,7 +58,7 @@ const slides: Slide[] = [
         text: `${fmt(nextEvent.data.start, { weekday: 'long', day: 'numeric', month: 'long' })}${nextEvent.data.summary ? `. ${nextEvent.data.summary}` : ''}`,
         ctas: [{ label: nextEvent.data.registration ? 'Register now' : 'Learn more', href: `/calendar/${nextEvent.id}`, style: 'gold' }, { label: 'Church Calendar', href: '/calendar', style: 'outline' }],
         art: 'd',
-        image: nextEvent.data.image,
+        image: nextEvent.data.image ?? '/images/photos/hero-library.webp',
       }
     : {
         eyebrow: 'GMI Digital Library',
@@ -63,6 +66,7 @@ const slides: Slide[] = [
         text: 'Messages, music, live services and resources from GMI.',
         ctas: [{ label: 'Open the Library', href: '/library', style: 'gold' }, { label: 'Watch live', href: '/library/live', style: 'outline' }],
         art: 'd',
+        image: '/images/photos/hero-library.webp',
       },
 ];
 
@@ -146,7 +150,7 @@ const steps = [
       </div>
       <div class="about__media" data-reveal="right">
         <span class="about__halo" aria-hidden="true"></span>
-        <div class="img-slot arch about__img"><span class="img-label"><Icon name="image" />Photograph: Senior Pastor</span></div>
+        <div class="img-slot arch about__img"><img src="/images/photos/pastor-samuel-kneeling.webp" alt="Pastor Samuel Bodunde ministering at Gloryville" loading="lazy" /></div>
         <div class="about__badge">
           <span class="about__badge-icon"><Icon name="clock" size={18} /></span>
           <span><strong>{site.services.map((s) => `${s.day.slice(0, 3)} ${s.time}`).join(' · ')}</strong>Service times</span>
@@ -329,7 +333,8 @@ const steps = [
       radial-gradient(60% 60% at 50% 110%, rgba(217, 166, 58, 0.6), transparent 60%),
       radial-gradient(60% 60% at 85% 10%, rgba(53, 80, 200, 0.75), transparent 65%),
       linear-gradient(135deg, #1e3282 0%, #111a44 55%, #0a0f26 100%); }
-  .slide__bg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; mix-blend-mode: luminosity; opacity: 0.45; }
+  .slide__bg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.62; }
+  .slide__bg:has(img)::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10,15,38,0.92) 0%, rgba(10,15,38,0.7) 45%, rgba(10,15,38,0.25) 100%), linear-gradient(0deg, rgba(10,15,38,0.85) 0%, transparent 40%); }
   .slide__bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10, 15, 38, 0.75) 0%, rgba(10, 15, 38, 0.2) 70%), linear-gradient(0deg, rgba(10, 15, 38, 0.6), transparent 40%); }
   :global(.slide__rays) { right: -6%; bottom: -10%; width: 70%; height: 90%; z-index: 1; }
   .slide__inner { position: relative; z-index: 2; }

@@ -11,7 +11,8 @@
       "Alongside the conferences came Times of Refreshing, a Saturday gathering much like a Sunday service, held in a home at UI (the University of Ibadan).",
       "The church then began fully as Gloryville Christian Centre, meeting on Sundays and Wednesdays, and for a season holding a weekly vigil on Fridays.",
       "The name later changed to Gloryville Ministries International, to make room for the broader vision of the ministry and the mandate God gave the set man, Pastor Samuel Bodunde."
-    ]
+    ],
+    "image": "/images/photos/about-story.webp"
   },
   "vision": {
     "text": "To see believers reigning in all areas of life, doing exploits in the faith.",
@@ -19,18 +20,43 @@
     "verse": "For if by one man's offence death reigned by one; much more they which receive abundance of grace and of the gift of righteousness shall reign in life by one, Jesus Christ."
   },
   "mission": [
-    { "text": "To preach the gospel of Jesus Christ so men may be saved.", "scripture": "Mark 16:15–16" },
-    { "text": "To teach believers to enjoy and walk in their inheritance.", "scripture": "Colossians 2:6–7; Acts 20:32" },
-    { "text": "To train believers to be witnesses of Jesus Christ in all the world.", "scripture": "Acts 11:19–21" }
+    {
+      "text": "To preach the gospel of Jesus Christ so men may be saved.",
+      "scripture": "Mark 16:15–16"
+    },
+    {
+      "text": "To teach believers to enjoy and walk in their inheritance.",
+      "scripture": "Colossians 2:6–7; Acts 20:32"
+    },
+    {
+      "text": "To train believers to be witnesses of Jesus Christ in all the world.",
+      "scripture": "Acts 11:19–21"
+    }
   ],
   "aims": [
-    { "text": "To see a move of the Spirit in the church, bringing believers massive personal victories and empowerment for the work of the ministry.", "scripture": "Acts 3:19–21" },
-    { "text": "To see neighbourhoods, communities and nations wholly turned to God by the preaching of the gospel of power.", "scripture": "Acts 19:1–20" }
+    {
+      "text": "To see a move of the Spirit in the church, bringing believers massive personal victories and empowerment for the work of the ministry.",
+      "scripture": "Acts 3:19–21"
+    },
+    {
+      "text": "To see neighbourhoods, communities and nations wholly turned to God by the preaching of the gospel of power.",
+      "scripture": "Acts 19:1–20"
+    }
   ],
   "bibleVersion": "KJV",
   "values": [],
   "leaders": [
-    { "role": "Senior Pastor", "name": "Pastor Samuel Bodunde", "bio": [], "portrait": "" },
-    { "role": "Pastor", "name": "Pastor Ifeoluwa Bodunde", "bio": [], "portrait": "" }
+    {
+      "role": "Senior Pastor",
+      "name": "Pastor Samuel Bodunde",
+      "bio": [],
+      "portrait": "/images/photos/pastor-samuel.webp"
+    },
+    {
+      "role": "Pastor",
+      "name": "Pastor Ifeoluwa Bodunde",
+      "bio": [],
+      "portrait": "/images/photos/pastor-ifeoluwa.webp"
+    }
   ]
 }

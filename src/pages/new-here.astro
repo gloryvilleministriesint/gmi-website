@@ -28,7 +28,7 @@ const steps = [
     <span class="watermark" aria-hidden="true">WELCOME</span>
     <div class="container intro">
       <div class="img-slot arch intro__img">
-        <span class="img-label"><Icon name="image" />Photograph: members welcoming visitors</span>
+        <img src="/images/photos/new-here-welcome.webp" alt="Members of Gloryville in worship" loading="lazy" />
       </div>
       <div>
         <p class="eyebrow">Welcome</p>
@@ -60,7 +60,7 @@ const steps = [
         {steps.map((s, i) => (
           <div class="journey__panel" role="tabpanel" id={`step-panel-${i}`} aria-labelledby={`step-tab-${i}`} hidden={i !== 0}>
             <div class:list={['img-slot journey__img', { 'img-slot--warm': i % 2 === 0 }]}>
-              <span class="img-label"><Icon name="image" />Photograph for this step</span>
+              <img src={`/images/photos/journey-${i + 1}.webp`} alt="" loading="lazy" />
             </div>
             <div>
               <p class="journey__count">Step {i + 1} of {steps.length}</p>

@@ -10,12 +10,13 @@
     "contact": "",
     "responsibilities": [],
     "activities": [],
-    "image": "",
+    "image": "/images/photos/music-hero.webp",
     "teams": [
       {
         "name": "Worship Team",
         "description": "",
-        "rehearsals": ""
+        "rehearsals": "",
+        "image": "/images/photos/music-worship-team.webp"
       },
       {
         "name": "Dance Group",
@@ -26,6 +27,24 @@
         "name": "Rap Group",
         "description": "",
         "rehearsals": ""
+      }
+    ],
+    "photos": [
+      {
+        "src": "/images/photos/music-1.webp",
+        "alt": "The worship team ministering on stage"
+      },
+      {
+        "src": "/images/photos/music-2.webp",
+        "alt": "The worship leader and singers leading the congregation"
+      },
+      {
+        "src": "/images/photos/music-3.webp",
+        "alt": "The bass and keyboard players"
+      },
+      {
+        "src": "/images/photos/music-4.webp",
+        "alt": "Singers of the worship team"
       }
     ]
   },

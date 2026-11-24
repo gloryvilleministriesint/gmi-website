@@ -86,7 +86,7 @@ const actPh = !d.activities.length;
           </div>
           {d.teams.map((t, i) => (
             <div class="teams__panel" role="tabpanel" id={`team-panel-${i}`} aria-labelledby={`team-tab-${i}`} hidden={i !== 0}>
-              <div class="img-slot arch teams__img"><span class="img-label"><Icon name="image" />Photograph: {t.name}</span></div>
+              <div class="img-slot arch teams__img">{t.image ? <img src={t.image} alt={`The ${t.name}`} loading="lazy" /> : <span class="img-label"><Icon name="image" />Photograph: {t.name}</span>}</div>
               <div>
                 <p class="teams__label">{t.name}</p>
                 <h3 class="h2">{t.name}</h3>
@@ -136,7 +136,9 @@ const actPh = !d.activities.length;
       <div class="media">
         <div class="img-slot img-slot--dark media__main"><span class="img-label"><Icon name="video" />Video: department highlight</span></div>
         {[0, 1, 2, 3].map((i) => (
-          <div class:list={['img-slot', { 'img-slot--warm': i === 0 || i === 3 }]}><span class="img-label"><Icon name="image" />Photo</span></div>
+          <div class:list={['img-slot', { 'img-slot--warm': i === 0 || i === 3 }]}>
+            {d.photos?.[i] ? <img src={d.photos[i].src} alt={d.photos[i].alt} loading="lazy" /> : <span class="img-label"><Icon name="image" />Photo</span>}
+          </div>
         ))}
       </div>
     </div>

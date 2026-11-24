@@ -21,14 +21,16 @@
       "day": "Sunday",
       "time": "9:00 AM",
       "description": "",
-      "streamed": true
+      "streamed": true,
+      "image": "/images/photos/service-sunday.webp"
     },
     {
       "name": "Midweek Service",
       "day": "Wednesday",
       "time": "6:00 PM",
       "description": "Our midweek gathering on Wednesdays: some weeks focus on prayer, others on the study of the Word.",
-      "streamed": false
+      "streamed": false,
+      "image": "/images/photos/service-midweek.webp"
     }
   ],
   "live": {

@@ -24,7 +24,7 @@ const visit = (site as any).visitorInfo ?? {};
         {site.services.map((s, i) => (
           <li class="service">
             <div class:list={['img-slot service__img', { 'img-slot--warm': i % 2 === 1 }]}>
-              <span class="img-label"><Icon name="image" />Photograph: {s.name}</span>
+              {s.image ? <img src={s.image} alt={`${s.name} at Gloryville`} loading="lazy" /> : <span class="img-label"><Icon name="image" />Photograph: {s.name}</span>}
             </div>
             <div class="service__body">
               <p class="service__num">Service {i + 1}</p>

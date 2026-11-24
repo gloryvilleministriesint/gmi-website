@@ -51,7 +51,9 @@ const [pastor, wife] = about.leaders;
           : <p class="ph small">[Two or three further paragraphs: how GMI started, who it serves and where it is going]</p>}
       </div>
       <div class="img-slot img-slot--warm arch story__img">
-        <span class="img-label"><Icon name="image" />Photograph: early or archival GMI image</span>
+        {about.story.image
+          ? <img src={about.story.image} alt="The Gloryville congregation in worship" loading="lazy" />
+          : <span class="img-label"><Icon name="image" />Photograph: early or archival GMI image</span>}
       </div>
     </div>
   </section>
