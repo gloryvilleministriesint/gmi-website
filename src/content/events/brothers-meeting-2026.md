@@ -1,12 +1,17 @@
 ---
 title: Brothers' Meeting
 category: Special meeting
-start: 2026-11-28T00:00:00+01:00
+start: 2026-11-28T17:00:00+01:00
 end: 2026-11-28T23:59:00+01:00
-time: Time to be announced
-venue: GMI, Ojurin, Ashi-Bodija, Ibadan
-summary: A meeting for the brothers of GMI on Saturday 28 November.
+time: 5:00 PM
+venue: GMI, 1B Titilayo Crescent, Off Olumbe Bashir Drive, Ojurin, Ashi-Bodija, Ibadan
+summary: An evening for the brothers of GMI on relationships, marriage, purpose and finance, with a panel session, games, refreshments and Q&A.
+image: /images/events/brothers-meeting-2026.webp
 ---
-The brothers of GMI gather on Saturday 28 November.
+All the brothers of GMI are invited to the Brothers' Meeting on Saturday 28 November at 5:00 PM, at the church.
 
-The time and programme will be shared here and on our channels very soon.
+**Topics:** relationship, marriage, purpose and finance.
+
+**On the evening:** a panel session, games, refreshments, and questions and answers.
+
+Come along and bring a brother with you.

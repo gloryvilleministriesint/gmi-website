@@ -60,7 +60,7 @@ const slides: Slide[] = [
         text: `${fmt(nextEvent.data.start, { weekday: 'long', day: 'numeric', month: 'long' })}${nextEvent.data.summary ? `. ${nextEvent.data.summary}` : ''}`,
         ctas: [{ label: nextEvent.data.registration ? 'Register now' : 'Learn more', href: `/calendar/${nextEvent.id}`, style: 'gold' }, { label: 'Church Calendar', href: '/calendar', style: 'outline' }],
         art: 'd',
-        image: nextEvent.data.image ?? '/images/photos/hero-library.webp',
+        image: '/images/photos/hero-library.webp', // flyers have their own text, so the slide keeps a church photo
       }
     : {
         eyebrow: 'GMI Digital Library',
