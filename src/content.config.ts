@@ -23,6 +23,8 @@ const events = defineCollection({
     outline: z.array(z.object({ time: z.string(), session: z.string() })).default([]),
     // Registration: shown only when true. Set `registrationStatus` to close it or mark it full.
     registration: z.boolean().default(false),
+    // Optional outside registration page (e.g. a form link from the flyer). When set, the event page links to it instead of showing the built-in form.
+    registrationUrl: z.string().url().optional(),
     registrationStatus: z.enum(['open', 'closed', 'full']).default('open'),
     maxAttending: z.number().int().min(1).max(20).default(5),
     sample: z.boolean().default(false),

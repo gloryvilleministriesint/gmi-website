@@ -82,9 +82,9 @@ const attendingOptions = Array.from({ length: d.maxAttending }, (_, i) => i + 1)
   <section class="section">
     <div class="container layout">
       <div class="main">
-        <div class="img-slot banner">
-          {d.image ? <img src={d.image} alt="" /> : <span class="img-label"><Icon name="image" />Event banner or photograph</span>}
-        </div>
+        {d.image
+          ? <figure class="flyer"><a href={d.image} target="_blank" rel="noopener"><img src={d.image} alt={`${d.title} flyer: ${dateLine(e)}${d.venue ? `, ${d.venue}` : ''}`} /></a><figcaption>Tap the flyer to open it full size.</figcaption></figure>
+          : <div class="img-slot banner"><span class="img-label"><Icon name="image" />Event banner or photograph</span></div>}
 
         <p class="eyebrow">About this event</p>
         <h2>What to <strong>expect</strong></h2>
@@ -122,7 +122,14 @@ const attendingOptions = Array.from({ length: d.maxAttending }, (_, i) => i + 1)
             <p class="eyebrow">Registration</p>
             <h2 class="h3 reg__title">Register for this event</h2>
 
-            {status === 'open' && (
+            {status === 'open' && d.registrationUrl && (
+              <>
+                <p class="reg__text">Registration is open. Register on the official form for this event.</p>
+                <a class="btn btn--gold reg__submit" href={d.registrationUrl} target="_blank" rel="noopener">Register now <Icon name="external-link" size={16} /></a>
+                <p class="small reg__note">Opens the registration form in a new tab: {d.registrationUrl.replace(/^https?:\/\//, '')}</p>
+              </>
+            )}
+            {status === 'open' && !d.registrationUrl && (
               <>
                 <form class="form-body" action="/api/forms/event" method="post" data-form>
                   <input type="hidden" name="event_id" value={e.id} />
@@ -232,6 +239,10 @@ const attendingOptions = Array.from({ length: d.maxAttending }, (_, i) => i + 1)
 
   .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--s-7); align-items: start; }
   .banner { aspect-ratio: 16 / 9; margin-bottom: var(--s-7); background-color: var(--blue-100); }
+  .flyer { max-width: 560px; margin: 0 0 var(--s-7); }
+  .flyer img { display: block; width: 100%; height: auto; border-radius: var(--r-card); box-shadow: var(--shadow-lg); }
+  .flyer figcaption { margin-top: var(--s-3); font-size: var(--fs-small); color: var(--ink-3); }
+  .reg__text { margin: 0 0 var(--s-4); color: var(--ink-2); }
   .main h2 { margin-bottom: var(--s-4); }
   .prose { max-width: var(--reading); }
   .prose :global(p) { margin-bottom: var(--s-4); }
