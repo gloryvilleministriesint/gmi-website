@@ -1,0 +1,93 @@
+---
+// Watch a GMI YouTube video on the website: /library/watch/?v=VIDEO_ID
+// One static page for every upload. The video id comes from the address, the title and details from
+// the latest-uploads list (build snapshot, refreshed from /api/youtube).
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import LibraryHeader from '../../components/LibraryHeader.astro';
+import site from '../../data/site.json';
+import { latestVideos } from '../../lib/youtube-build';
+import { cardHtml, shownDate } from '../../lib/youtube';
+import '../../styles/library.css';
+import '../../styles/youtube.css';
+
+const videos = await latestVideos();
+const first = videos.find((v) => !v.short) ?? videos[0];
+---
+<Base title="Watch" description="Watch messages and services from Gloryville Ministries International.">
+  <LibraryHeader title="Watch a <strong>Message</strong>" current="/library" crumb="Watch" intro="Messages and services from the GMI YouTube channel." />
+
+  <section class="section">
+    <div class="container watch" data-watch>
+      <div class="watch__player" data-player>
+        <iframe class="yt-frame" src={`https://www.youtube-nocookie.com/embed/${first.id}?rel=0`} title={first.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <div class="watch__info">
+        <p class="ytc__kind" data-kind>{first.kind}</p>
+        <h2 class="h2 watch__title" data-title>{first.title}</h2>
+        <p class="ytc__meta" data-meta>{first.speaker && <span>{first.speaker}</span>}<span>{shownDate(first)}</span></p>
+        <p class="watch__desc" data-desc>{first.description}</p>
+        <a class="btn btn--outline btn--sm watch__yt" data-yt-link href={`https://www.youtube.com/watch?v=${first.id}`} target="_blank" rel="noopener">Open on YouTube <Icon name="external-link" size={16} /></a>
+        <a class="link-arrow" href={site.social.youtube} target="_blank" rel="noopener">Subscribe to our channel <Icon name="arrow-right" /></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section bg-stone">
+    <div class="container">
+      <p class="eyebrow">Keep watching</p>
+      <h2>More recent <strong>messages</strong></h2>
+      <ul class="watch__more" data-more set:html={videos.filter((v) => !v.short).slice(0, 6).map((v) => cardHtml(v)).join('')} />
+    </div>
+  </section>
+  <script is:inline type="application/json" id="yt-seed" set:html={JSON.stringify(videos).replace(/</g, '\\u003c')} />
+</Base>
+
+<style>
+  .watch { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: var(--s-7); align-items: start; }
+  .watch__player :global(.yt-frame) { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: var(--r-card); background: var(--blue-950); box-shadow: var(--shadow-lg); }
+  .watch__player.is-short { max-width: 400px; justify-self: center; }
+  .watch__player.is-short :global(.yt-frame) { aspect-ratio: 9 / 16; }
+  .watch__title { margin: 0 0 var(--s-3); }
+  .watch__desc { margin: var(--s-5) 0; white-space: pre-line; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical; overflow: hidden; }
+  .watch__desc:empty { display: none; }
+  .watch__yt { margin-right: var(--s-4); }
+  .watch__more { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-6) var(--s-5); list-style: none; margin: var(--s-6) 0 0; padding: 0; }
+  @media (max-width: 960px) { .watch { grid-template-columns: 1fr; } .watch__more { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .watch__more { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { cardHtml, shownDate, type Video } from '../../lib/youtube';
+  const id = new URLSearchParams(location.search).get('v') ?? '';
+  const root = document.querySelector<HTMLElement>('[data-watch]')!;
+  const q = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
+  const seed: Video[] = JSON.parse(document.getElementById('yt-seed')?.textContent || '[]');
+  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+  function show(list: Video[]) {
+    const v = list.find((x) => x.id === id);
+    if (v) {
+      q('[data-kind]').textContent = v.kind;
+      q('[data-title]').textContent = v.title;
+      q('[data-meta]').innerHTML = `${v.speaker ? `<span>${esc(v.speaker)}</span>` : ''}<span>${shownDate(v)}</span>`;
+      q('[data-desc]').textContent = v.description;
+      q('[data-player]').classList.toggle('is-short', v.short);
+      document.title = `${v.title} | Gloryville Ministries International`;
+    }
+    const more = document.querySelector<HTMLElement>('[data-more]');
+    if (more) more.innerHTML = list.filter((x) => !x.short && x.id !== id).slice(0, 6).map((x) => cardHtml(x)).join('');
+  }
+
+  if (/^[\w-]{11}$/.test(id)) {
+    const frame = q<HTMLIFrameElement>('iframe');
+    frame.src = `https://www.youtube-nocookie.com/embed/${id}?rel=0&autoplay=1`;
+    q<HTMLAnchorElement>('[data-yt-link]').href = `https://www.youtube.com/watch?v=${id}`;
+    const known = seed.some((x) => x.id === id);
+    if (!known) { q('[data-kind]').textContent = 'Video'; q('[data-title]').textContent = 'GMI on YouTube'; q('[data-meta]').textContent = ''; q('[data-desc]').textContent = ''; }
+    show(seed);
+    fetch('/api/youtube').then((r) => (r.ok ? r.json() : null)).then((d) => {
+      if (d?.videos?.length) { const seen = new Set<string>(); show([...d.videos, ...seed].filter((x: Video) => !seen.has(x.id) && seen.add(x.id))); }
+    }).catch(() => {});
+  }
+</script>

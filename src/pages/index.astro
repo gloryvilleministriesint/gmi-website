@@ -3,12 +3,10 @@
 import Base from '../layouts/Base.astro';
 import Icon from '../components/Icon.astro';
 import GloryRays from '../components/GloryRays.astro';
-import MessageCard from '../components/MessageCard.astro';
 import site from '../data/site.json';
 import about from '../data/about.json';
 import departments from '../data/departments.json';
 import { getCollection } from 'astro:content';
-import { getMessages } from '../lib/messages';
 
 const tz = 'Africa/Lagos';
 const now = new Date();
@@ -18,7 +16,11 @@ const events = (await getCollection('events'))
   .filter((e) => e.data.repeat !== 'weekly' && (e.data.end ?? e.data.start) >= now)
   .sort((a, b) => +a.data.start - +b.data.start)
   .slice(0, 3);
-const messages = (await getMessages()).slice(0, 8);
+import { latestVideos } from '../lib/youtube-build';
+import { cardHtml, shortHtml, split } from '../lib/youtube';
+import '../styles/youtube.css';
+const buildTime = Date.now();
+const yt = split(await latestVideos());
 const nextEvent = events.find((e) => !e.data.sample);
 
 // Hero slides. Facts come from site.json; slide copy beyond the facts is kept short and factual.
@@ -187,25 +189,40 @@ const steps = [
     </div>
   </section>
 
-  <!-- 4. Latest messages (swipeable row) -->
-  {messages.length > 0 && (
-    <section class="section messages" aria-labelledby="msgs-h" data-carousel>
+  <!-- 4. Latest messages from the GMI YouTube channel (refreshed in the browser from /api/youtube) -->
+  {yt.full.length > 0 && (
+    <section class="section messages" aria-labelledby="msgs-h" data-carousel data-yt-row="full">
       <div class="container">
         <div class="row-head" data-reveal>
           <div>
-            <p class="eyebrow">Messages and Sermons</p>
+            <p class="eyebrow">From our YouTube channel</p>
             <h2 id="msgs-h">Latest <strong>Messages</strong></h2>
           </div>
           <div class="row-head__ctl">
-            <a class="link-arrow" href="/library">All messages <Icon name="arrow-right" /></a>
+            <a class="link-arrow" href={site.social.youtube} target="_blank" rel="noopener">Watch on YouTube <Icon name="arrow-right" /></a>
             <button type="button" class="round" data-scroll="-1" aria-label="Scroll messages back"><Icon name="arrow-left" size={18} /></button>
             <button type="button" class="round" data-scroll="1" aria-label="Scroll messages forward"><Icon name="arrow-right" size={18} /></button>
           </div>
         </div>
       </div>
-      <ul class="track" data-track tabindex="0" aria-label="Latest messages">
-        {messages.map((m) => <li class="track__item"><MessageCard m={m} /></li>)}
-      </ul>
+      <ul class="track" data-track tabindex="0" aria-label="Latest messages" set:html={yt.full.map((v) => cardHtml(v, buildTime)).join('')} />
+    </section>
+  )}
+  {yt.shorts.length > 0 && (
+    <section class="section messages messages--shorts" aria-labelledby="shorts-h" data-carousel data-yt-row="shorts">
+      <div class="container">
+        <div class="row-head" data-reveal>
+          <div>
+            <p class="eyebrow">Short clips</p>
+            <h2 id="shorts-h">A word <strong>in a minute</strong></h2>
+          </div>
+          <div class="row-head__ctl">
+            <button type="button" class="round" data-scroll="-1" aria-label="Scroll clips back"><Icon name="arrow-left" size={18} /></button>
+            <button type="button" class="round" data-scroll="1" aria-label="Scroll clips forward"><Icon name="arrow-right" size={18} /></button>
+          </div>
+        </div>
+      </div>
+      <ul class="track track--shorts" data-track tabindex="0" aria-label="Short clips" set:html={yt.shorts.map((v) => shortHtml(v, buildTime)).join('')} />
     </section>
   )}
 
@@ -311,6 +328,7 @@ const steps = [
       </div>
     </div>
   </section>
+  <script is:inline type="application/json" id="yt-seed" set:html={JSON.stringify([...yt.full, ...yt.shorts]).replace(/</g, '\\u003c')} />
 </Base>
 
 <style>
@@ -428,7 +446,8 @@ const steps = [
   }
   .track::-webkit-scrollbar { display: none; }
   .track:focus-visible { outline-offset: -3px; }
-  .track__item { scroll-snap-align: start; }
+  .track :global(.track__item) { scroll-snap-align: start; }
+  .messages--shorts { padding-top: 0; }
 
   /* ---------- 5. Giving ---------- */
   .giving__inner { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 900px; }
@@ -535,6 +554,8 @@ const steps = [
 
 <script>
   import { initHero, initTrack } from '../scripts/home';
+  import { refreshYouTube } from '../scripts/youtube-feed';
   initHero();
   initTrack();
+  refreshYouTube();
 </script>

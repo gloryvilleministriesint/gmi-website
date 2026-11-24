@@ -1,0 +1,25 @@
+{
+  "note": "Fallback list of the latest GMI YouTube uploads. The build refreshes the list from YouTube when it can, and the live site loads the newest uploads from /api/youtube, so this file never needs editing by hand.",
+  "updated": "2026-11-24T07:40:00Z",
+  "videos": [
+    {"id":"WM55K4knuzw","rawTitle":"What Is True Faith in Prayer? | Pastor Samuel Bodunde","published":"2026-11-24T07:12:59+00:00","short":true,"description":"What does it truly mean to pray in faith? In this powerful excerpt from the message, Pastor Samuel Bodunde explains that praying in faith is about praying based on our redemption rights in Christ."},
+    {"id":"eIaqQXXEzWw","rawTitle":"SUNDAY SERVICE || GLORYVILLE MINISTRIES INTERNATIONAL || NOVEMBER 22, 2026","published":"2026-11-22T23:54:13+00:00","short":false,"description":"God has indeed been good to us. Join us for an amazing time in God's presence."},
+    {"id":"nM4sy9gs5WM","rawTitle":"YOU'RE A HELPER","published":"2026-11-18T06:28:48+00:00","short":true,"description":""},
+    {"id":"bvVMneFF81A","rawTitle":"AND GOD IS ABLE TO MAKE ALL GRACE || Pastor Samuel Bodunde","published":"2026-11-17T18:45:48+00:00","short":true,"description":""},
+    {"id":"SjNxFvrkrug","rawTitle":"WILL THIS SUFFERING LAST FOREVER? | Pastor Samuel Bodunde","published":"2026-11-17T06:00:08+00:00","short":true,"description":""},
+    {"id":"9RnH-YSRGQ0","rawTitle":"SUNDAY SERVICE || GLORYVILLE MINISTRIES INTERNATIONAL || NOVEMBER  15, 2026","published":"2026-11-15T12:01:58+00:00","short":false,"description":"God has indeed been good to us. Join us for an amazing time in God's presence."},
+    {"id":"SD-V9G-00K8","rawTitle":"SUNDAY SERVICE || GLORYVILLE MINISTRIES INTERNATIONAL || NOVEMBER  15, 2026","published":"2026-11-15T08:24:56+00:00","short":false,"description":"God has indeed been good to us. Join us for an amazing time in God's presence."},
+    {"id":"5lRhgkwJnPw","rawTitle":"What Most People Realize Too Late in Life","published":"2026-11-11T06:02:32+00:00","short":true,"description":""},
+    {"id":"3SbeG-xsiIY","rawTitle":"YOU ARE NOT POWERLESS! | Pastor Samuel Bodunde","published":"2026-11-10T17:00:36+00:00","short":true,"description":""},
+    {"id":"P-vxngK4gOY","rawTitle":"Trials Don't Mean Your Faith Isn't Working   #pastorsamuelbodunde #theyearoftheholyghost","published":"2026-11-09T17:30:22+00:00","short":true,"description":""},
+    {"id":"eEilqyhqLZU","rawTitle":"The Pleasure of Sin Is Deception","published":"2026-11-09T07:48:49+00:00","short":true,"description":""},
+    {"id":"jWKcxhvaHT0","rawTitle":"SUNDAY SERVICE || GLORYVILLE MINISTRIES INTERNATIONAL || NOVEMBER 8, 2026","published":"2026-11-08T17:28:38+00:00","short":false,"description":"God has indeed been good to us. Join us for an amazing time in God's presence."},
+    {"id":"L-PLuAbb5Ss","rawTitle":"When a Season Is Over, You Will Know | Changing Seasons by Prophecy","published":"2026-11-07T06:00:36+00:00","short":true,"description":"How do you recognise when a season of trials has run its course? Discover from God's Word how to move from trials into enlargement, establishment, strengthening and settlement."},
+    {"id":"Bps_c1Hc4Mc","rawTitle":"GOD'S PLAN FOR YOUR LIFE IS A PARTNERSHIP! | Pastor Samuel Bodunde","published":"2026-11-03T06:17:02+00:00","short":true,"description":"God has a plan and purpose for your life, but bringing that plan to fulfilment is a partnership between you and God."},
+    {"id":"rWAiiN4FZiA","rawTitle":"God Is More Than What He Gives You | Pastor Samuel Bodunde | Pastor Samuel Bodunde","published":"2026-10-29T20:54:38+00:00","short":true,"description":""},
+    {"id":"U5u7kNlj1tY","rawTitle":"SESSION TWO || SOUL WINNERS’ SUMMIT 2026 || Pastor Samuel Bodunde || OCTOBER 10, 2026","published":"2026-10-10T18:00:00+00:00","short":false,"description":""},
+    {"id":"9CsxV2L5qCg","rawTitle":"SESSION ONE || SOUL WINNERS’ SUMMIT 2026 || Pastor Samuel Bodunde || OCTOBER 10, 2026","published":"2026-10-10T12:00:00+00:00","short":false,"description":""},
+    {"id":"piYgnaF1FeY","rawTitle":"FINANCE SEMINAR || SESSION THREE || GLORYVILLE MINISTRIES INTERNATIONAL || SEPTEMBER 19TH, 2026","published":"2026-09-19T16:00:00+00:00","short":false,"description":""},
+    {"id":"E7YgRZijD5c","rawTitle":"AN EVENING OF WORSHIP || GLORYVILLE MINISTRIES INTERNATIONAL || September 12, 2026","published":"2026-09-12T17:00:00+00:00","short":false,"description":""}
+  ]
+}
