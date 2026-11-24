@@ -400,13 +400,13 @@ const steps = [
   .about__img { position: relative; aspect-ratio: 4 / 5; border-radius: 999px 999px var(--r-panel) var(--r-panel); box-shadow: var(--shadow-lg); }
   .about__img--cutout { box-shadow: none; border-radius: 0; }
   .about__arch { position: absolute; inset: 10% 0 0 0; border-radius: 999px 999px var(--r-panel) var(--r-panel); background:
-      radial-gradient(70% 55% at 50% 30%, rgba(234, 192, 106, 0.45), transparent 70%),
-      linear-gradient(180deg, var(--blue-500, #3550c8) 0%, var(--blue-700, #1e3282) 55%, var(--blue-950) 100%);
-    box-shadow: var(--shadow-lg); overflow: hidden; }
-  .about__arch::after { content: ''; position: absolute; inset: 0; border-radius: inherit; border: 1px solid rgba(255, 255, 255, 0.18); }
+      radial-gradient(75% 55% at 50% 28%, rgba(234, 192, 106, 0.16), transparent 70%),
+      linear-gradient(180deg, #ffffff 0%, #ffffff 60%, #f7f4ec 100%);
+    box-shadow: 0 30px 60px -28px rgba(17, 26, 68, 0.35), 0 2px 10px rgba(17, 26, 68, 0.06); overflow: hidden; }
+  .about__arch::after { content: ''; position: absolute; inset: 0; border-radius: inherit; border: 1px solid rgba(17, 26, 68, 0.08); }
   .about__img--cutout img { position: absolute; left: 50%; bottom: 0; height: 104%; width: auto; max-width: none; transform: translateX(-50%);
     -webkit-mask-image: linear-gradient(180deg, #000 86%, transparent 100%); mask-image: linear-gradient(180deg, #000 86%, transparent 100%);
-    filter: drop-shadow(0 18px 30px rgba(10, 15, 38, 0.35)); }
+    filter: drop-shadow(0 14px 22px rgba(10, 15, 38, 0.18)); }
   .about__badge { position: absolute; left: -36px; bottom: 40px; display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: var(--white); border-radius: var(--r-card); box-shadow: var(--shadow-md); font-size: 0.8125rem; color: var(--ink-3); animation: floaty 6s ease-in-out infinite; }
   .about__badge strong { display: block; color: var(--blue-900); font-size: 0.9375rem; }
   .about__badge-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--gold-100); color: var(--gold-700); }
