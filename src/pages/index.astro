@@ -296,7 +296,9 @@ const steps = [
                 <span class="ev__body">
                   <span class="chip">{e.data.category}</span>
                   <span class="ev__title">{e.data.title}</span>
-                  <span class="ev__meta">{e.data.sample ? <span class="ph">[Time · Venue]</span> : `${e.data.time ?? fmt(e.data.start, { hour: 'numeric', minute: '2-digit' })}${e.data.venue ? ` · ${e.data.venue}` : ''}`}</span>
+                  <span class="ev__meta">{e.data.sample ? <span class="ph">[Time · Venue]</span> : (e.data.end && fmt(e.data.end, { dateStyle: 'short' }) !== fmt(e.data.start, { dateStyle: 'short' }))
+                    ? `${fmt(e.data.start, { day: 'numeric', month: 'short' })} – ${fmt(e.data.end, { day: 'numeric', month: 'short' })}${e.data.venue ? ` · ${e.data.venue.split(',')[0]}` : ''}`
+                    : `${e.data.time ?? fmt(e.data.start, { hour: 'numeric', minute: '2-digit' })}${e.data.venue ? ` · ${e.data.venue}` : ''}`}</span>
                 </span>
                 <span class="ev__go" aria-hidden="true"><Icon name="arrow-up-right" size={20} /></span>
               </a>
